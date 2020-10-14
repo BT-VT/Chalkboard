@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    background-color: #283333;
+}
+.toolbox {
+    height: 100vh;
+    position: absolute;
+    background-color: #a0a0a0;
+}
+.toolbox .group {
+    background-color: #a0a0a0;
+    border-bottom: thin solid gray;
+}
+.toolbox .group .item {
+    width: 24px;
+    height: 24px;
+    padding: 20px;
+    cursor: pointer;
+}
+.toolbox .group .item img {
+    width: 100%;
+    height: 100%;
+    filter: invert(1);
+}
+.toolbox .group .item.active,
+.toolbox .group .item:hover {
+    background-color: #4b6161;
+}
+.toolbox .group.stroks .item {
+    position: relative;
+}
+.toolbox .group.stroks .item .stroke {
+    background-color: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.toolbox .group.colors .item .swatch {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border: 2px #fff solid;
+}
+.toolbox.left {
+    top: 0;
+    left: 0;
+}
+.toolbox.right {
+    top: 0;
+    right: 0;
+}
+#canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+
+}
