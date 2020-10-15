@@ -5,76 +5,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Paint</title>
+    <title>Chalkboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="styles.css" rel="stylesheet">
     <script defer src="js/app.js" type="module"></script>
 </head>
 
 <body>
-    <!-- tool box on left panel -->
-    <div class="toolbox left">
-        <div class="group commands">
-            <div class="item" data-command="undo" title="Undo">
-                <img src="images/undo-icon.png" />
-            </div>
-            <div class="item" data-command="download" title="Download">
-                <img src="images/download-icon.png" />
-            </div>
+    <!--NAV BAR-->
+        <!--NA2322V BAR-->
+
+    <nav class="z-depth-0 grey lighten-4">
+        <div style="padding-left: 18px; padding-right: 18px; width: 100%">
+            <a href="#" class="brand-logo">
+                <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
+            </a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li class="logged-in" style="display: none;">
+                    <a href="#" class="grey-text modal-trigger">My chalkboards</a>
+                </li>
+                <li class="logged-in" style="display: none;">
+                    <a href="#" class="grey-text modal-trigger">Create new</a>
+                </li>
+                <li class="logged-in" style="display: none;">
+                    <a href="#" class="cyan-text modal-trigger" id="navEmail" data-target="modal-account"></a>
+                </li>
+                <li class="logged-out" style="display: none;">
+                    <a href="#" class="grey-text modal-trigger" data-target="modal-login">Log in</a>
+                </li>
+                <li class="logged-out" style="display: none;">
+                    <a href="#" class="grey-text modal-trigger" data-target="modal-signup">Sign up</a>
+                </li>
+                </span>
+            </ul>
         </div>
-        <div class="group tools">
-            <div class="item" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
-            <div class="item active" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png"></div>
-            <div class="item" data-tool="circle" title="Circle Tool"><img src="images/circle-icon.png"></div>
-            <div class="item" data-tool="triangle" title="Triangle Tool"><img src="images/tri-icon.png"></div>
-        </div>
-        <div class="group tools">
-            <div class="item" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
-            <div class="item" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
-        </div>
-    </div>
-    <!-- PAint sheet where we draw-->
-    <canvas id="canvas" width="1200" height="600"></canvas>
-    <!-- right toolbox with colors-->
-    <div class="toolbox right">
-        <div class="group colors">
-            <div class="item" data-color="#ffffff">
-                <div class="swatch" style="background-color:#fff"></div>
-            </div>
-            <div class="item active" data-color="#000000">
-                <div class="swatch" style="background-color:#000"></div>
-            </div>
-            <div class="item" data-color="#ff0000">
-                <div class="swatch" style="background-color:red"></div>
-            </div>
-            <div class="item" data-color="#00ff00">
-                <div class="swatch" style="background-color:#0f0"></div>
-            </div>
-            <div class="item" data-color="#0000ff">
-                <div class="swatch" style="background-color:#00f"></div>
-            </div>
-            <div class="item" data-color="#00ffff">
-                <div class="swatch" style="background-color:#0ff"></div>
-            </div>
-            <div class="item" data-color="#ff00ff">
-                <div class="swatch" style="background-color:#f0f"></div>
-            </div>
-            <div class="item" data-color="#ffff00">
-                <div class="swatch" style="background-color:#ff0"></div>
-            </div>
-            <div class="item" data-color="#c46f0f">
-                <div class="swatch" style="background-color:#c46f0f"></div>
-            </div>
-            <div class="item" data-color="#fd8f27">
-                <div class="swatch" style="background-color:#fd8f27"></div>
-            </div>
-            <div class="item" data-color="#0099ff">
-                <div class="swatch" style="background-color:#09f"></div>
-            </div>
-            <div class="item" data-color="#ff009d">
-                <div class="swatch" style="background-color:#ff009d"></div>
-            </div>
+    </nav>
+    <!--SIGNUP MODAL-->
+    <div id="modal-signup" class="modal">
+        <div class="modal-content">
+            <h4>Sign up</h4><br />
+            <form id="signup-form">
+                <div class="input-field">
+                    <input type="email" id="signup-email" required />
+                    <label for="signup-email">Email address</label>
+                </div>
+                <div class="input-field">
+                    <input type="password" id="signup-password" required />
+                    <label for="signup-password">Choose password</label>
+                </div>
+                <button class="btn cyan darken-2 z-depth-0">Sign up</button>
+            </form>
         </div>
     </div>
+    <!--LOGIN MODAL-->
+    <div id="modal-login" class="modal">
+        <div class="modal-content">
+            <h4>Login</h4><br />
+            <form id="login-form">
+                <div class="input-field">
+                    <input type="email" id="login-email" required />
+                    <label for="login-email">Email address</label>
+                </div>
+                <div class="input-field">
+                    <input type="password" id="login-password" required />
+                    <label for="login-password">Your password</label>
+                </div>
+                <button class="btn cyan darken-2 z-depth-0">Login</button>
+            </form>
+        </div>
+    </div>
+    <!--ACCOUNT MODAL-->
+    <div id="modal-account" class="modal">
+        <div class="modal-content center align">
+            <h4>Account Details</h4>
+            <div class="account-details"></div>
+            <div style="margin: 12px; width: 100%">
+                <a href="#" class="cyan-text" id="logout">Log out</a>
+                <a href="#" class="cyan-text" id="delete-account">Delete account</a>
+            </div>
+        </div>
+    </div>
+    <div id="canvas-container">
+        <!-- tool box on left panel -->
+        <div class="toolbox left">
+            <div class="group commands">
+                <div class="item" data-command="undo" title="Undo">
+                    <img src="images/undo-icon.png" />
+                </div>
+                <div class="item" data-command="download" title="Download">
+                    <img src="images/download-icon.png" />
+                </div>
+            </div>
+            <div class="group tools">
+                <div class="item" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
+                <div class="item active" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png">
+                </div>
+                <div class="item" data-tool="circle" title="Circle Tool"><img src="images/circle-icon.png"></div>
+                <div class="item" data-tool="triangle" title="Triangle Tool"><img src="images/tri-icon.png"></div>
+            </div>
+            <div class="group tools">
+                <div class="item" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
+                <div class="item" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
+            </div>
+        </div>
+        <!-- PAint sheet where we draw-->
+        <canvas id="canvas" width="1000" height="500"></canvas>
+        <!-- right toolbox with colors-->
+        <div class="toolbox right">
+            <div class="group colors">
+                <div class="item" data-color="#ffffff">
+                    <div class="swatch" style="background-color:#fff"></div>
+                </div>
+                <div class="item active" data-color="#000000">
+                    <div class="swatch" style="background-color:#000"></div>
+                </div>
+                <div class="item" data-color="#ff0000">
+                    <div class="swatch" style="background-color:red"></div>
+                </div>
+                <div class="item" data-color="#00ff00">
+                    <div class="swatch" style="background-color:#0f0"></div>
+                </div>
+                <div class="item" data-color="#0000ff">
+                    <div class="swatch" style="background-color:#00f"></div>
+                </div>
+                <div class="item" data-color="#00ffff">
+                    <div class="swatch" style="background-color:#0ff"></div>
+                </div>
+                <div class="item" data-color="#ff00ff">
+                    <div class="swatch" style="background-color:#f0f"></div>
+                </div>
+                <div class="item" data-color="#ffff00">
+                    <div class="swatch" style="background-color:#ff0"></div>
+                </div>
+                <div class="item" data-color="#c46f0f">
+                    <div class="swatch" style="background-color:#c46f0f"></div>
+                </div>
+                <div class="item" data-color="#fd8f27">
+                    <div class="swatch" style="background-color:#fd8f27"></div>
+                </div>
+                <div class="item" data-color="#0099ff">
+                    <div class="swatch" style="background-color:#09f"></div>
+                </div>
+                <div class="item" data-color="#ff009d">
+                    <div class="swatch" style="background-color:#ff009d"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-firestore.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+ https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-analytics.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyASMdbaYF0eelR_znDNu2Y0__4hABi5n5g",
+            authDomain: "chalkboard-ce2b6.firebaseapp.com",
+            databaseURL: "https://chalkboard-ce2b6.firebaseio.com",
+            projectId: "chalkboard-ce2b6",
+            storageBucket: "chalkboard-ce2b6.appspot.com",
+            messagingSenderId: "801991166996",
+            appId: "1:801991166996:web:b2287b110a18a36477ab01",
+            measurementId: "G-F5H7K3MXXB"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        //make auth and firestore references
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+
+    </script>
+
+    <!-- Compiled and minified JavaScript for materialize-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script src="js/auth.js"></script>
+    <script src="js/index.js"></script>
 </body>
 
 </html>
