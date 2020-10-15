@@ -1,3 +1,4 @@
+
 import Paint from "./paint.class.js";
 import Tool from "./tool.class.js";
 let paint = new Paint("canvas");
