@@ -71,3 +71,36 @@ body {
     margin-right: auto;
     background-color: #fff;
 }
+
+
+#message-container {
+    background: #ccc;
+    padding: 20px;
+    width: 200px;
+    height: 100px;
+    max-height: 100px;
+    display: flex;
+    flex-direction:column;
+    align-items: flex-start;
+    border: 1px solid black;
+    overflow-y: auto;
+    bottom: 10%;
+    position:fixed;
+  }
+  
+  #send-container {
+      position: fixed;
+      bottom:7%;
+      width: 1000px;
+  }
+  
+  #hide-display {
+      position: fixed;
+      bottom: 1%;
+  }
+  
+  #whoIsTyping {
+      position: fixed;
+      bottom: 4%;
+  }
+  

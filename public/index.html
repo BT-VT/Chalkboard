@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chalkboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="/socket.io/socket.io.js"></script>
     <link href="styles.css" rel="stylesheet">
     <script defer src="js/app.js" type="module"></script>
 </head>
@@ -190,6 +191,21 @@
 
     <script src="js/auth.js"></script>
     <script src="js/index.js"></script>
+    
+    <!-- Chat functions -->
+
+    <div id = "message-container"></div>
+    <form id = "send-container">
+        <input type="text" id="message-input" placeholder="Type a message">
+        <button type="submit" id="send-button">Send</button>
+    </form>
+    <div id="whoIsTyping"></div>
+        
+        <button type="button" id="hide-display">Hide Chat</button>
+       
+        <script src="js/chat.js" type = "module"></script>
+        
+
 </body>
 
 </html>
