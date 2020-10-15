@@ -40,15 +40,16 @@ body {
     border-bottom: thin solid gray;
 }
 .toolbox .group .item {
-    width: 24px;
-    height: 24px;
+    width: 40px;
+    height: 40px;
     padding: 20px;
     cursor: pointer;
 }
 .toolbox .group .item img {
-    width: 100%;
-    height: 100%;
+    width: 18px;
+    height: 18px;
     filter: invert(1);
+    margin: auto;
 }
 .toolbox .group .item.active,
 .toolbox .group .item:hover {
