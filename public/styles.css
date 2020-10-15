@@ -76,31 +76,40 @@ body {
 #message-container {
     background: #ccc;
     padding: 20px;
-    width: 200px;
-    height: 100px;
-    max-height: 100px;
+    width: 355px;
+    height: 300px;
+    max-height: 300px;
     display: flex;
     flex-direction:column;
     align-items: flex-start;
     border: 1px solid black;
     overflow-y: auto;
-    bottom: 10%;
+    bottom: 15.5%;
+    left: 2%;
     position:fixed;
   }
   
   #send-container {
       position: fixed;
-      bottom:7%;
-      width: 1000px;
+      bottom:11%;
+      width: 250px;
+      left: 2%;
   }
   
   #hide-display {
       position: fixed;
-      bottom: 1%;
+      bottom: 6%;
+      left: 2%;
   }
   
   #whoIsTyping {
       position: fixed;
-      bottom: 4%;
+      color: white;
+      bottom: 9%;
+      left: 2%;
   }
   
+  #send-button {
+      position: fixed;
+      
+  }

@@ -35,12 +35,12 @@ hideBTn.onclick = function() {
     if (showHideNum === 0) {
         sendContainer.style.display = "none";
         messageContainer.style.display = "none";
-        hideBTn.innerHTML = "Show Chat";
+        typingMsg.style.display = "none";
         showHideNum = 1;
     } else {
         sendContainer.style.display = "block";
         messageContainer.style.display = "block";
-        hideBTn.innerHTML = "Hide Chat";
+        typingMsg.style.display = "block";
         showHideNum = 0;
     }
 }

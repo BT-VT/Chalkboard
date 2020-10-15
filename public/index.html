@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chalkboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel = "stylesheet" href = "https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="/socket.io/socket.io.js"></script>
     <link href="styles.css" rel="stylesheet">
     <script defer src="js/app.js" type="module"></script>
@@ -197,11 +198,14 @@
     <div id = "message-container"></div>
     <form id = "send-container">
         <input type="text" id="message-input" placeholder="Type a message">
-        <button type="submit" id="send-button">Send</button>
+        <button type="submit" id="send-button" name="action" class="btn waves-effect waves-light">Send
+            <i class="material-icons right">send</i>
+        </button>
     </form>
     <div id="whoIsTyping"></div>
         
-        <button type="button" id="hide-display">Hide Chat</button>
+        <button type="button" id="hide-display" class="btn-floating pink waves-effect">
+            <i class="material-icons">chat</i></button>
        
         <script src="js/chat.js" type = "module"></script>
         
