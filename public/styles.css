@@ -91,7 +91,7 @@ body {
   
   #send-container {
       position: fixed;
-      bottom:11%;
+      bottom:10%;
       width: 250px;
       left: 2%;
   }
@@ -105,11 +105,15 @@ body {
   #whoIsTyping {
       position: fixed;
       color: white;
-      bottom: 9%;
+      bottom: 13.5%;
       left: 2%;
   }
   
   #send-button {
       position: fixed;
       
+  }
+
+  #message-input {
+      color:white;
   }

@@ -1,4 +1,6 @@
- var socket = io();
+
+
+export var socket = io();
 
 let sendContainer = document.getElementById("send-container");
 let messageInput = document.getElementById("message-input");

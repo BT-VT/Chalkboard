@@ -1,3 +1,4 @@
+
 // set up express server
 var express = require("express");
 var app = express();
@@ -18,7 +19,6 @@ app.get('/', (req,res) => {
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
-    let name = "Guest" +  Math.floor( Math.random() * 10000);
 
     socket.on('startPos', (data) => {
         socket.broadcast.emit('lock');        // broadcast to all sockets except sender who triggered event
@@ -38,8 +38,10 @@ io.on('connection', (socket) => {
         socket.broadcast.emit(message);
     });
 
+
     // chat handling
 
+    // sending a chat message
     socket.on("sendChatMessage", (message) => {
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
@@ -47,6 +49,7 @@ io.on('connection', (socket) => {
     });
 
 
+    // a user is typing message
     socket.on("typingMsg", (data) => {
         socket.broadcast.emit("typing", name, data);
     });

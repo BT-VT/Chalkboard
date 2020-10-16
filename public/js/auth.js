@@ -1,3 +1,4 @@
+import {socket} from "./chat.js"
 // listen for auth status changes
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -15,6 +16,7 @@ signupForm.addEventListener('submit', (e) => {
     // get user info
     const email = signupForm['signup-email'].value;
     const password = signupForm['signup-password'].value;
+    
 
     // sign up the user
     auth.createUserWithEmailAndPassword(email, password).then(cred => {
@@ -22,6 +24,7 @@ signupForm.addEventListener('submit', (e) => {
         const modal = document.querySelector('#modal-signup');
         M.Modal.getInstance(modal).close();
         signupForm.reset();
+        socket.emit("username", email);
     });
 });
 
@@ -51,6 +54,7 @@ loginForm.addEventListener('submit', (e) => {
         const modal = document.querySelector('#modal-login');
         M.Modal.getInstance(modal).close();
         loginForm.reset();
+        socket.emit("username", email);
     });
 
 });
@@ -70,3 +74,4 @@ deleteBtn.addEventListener('click', (e) => {
         console.log(error);
     });
 });
+
