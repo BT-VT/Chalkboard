@@ -1,3 +1,4 @@
+var selectedColor = "black";
 
 window.addEventListener('load', () => {
     var socket = io();
@@ -46,7 +47,7 @@ window.addEventListener('load', () => {
 
     // set attributes for a canvas line
     // set rand = false to limit amount of random colors used
-    function getLineAttributes(rand = true) {
+    function getLineAttributes(rand = false) {
 
         let colors = ["#8093F1", "#F9DC5C", "#EA526F", "#70F8BA", "#1B98E0", ];
 
@@ -57,6 +58,8 @@ window.addEventListener('load', () => {
             strokeStyle = `rgba(${Math.random() * 255},
                                   ${Math.random() * 255},
                                   ${Math.random() * 255}, 1)`;
+        }else {
+            strokeStyle = selectedColor;
         }
         return {
             lineWidth: lineWidth,
@@ -288,5 +291,30 @@ window.addEventListener('load', () => {
 
 });
 
+function removeClass(el, removeClassName){
+    var elClass = el.className;
+    while(elClass.indexOf(removeClassName) != -1) {
+        elClass = elClass.replace(removeClassName, '');
+        elClass = elClass.trim();
+    }
+    el.className = elClass;
+}
 
+var colorBtns = document.querySelectorAll(".color-box");
+console.log(colorBtns);
+colorBtns.forEach((btn) => {
+    btn.onclick = function () {
+        //make all buttons inactive
+        colorBtns.forEach((btn) =>{
+            removeClass(btn, "active");
+        });
+
+        //make selected button active
+        btn.className += " active";  
+
+        //set color to button color
+        selectedColor = btn.attributes["data-color"].value;
+        console.log(selectedColor);
+    };
+});
 
