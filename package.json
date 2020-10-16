@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain#readme",
   "dependencies": {
+    "canvas": "^2.6.1",
     "express": "^4.17.1",
     "paper": "^0.12.11",
     "paper-jsdom-canvas": "^0.12.11",
