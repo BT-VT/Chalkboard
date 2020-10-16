@@ -8,11 +8,15 @@
     <title>Chalkboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="styles.css" rel="stylesheet">
-    <!-- <script defer src="js/app.js" type="module"></script> -->
-    <!-- Load the Paper.js library -->
-    <script type="text/javascript" src="paper-full.js"></script>
-    <!-- Load external PaperScript and associate it with canvas -->
+    <!-- Load the libraris -->
+    <!-- alternate way to load paper.js from node_modules:
+    <script type="text/javascript" src="paper-full.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.0.4/acorn.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.js"></script>
+    <script src = "/socket.io/socket.io.js"></script>
+    <!-- Load chalkboard scripts -->
     <script type="text/paperscript" src="js/paperApp.js" canvas="canvas"></script>
+    <!-- <script defer src="js/app.js" type="module"></script> -->
 </head>
 
 <body>
@@ -114,7 +118,7 @@
         </div>
         <!-- PAint sheet where we draw-->
         <canvas id="canvas" width="1000" height="500"></canvas>
-        <script type="module" src="./js/draw.js"></script>
+        <!-- <script type="module" src="./js/draw.js"></script> -->
         <!-- right toolbox with colors-->
         <div class="toolbox right">
             <div class="group colors">
