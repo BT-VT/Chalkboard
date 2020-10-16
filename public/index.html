@@ -8,9 +8,13 @@
     <title>Chalkboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="styles.css" rel="stylesheet">
+<<<<<<< HEAD
     <!-- <script defer src="js/app.js" type="module"></script> -->
     <!-- Load external PaperScript and associate it with myCanvas -->
     <script type="text/paperscript" src="js/myScript.js" canvas="canvas"></script>
+=======
+    <script src = "/socket.io/socket.io.js"></script>
+>>>>>>> NetworkedCanvas
 </head>
 
 <body>
@@ -112,6 +116,7 @@
         </div>
         <!-- PAint sheet where we draw-->
         <canvas id="canvas" width="1000" height="500"></canvas>
+        <script type="module" src="./js/draw.js"></script>
         <!-- right toolbox with colors-->
         <div class="toolbox right">
             <div class="group colors">
