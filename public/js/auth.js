@@ -3,8 +3,10 @@ import {socket} from "./chat.js"
 auth.onAuthStateChanged(user => {
     if (user) {
         setupUI(user);
+        socket.emit("giveUsername", auth.currentUser.email);
     } else {
         setupUI();
+        socket.emit("giveUsername", -1);
     }
 })
 
@@ -24,7 +26,6 @@ signupForm.addEventListener('submit', (e) => {
         const modal = document.querySelector('#modal-signup');
         M.Modal.getInstance(modal).close();
         signupForm.reset();
-        socket.emit("username", email);
     });
 });
 
@@ -43,6 +44,7 @@ logout.addEventListener('click', (e) => {
 const loginForm = document.querySelector('#login-form');
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    
 
     // get user info
     const email = loginForm['login-email'].value;
@@ -54,7 +56,7 @@ loginForm.addEventListener('submit', (e) => {
         const modal = document.querySelector('#modal-login');
         M.Modal.getInstance(modal).close();
         loginForm.reset();
-        socket.emit("username", email);
+       
     });
 
 });
@@ -74,4 +76,3 @@ deleteBtn.addEventListener('click', (e) => {
         console.log(error);
     });
 });
-

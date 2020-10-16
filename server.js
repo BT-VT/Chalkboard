@@ -17,11 +17,6 @@ app.get('/', (req,res) => {
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
-    let name;
-    if (name === undefined) {
-        name =  "Guest" +  Math.floor( Math.random() * 10000);
-    }
-
     socket.on('startPos', (data) => {
         socket.broadcast.emit('lock');        // broadcast to all sockets except sender who triggered event
         io.emit('startPos', data);            // broadcast to all sockets, including sender who triggered event
@@ -35,29 +30,31 @@ io.on('connection', (socket) => {
     socket.on('finishPos', () => {
         io.emit('finishPos');
     });
-
-    socket.on("sentMessage", (message) => {
-        socket.broadcast.emit(message);
-    });
+    
 
     // chat handling
 
+    // sends chat message to the chat box
     socket.on("sendChatMessage", (message) => {
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
         io.emit("chat-message", name + " at " + formattedTime + ":\n" + message);
     });
 
-
+    // broadcasts a message when a user is typing
     socket.on("typingMsg", (data) => {
         socket.broadcast.emit("typing", name, data);
     });
 
-    // username handling
-    socket.on("username", (username) => {
-         name = username;
-         console.log(name);
+    // get the username when the user is signed in, username is -1 if not logged in
+    socket.on("giveUsername" , (username) => {
+        if (username != -1) {
+            name = username;
+        } else {
+            name =  "Guest" +  Math.floor( Math.random() * 10000);
+        }
     });
+
 
 });
 
