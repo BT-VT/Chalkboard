@@ -62,8 +62,9 @@ body {
     margin: auto;
     box-sizing: border-box;
     width: 100%;
-    height: 18px;
+    height: 28px;
     border: 1px #fff solid;
+    border-radius: 2px;
 }
 
 #canvas {
