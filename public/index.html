@@ -11,7 +11,7 @@
     <link rel = "stylesheet" href = "https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="/socket.io/socket.io.js"></script>
     <link href="styles.css" rel="stylesheet">
-    <script defer src="js/app.js" type="module"></script>
+    <script src = "/socket.io/socket.io.js"></script>
 </head>
 
 <body>
@@ -31,7 +31,7 @@
                     <a href="#" class="grey-text modal-trigger">Create new</a>
                 </li>
                 <li class="logged-in" style="display: none;">
-                    <a href="#" class="cyan-text modal-trigger" id="navEmail" data-target="modal-account"></a>
+                    <a href="#" class=" modal-trigger" id="navEmail" data-target="modal-account" style="color: #02A6C1"></a>
                 </li>
                 <li class="logged-out" style="display: none;">
                     <a href="#" class="grey-text modal-trigger" data-target="modal-login">Log in</a>
@@ -83,8 +83,8 @@
             <h4>Account Details</h4>
             <div class="account-details"></div>
             <div style="margin: 12px; width: 100%">
-                <a href="#" class="cyan-text" id="logout">Log out</a>
-                <a href="#" class="cyan-text" id="delete-account">Delete account</a>
+                <a href="#" id="logout" style="color: #02A6C1">Log out</a>
+                <a href="#" id="delete-account" style="color: #02A6C1">Delete account</a>
             </div>
         </div>
     </div>
@@ -111,45 +111,46 @@
                 <div class="item" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
             </div>
         </div>
-        <!-- PAint sheet where we draw-->
+        <!-- Paint sheet where we draw-->
         <canvas id="canvas" width="1000" height="500"></canvas>
+        <script type="module" src="./js/draw.js"></script>
         <!-- right toolbox with colors-->
         <div class="toolbox right">
             <div class="group colors">
-                <div class="item" data-color="#ffffff">
+                <div class="item color-box" data-color="#ffffff">
                     <div class="swatch" style="background-color:#fff"></div>
                 </div>
-                <div class="item active" data-color="#000000">
+                <div class="item active color-box" data-color="#000000">
                     <div class="swatch" style="background-color:#000"></div>
                 </div>
-                <div class="item" data-color="#ff0000">
+                <div class="item color-box" data-color="#ff0000">
                     <div class="swatch" style="background-color:red"></div>
                 </div>
-                <div class="item" data-color="#00ff00">
+                <div class="item color-box" data-color="#00ff00">
                     <div class="swatch" style="background-color:#0f0"></div>
                 </div>
-                <div class="item" data-color="#0000ff">
+                <div class="item color-box" data-color="#0000ff">
                     <div class="swatch" style="background-color:#00f"></div>
                 </div>
-                <div class="item" data-color="#00ffff">
+                <div class="item color-box" data-color="#00ffff">
                     <div class="swatch" style="background-color:#0ff"></div>
                 </div>
-                <div class="item" data-color="#ff00ff">
+                <div class="item color-box" data-color="#ff00ff">
                     <div class="swatch" style="background-color:#f0f"></div>
                 </div>
-                <div class="item" data-color="#ffff00">
+                <div class="item color-box" data-color="#ffff00">
                     <div class="swatch" style="background-color:#ff0"></div>
                 </div>
-                <div class="item" data-color="#c46f0f">
+                <div class="item color-box" data-color="#c46f0f">
                     <div class="swatch" style="background-color:#c46f0f"></div>
                 </div>
-                <div class="item" data-color="#fd8f27">
+                <div class="item color-box" data-color="#fd8f27">
                     <div class="swatch" style="background-color:#fd8f27"></div>
                 </div>
-                <div class="item" data-color="#0099ff">
+                <div class="item color-box" data-color="#0099ff">
                     <div class="swatch" style="background-color:#09f"></div>
                 </div>
-                <div class="item" data-color="#ff009d">
+                <div class="item color-box" data-color="#ff009d">
                     <div class="swatch" style="background-color:#ff009d"></div>
                 </div>
             </div>
