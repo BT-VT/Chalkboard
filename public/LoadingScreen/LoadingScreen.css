@@ -1,0 +1,134 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    overflow: hidden;
+}
+
+.chalk{
+    width: 390px;
+    height:15px;
+    background: #e4e0da;
+    border-top: 10px solid #d6d1c88a;
+    border-bottom: 10px solid #bbb4a7a1;
+    border-left: curve;
+    border-radius: 15px;
+    overflow: hidden;
+    transform-origin: top;
+    padding-left: -5px;
+    z-index: 2;
+}
+
+.chalk p{
+    margin: 0;
+    padding: 0;
+    text-align:center;
+    font-size: 14px;
+    line-height: 15px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: rgb(184, 173, 173);
+    white-space: nowrap;
+}
+
+
+#page{
+    display: none;
+}
+#loading {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("https://img.freepik.com/free-photo/blackboard-texture_1205-375.jpg?size=626&ext=jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.stroke{
+    position: absolute;
+    top:50%;
+    left:calc(50%);
+    transform: translate(-50%,-50%) rotate(45deg);
+    border: 5px solid transparent;
+    border-left-color: #FFF;
+    border-top-color: #FFF;
+    width: 375px;
+    height: 375px;
+    border-radius: 50%;
+    z-index: -1;
+}
+.center{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    animation: animate 8s linear infinite;
+}
+.fade-out {
+    animation-delay: 1s;
+    animation: fadeOut ease 5s;
+    -webkit-animation: fadeOut ease 5s;
+    -moz-animation: fadeOut ease 5s;
+    -o-animation: fadeOut ease 5s;
+    -ms-animation: fadeOut ease 5s;
+  }
+@keyframes spin {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}
+@keyframes animate{
+    0%{
+        transform: translate(-50%,-50%) rotate(360deg);
+    }
+    100%{
+        transform: translate(-50%,-50%) rotate(0deg);
+    }
+}
+  @keyframes fadeOut {
+    0% {
+      opacity:1;
+    }
+    100% {
+      opacity:0;
+    }
+  }
+  
+  @-moz-keyframes fadeOut {
+    0% {
+      opacity:1;
+    }
+    100% {
+      opacity:0;
+    }
+  }
+  
+  @-webkit-keyframes fadeOut {
+    0% {
+      opacity:1;
+    }
+    100% {
+      opacity:0;
+    }
+  }
+  
+  @-o-keyframes fadeOut {
+    0% {
+      opacity:1;
+    }
+    100% {
+      opacity:0;
+    }
+  }
+  
+  @-ms-keyframes fadeOut {
+    0% {
+      opacity:1;
+    }
+    100% {
+      opacity:0;
+  }
+}
