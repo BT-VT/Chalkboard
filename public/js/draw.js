@@ -1,11 +1,12 @@
 // uncomment testing section of code for testing
 // ================ TESTING ===============================
-// const io = require('socket.io-client');
-// module.exports = {
-//     startPosition,
-//     remoteStartPosition,
-//     lockDrawing
-// }
+const io = require('socket.io-client');
+module.exports = {
+    getLineAttributes,
+    lockDrawing,
+    startPosition,
+    remoteStartPosition
+}
 // ================ END TESTING ===========================
 
 
@@ -60,14 +61,12 @@ function getMouseCoordsOnCanvas(canvas, e) {
 }
 
 // set attributes for a canvas line
-// set rand = false to limit amount of random colors used
+// set rand = true to generate random colors when drawing
 function getLineAttributes(rand = false) {
-
-    let colors = ["#8093F1", "#F9DC5C", "#EA526F", "#70F8BA", "#1B98E0", ];
 
     let lineWidth = 10;
     let lineCap = "round";
-    let strokeStyle = colors[Math.floor(Math.random()*5)];
+    let strokeStyle;
     if(rand == true) {
         strokeStyle = `rgba(${Math.random() * 255},
                               ${Math.random() * 255},
