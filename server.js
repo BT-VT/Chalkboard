@@ -42,24 +42,19 @@ io.on('connection', (socket) => {
     // chat handling
 
     // sends chat message to the chat box
-    socket.on("sendChatMessage", (message) => {
+    socket.on("sendChatMessage", (message, name) => {
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
         io.emit("chat-message", name + " at " + formattedTime + ":\n" + message);
     });
 
     // broadcasts a message when a user is typing
-    socket.on("typingMsg", (data) => {
-        socket.broadcast.emit("typing", name, data);
+    socket.on("typingMsg", (data, name) => {
+        socket.broadcast.emit("typing", data, name);
     });
 
-    // get the username when the user is signed in, username is -1 if not logged in
-    socket.on("giveUsername" , (username) => {
-        if (username != -1) {
-            name = username;
-        } else {
-            name =  "Guest" +  Math.floor( Math.random() * 10000);
-        }
+    socket.on("getUsernameFromAuth", (username) => {
+        socket.emit("giveUsername", username);
     });
 
 

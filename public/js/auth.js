@@ -3,10 +3,10 @@ import {socket} from "./chat.js"
 auth.onAuthStateChanged(user => {
     if (user) {
         setupUI(user);
-        socket.emit("giveUsername", auth.currentUser.email);
+        socket.emit("getUsernameFromAuth", auth.currentUser.email);
     } else {
         setupUI();
-        socket.emit("giveUsername", -1);
+        socket.emit("getUsernameFromAuth", -1);
     }
 })
 
