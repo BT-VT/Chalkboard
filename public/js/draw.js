@@ -1,3 +1,12 @@
+// uncomment testing section of code for testing
+// ================ TESTING ===============================
+//const io = require('socket.io-client');
+// module.exports = {
+//     startPosition,
+//     remoteStartPosition,
+//     lockDrawing
+// }
+// ================ END TESTING ===========================
 let socket = io();
 
 let canvas;
@@ -80,13 +89,15 @@ function getLineAttributes(rand = false) {
 function lockDrawing() {
     LOCKED = true;
     console.log('*********** lock is LOCKED');
+    return LOCKED;
 }
 // called when mouse button is pressed down, allows draw() to start
-// emitting drawing coordinate data to server
+// emitting drawing coordinate data to server.
+// On successful emition, returns data emitted.
 function startPosition(e) {
     if(LOCKED) {
         console.log('cant draw, lock is locked');
-        return;
+        return false;
     }
     painting = true;
     c.startPos = getMouseCoordsOnCanvas(canvas, e);
@@ -96,6 +107,8 @@ function startPosition(e) {
         attr: attr
     }
     socket.emit('startPos', data);       // this emit is only necessary for drawing single points
+
+    return data;
 }
 
 // called when socket detects incoming data labeled as 'startPos', indicating that
