@@ -21,8 +21,6 @@ io.on('connection', (socket) => {
     socket.send("hello");
 
 
-    let name = "Guest" +  Math.floor( Math.random() * 10000);
-
     socket.on('startPos', (data) => {
         socket.broadcast.emit('lock');        // broadcast to all sockets except sender who triggered event
         console.log("Start position");
@@ -41,24 +39,24 @@ io.on('connection', (socket) => {
         io.emit('finishPos');
     });
 
-    socket.on("sentMessage", (message) => {
-        socket.broadcast.emit(message);
-        console.log("Start position");
-
-    });
-
     // chat handling
 
-    socket.on("sendChatMessage", (message) => {
+    // sends chat message to the chat box
+    socket.on("sendChatMessage", (message, name) => {
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
         io.emit("chat-message", name + " at " + formattedTime + ":\n" + message);
     });
 
-
-    socket.on("typingMsg", (data) => {
-        socket.broadcast.emit("typing", name, data);
+    // broadcasts a message when a user is typing
+    socket.on("typingMsg", (data, name) => {
+        socket.broadcast.emit("typing", data, name);
     });
+
+    socket.on("getUsernameFromAuth", (username) => {
+        socket.emit("giveUsername", username);
+    });
+
 
 });
 
