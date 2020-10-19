@@ -1,11 +1,18 @@
-
+// uncomment testing section of code for testing
+// ================ TESTING ===============================
+//const io = require('socket.io-client');
+// module.exports = {
+//     startPosition,
+//     remoteStartPosition,
+//     lockDrawing
+// }
+// ================ END TESTING ===========================
 
 
 let socket = io();
 let selectedColor = "black";
 let canvas;
-let c;
-let painting = false;      // prevents drawing when mouse isnt clicked down
+let c;let painting = false;      // prevents drawing when mouse isnt clicked down
 let LOCKED = false;
 const mouseBuff = 2;       // moves line above mouse cursor
 
@@ -80,6 +87,7 @@ function getLineAttributes(rand = false) {
 function lockDrawing() {
     LOCKED = true;
     console.log('*********** lock is LOCKED');
+    return LOCKED;
 }
 // called when mouse button is pressed down, allows draw() to start
 // emitting drawing coordinate data to server
