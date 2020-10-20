@@ -5,6 +5,7 @@ let LOCKED = false;
 let paths = {};
 let curPath;
 let curPathName;
+let selectedColor;
 // global settings for all paths, can (and will) be overridden
 project.currentStyle = {
 	strokeWidth: 5,
@@ -51,13 +52,14 @@ function onMouseDown(event) {
         return;
     }
 
-	let pathAttr = getPathAttributes();
+	let pathAttr = getPathAttributes(true);
 	socket.emit('beginDrawing', pathAttr);
 }
 
 // callback, called when newPath socket message is received. Make a new path,
 // set it as curPath, add it to the paths obj.
 function createNewPath(pathAttr) {
+	console.log(pathAttr);
 	// create new path
 	curPath = new Path();
 	//curPath.strokeColor = pathAttr.strokecolor;
@@ -109,17 +111,28 @@ function unlockCanvas(event) {
 }
 
 // returns an object of path attributes
-function getPathAttributes() {
-    let strokeColor = {
-        r: Math.random(),
-        g: Math.random(),
-        b: Math.random()
-    }
+function getPathAttributes(rand = false) {
+	let strokeColor;
+	if(rand == true) {
+		strokeColor = {
+	        r: Math.random(),
+	        g: Math.random(),
+	        b: Math.random()
+	    }
+	}
+	else {
+		strokeColor = {
+	        r: 0,
+	        g: 0,
+	        b: 0
+	    }
+	}
+
 	let attr = {
 		strokeColor: strokeColor
 	};
-
-	return attr
+	console.log(attr);
+	return attr;
 }
 
 // rotate colors of existing paths
@@ -137,3 +150,30 @@ function rotateColors() {
 		paths[keys[keys.length-1]].strokeColor = path0Color;
 	}
 }
+
+function removeClass(el, className){
+    var elClass = el.className;
+    while(elClass.indexOf(className) != -1) {
+        elClass = elClass.replace(className, '');
+        elClass = elClass.trim();
+    }
+    el.className = elClass;
+}
+
+var colorBtns = document.querySelectorAll(".color-box");
+console.log(colorBtns);
+colorBtns.forEach((btn) => {
+    btn.onclick = function () {
+        //make all buttons inactive
+        colorBtns.forEach((btn) =>{
+            removeClass(btn, "active");
+        });
+
+        //make selected button active
+        btn.className += " active";
+
+        //set color to button color
+        selectedColor = btn.attributes["data-color"].value;
+        console.log(selectedColor);
+    };
+});
