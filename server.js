@@ -19,12 +19,10 @@ app.get('/', (req,res) => {
 
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
-    socket.send("hello");
 
-
-    socket.on('startPos', (data) => {
-        socket.broadcast.emit('lock');        // broadcast to all sockets except sender who triggered event
-        io.emit('startPos', data);            // broadcast to all sockets, including sender who triggered event
+    socket.on('beginDrawing', (pathAttr) => {
+        socket.broadcast.emit('lockCanvas');  // broadcast to all sockets except sender who triggered event
+        io.emit('newPath', pathAttr);         // broadcast to all sockets, including sender who triggered event
     });
 
     socket.on('mousePos', (data) => {
