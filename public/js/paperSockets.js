@@ -4,6 +4,7 @@ let LOCKED = false;
 // global obj that contains all paths that are drawn
 let paths = {};
 let curPath;
+let curPathName;
 // global settings for all paths, can (and will) be overridden
 project.currentStyle = {
 	strokeWidth: 5,
@@ -12,6 +13,7 @@ project.currentStyle = {
 }
 
 // socket listeners
+socket.on('addPaths', addPaths);
 socket.on('lockCanvas', lockCanvas);
 socket.on('newPath', createNewPath);
 socket.on('newPoint', addPointToPath);
@@ -23,6 +25,23 @@ function lockCanvas() {
     LOCKED = true;
     console.log('*********** lock is LOCKED');
     return LOCKED;
+}
+
+// called when socket receives an 'addPaths' message from server when socket
+// connection is first established between client/server.
+// Adds all previously existing drawings on chalkboard to new client canvas.
+// newPaths is an object consisting of Path-like object values that can be used by the
+// Path constructor to create actual Path objects.
+// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
+function addPaths(newPaths) {
+
+	for(let [pathName, pathObj] of newPaths) {
+		// use the same keys for path that are found in newPaths
+		paths.pathName = new Path(pathObj);
+		paths.pathName.simplify();
+		curPath = paths.pathName;
+	}
+	socket.emit('pathsLoaded');
 }
 
 // notify users to create a new path
@@ -52,24 +71,9 @@ function createNewPath(pathAttr) {
     // curPath.strokeColor = 'red';
 	rotateColors();
 	// add new path to paths object
-	paths['path'+ Object.keys(paths).length] = curPath;
+	curPathName = 'path'+ Object.keys(paths).length;
+	paths[curPathName] = curPath;
 	console.log(paths);
-}
-
-// rotate colors of existing paths
-function rotateColors() {
-	// create array of paths obj keys
-	let keys = Object.keys(paths);
-	if(keys.length > 1) {
-		// save color of first path
-		let path0Color = paths[keys[0]].strokeColor;
-		// change the rest of the colors
-		for(let i = 0; i < keys.length-1; i++) {
-			paths[keys[i]].strokeColor = paths[keys[i+1]].strokeColor;
-		}
-		// last path gets firt paths original color
-		paths[keys[keys.length-1]].strokeColor = path0Color;
-	}
 }
 
 // This function is called whenever the user
@@ -89,20 +93,23 @@ function addPointToPath(loc) {
 
 // called when user releases a click, used to notify server of event
 function onMouseUp(event) {
-    socket.emit('endDrawing');
+	let pathData = {
+		pathName: curPathName,
+		path: curPath
+	}
+    socket.emit('endDrawing', pathData);
 }
 
 // called when socket receives "unlockCanvas" message. Smooths the path
 // and unlocks the canvas for drawing.
 function unlockCanvas(event) {
-    curPath.simplify();
+	if(curPath != null) { curPath.simplify(); }
     LOCKED = false;
     console.log('lock is unlocked');
 }
 
 // returns an object of path attributes
 function getPathAttributes() {
-	// let strokeColor = new Color(Math.random(), Math.random(), Math.random());
     let strokeColor = {
         r: Math.random(),
         g: Math.random(),
@@ -113,4 +120,20 @@ function getPathAttributes() {
 	};
 
 	return attr
+}
+
+// rotate colors of existing paths
+function rotateColors() {
+	// create array of paths obj keys
+	let keys = Object.keys(paths);
+	if(keys.length > 1) {
+		// save color of first path
+		let path0Color = paths[keys[0]].strokeColor;
+		// change the rest of the colors
+		for(let i = 0; i < keys.length-1; i++) {
+			paths[keys[i]].strokeColor = paths[keys[i+1]].strokeColor;
+		}
+		// last path gets firt paths original color
+		paths[keys[keys.length-1]].strokeColor = path0Color;
+	}
 }
