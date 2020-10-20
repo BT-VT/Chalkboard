@@ -5,7 +5,7 @@ let LOCKED = false;
 let paths = {};
 let curPath;
 let curPathName;
-let selectedColor;
+let selectedColor = '#000000';
 // global settings for all paths, can (and will) be overridden
 project.currentStyle = {
 	strokeWidth: 5,
@@ -52,7 +52,7 @@ function onMouseDown(event) {
         return;
     }
 
-	let pathAttr = getPathAttributes(true);
+	let pathAttr = getPathAttributes();
 	socket.emit('beginDrawing', pathAttr);
 }
 
@@ -62,16 +62,15 @@ function createNewPath(pathAttr) {
 	console.log(pathAttr);
 	// create new path
 	curPath = new Path();
-	//curPath.strokeColor = pathAttr.strokecolor;
+	//set the color
+	let r = pathAttr.strokeColor[1];
+	let g = pathAttr.strokeColor[2];
+	let b = pathAttr.strokeColor[3];
+	curPath.strokeColor = new Color(r,g,b);
 
-    // extract color ratios and set strokeColor
-    let r = pathAttr.strokeColor.r;
-    let g = pathAttr.strokeColor.g;
-    let b = pathAttr.strokeColor.b;
-    curPath.strokeColor = new Color(r,g,b);
+	// curPath.strokeColor = new Color(selectedColor);
 
-    // curPath.strokeColor = 'red';
-	rotateColors();
+	// rotateColors();
 	// add new path to paths object
 	curPathName = 'path'+ Object.keys(paths).length;
 	paths[curPathName] = curPath;
@@ -114,24 +113,15 @@ function unlockCanvas(event) {
 function getPathAttributes(rand = false) {
 	let strokeColor;
 	if(rand == true) {
-		strokeColor = {
-	        r: Math.random(),
-	        g: Math.random(),
-	        b: Math.random()
-	    }
+		strokeColor = new Color(Math.random(), Math.random(), Math.random());
 	}
 	else {
-		strokeColor = {
-	        r: 0,
-	        g: 0,
-	        b: 0
-	    }
+		strokeColor = new Color(selectedColor);
 	}
 
 	let attr = {
 		strokeColor: strokeColor
 	};
-	console.log(attr);
 	return attr;
 }
 
@@ -161,7 +151,6 @@ function removeClass(el, className){
 }
 
 var colorBtns = document.querySelectorAll(".color-box");
-console.log(colorBtns);
 colorBtns.forEach((btn) => {
     btn.onclick = function () {
         //make all buttons inactive

@@ -37,6 +37,7 @@ io.on('connection', (socket) => {
     // called when mousedown event is detected by client. pathAttr obj is
     // created by getPathAttributes() function on client-side.
     socket.on('beginDrawing', (pathAttr) => {
+        console.log(pathAttr);
         socket.broadcast.emit('lockCanvas');  // broadcast to all sockets except sender who triggered event
         io.emit('newPath', pathAttr);         // broadcast to all sockets, including sender who triggered event
     });
