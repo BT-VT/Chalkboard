@@ -35,5 +35,7 @@ function onMouseDown(event) {
 // clicks the mouse in the view:
 function onMouseDrag(event) {
 	// Add a segment to the path at the position of the mouse:
+	let p = event.point;
+	console.log({p});
 	curPath.add(event.point);
 }

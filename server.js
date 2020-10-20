@@ -2,7 +2,7 @@
 // set up express server
 var express = require("express");
 var app = express();
-var portNum = process.env.PORT || '5000';
+var portNum = process.env.PORT || '4000';
 var server = app.listen(portNum);
 app.use(express.static("public"));
 app.use(express.static(__dirname + "/node_modules/paper/dist"));
@@ -25,13 +25,13 @@ io.on('connection', (socket) => {
         io.emit('newPath', pathAttr);         // broadcast to all sockets, including sender who triggered event
     });
 
-    socket.on('mousePos', (data) => {
+    socket.on('draw', (point) => {
         socket.broadcast.emit('lock');
-        io.emit('mousePos', data);
+        io.emit('newPoint', point);
     });
 
-    socket.on('finishPos', () => {
-        io.emit('finishPos');
+    socket.on('endDrawing', () => {
+        io.emit('unlockCanvas');
     });
 
     // chat handling
