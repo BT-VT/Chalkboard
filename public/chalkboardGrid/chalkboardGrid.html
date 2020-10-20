@@ -3,7 +3,6 @@
     <head>
         <meta charset="utf-8">
         <title>My Chalkboards</title>
-        <link rel="stylesheet" href="myChalkboards.css">
         <style media="screen">
             body {
                 padding: 0;
@@ -36,11 +35,13 @@
             .chalkboards {
                 border-style: solid;
                 border-color: blue;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                grid-gap: 1rem;
                 min-height: 100vh;
                 width: 80vw;
                 padding: 0;
                 margin: 0;
-                position: relative;
             }
             .hovering {
                 flex: 2;
@@ -49,10 +50,8 @@
                 border-style: solid;
                 border-color: black;
                 background: #EDE7F6;
-                padding: 0.5rem;
+                padding: 1.5rem;
                 border-radius: 1rem;
-                max-width: 1fr;
-                max-height: 200px;
             }
 
         </style>
@@ -98,6 +97,6 @@
             firebase.initializeApp(firebaseConfig);
             firebase.analytics();
         </script>
-        <script src="chalkboardGrid.js"></script>
+        <script src="chalkboards.js"></script>
     </body>
 </html>
