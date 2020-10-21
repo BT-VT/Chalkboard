@@ -1,0 +1,119 @@
+body {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    min-width: 100%;
+    background-color: #283333;
+}
+#navbar {
+    height: 10vh;
+}
+#canvas-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}
+.toolbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    height: 90vh;
+    background-color: #a0a0a0;
+    overflow-y: auto;
+}
+.toolbox .group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #a0a0a0;
+    border-bottom: thin solid gray;
+}
+.toolbox .group .item {
+    display: flex;
+    width: 42px;
+    height: 48px;
+    padding: 4px;
+    cursor: pointer;
+}
+.toolbox .group .item img {
+    width: 18px;
+    height: 18px;
+    filter: invert(1);
+    margin: auto;
+}
+.toolbox .group .item.active,
+.toolbox .group .item:hover {
+    background-color: #4b6161;
+}
+.toolbox .group.stroks .item {
+    position: relative;
+}
+.toolbox .group.stroks .item .stroke {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+}
+.toolbox .group.colors .item .swatch {
+    margin: auto;
+    box-sizing: border-box;
+    width: 100%;
+    height: 18px;
+    border: 1px #fff solid;
+}
+
+#canvas {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+}
+
+
+#message-container {
+    background: #ccc;
+    padding: 20px;
+    width: 355px;
+    height: 300px;
+    max-height: 300px;
+    display: flex;
+    flex-direction:column;
+    align-items: flex-start;
+    border: 1px solid black;
+    overflow-y: auto;
+    bottom: 15.5%;
+    left: 2%;
+    position:fixed;
+  }
+  
+  #send-container {
+      position: fixed;
+      bottom:10%;
+      width: 250px;
+      left: 2%;
+  }
+  
+  #hide-display {
+      position: fixed;
+      bottom: 6%;
+      left: 2%;
+  }
+  
+  #whoIsTyping {
+      position: fixed;
+      color: white;
+      bottom: 13.5%;
+      left: 2%;
+  }
+  
+  #send-button {
+      position: fixed;
+      
+  }
+
+  #message-input {
+      color:white;
+  }

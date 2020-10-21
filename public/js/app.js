@@ -1,5 +1,17 @@
 import Paint from "./paint.class.js";
 import Tool from "./tool.class.js";
+//import io from 'socket.io-client';
+//var client = app.listen(portNum);
+var socket;
+io.connect('http://localhost:5000/');
+console.log("Csadsa");
+console.log(socket);
+
+
+
+socket.on('hello', (socket) => {
+  console.log("Hello!");
+});
 let paint = new Paint("canvas");
 (paint.activeTool = Tool.TOOL_RECTANGLE), //set defaut tool in start of app to line tool
   (paint.lineWidth = "1"), // set line width in pixels
@@ -26,6 +38,7 @@ let paint = new Paint("canvas");
 
 // select all elements on page with tata attribute as tool and add a event listener to all of them
 document.querySelectorAll("[data-tool]").forEach((e) => {
+  
   // add event listener of click to elements and declare a arrow fuction to be invoked upon event
   e.addEventListener("click", (t) => {
     //remove active class from previous tool (changes background color)
@@ -41,6 +54,7 @@ document.querySelectorAll("[data-tool]").forEach((e) => {
       case Tool.TOOL_TRIANGLE:
       case Tool.TOOL_PENCIL:
         (document.querySelector(".group.pencil").style.display = "block");
+
         break;
       default:
         (document.querySelector(".group.pencil").style.display = "none");
