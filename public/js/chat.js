@@ -1,6 +1,4 @@
-
-
-export var socket = io();
+import {socket} from "./paperSockets.js"
 
 let sendContainer = document.getElementById("send-container");
 let messageInput = document.getElementById("message-input");

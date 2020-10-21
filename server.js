@@ -1,4 +1,3 @@
-
 // set up express server
 var express = require("express");
 var app = express();
@@ -24,16 +23,14 @@ io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
     // ================ CANVAS HANDLING =========================
-    console.log(LOCKED);
+    console.log('LOCKED: ' + LOCKED);
     if(!LOCKED) {
         LOCKED = socket.id;
         socket.broadcast.emit('lockCanvas', socket.id);     // lock canvas for all other users
-        console.log('not locked');
         socket.emit('addPaths', paths);                     // notify new socket to add existing paths
     }
     else {
         // add new users to queue
-        console.log("lock is locked");
         newUsers.push(socket.id);
     }
 
