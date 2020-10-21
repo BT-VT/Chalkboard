@@ -13,7 +13,6 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-
 }
 .toolbox {
     display: flex;
