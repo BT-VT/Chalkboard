@@ -9,42 +9,47 @@
     <title>Chalkboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- For material icons -->
-    <link rel = "stylesheet" href = "https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="/socket.io/socket.io.js"></script>
     <link href="styles.css" rel="stylesheet">
     <link href="myChalkboards.css" rel="stylesheet">
-    <script src = "/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
- 
+
 <body>
     <!--NAV BAR-->
-        <!--NA2322V BAR-->
-        <div id="page">
-        <nav class="z-depth-0 grey lighten-4">
-            <div style="padding-left: 18px; padding-right: 18px; width: 100%">
-                <a href="#/home" class="brand-logo">
-                    <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
-                </a>
-                <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li class="logged-in" style="display: none;">
-                        <a href="#/my-chalkboards" class="grey-text modal-trigger">My chalkboards</a>
-                    </li>
-                    <li class="logged-in" style="display: none;">
-                        <a href="#/home" class="grey-text modal-trigger">Create new</a>
-                    </li>
-                    <li class="logged-in" style="display: none;">
-                        <a href="#modal" class="modal-trigger" id="navEmail" data-target="modal-account" style="color: #02A6C1"></a>
-                    </li>
-                    <li class="logged-out" style="display: none;">
-                        <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1">Log in</a>
-                    </li>
-                    <li class="logged-out" style="display: none;">
-                        <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #02A6C1">Sign up</a>
-                    </li>
-                    </span>
-                </ul>
-            </div>
-        </nav>
+    <!--NA2322V BAR-->
+    <div id="page">
+        <div class="navbar-fixed">
+            <nav class="z-depth-0 grey lighten-4 nav-extended">
+                <div style="padding-left: 18px; padding-right: 18px; width: 100%">
+                    <a href="#/home" class="brand-logo">
+                        <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
+                    </a>
+                    <ul id="nav-mobile" class="right">
+                        <li class="logged-in" style="display: none;">
+                            <a href="#/my-chalkboards" class="grey-text modal-trigger">My chalkboards</a>
+                        </li>
+                        <li class="logged-in" style="display: none;">
+                            <a href="#/home" class="grey-text modal-trigger">Create new</a>
+                        </li>
+                        <li class="logged-in" style="display: none;">
+                            <a href="#modal" class="modal-trigger" id="navEmail" data-target="modal-account"
+                                style="color: #02A6C1"></a>
+                        </li>
+                        <li class="logged-out" style="display: none;">
+                            <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1">Log
+                                in</a>
+                        </li>
+                        <li class="logged-out" style="display: none;">
+                            <a href="#modal" class="modal-trigger" data-target="modal-signup"
+                                style="color: #02A6C1">Sign up</a>
+                        </li>
+                        </span>
+                    </ul>
+                </div>
+            </nav>
+        </div>
         <!--SIGNUP MODAL-->
         <div id="modal-signup" class="modal">
             <div class="modal-content">
@@ -91,7 +96,7 @@
             </div>
         </div>
         <div id="content" style="z-index: -1;">
-        
+
         </div>
 
         <!-- The core Firebase JS SDK is always required and must be listed first -->
@@ -111,7 +116,7 @@
                 authDomain: "chalkboard-ce2b6.firebaseapp.com",
                 databaseURL: "https://chalkboard-ce2b6.firebaseio.com",
                 projectId: "chalkboard-ce2b6",
-                storageBucket: "chalkboard-ce2b6.appspot.com",
+                storageBucket: "gs://chalkboard-ce2b6.appspot.com/",
                 messagingSenderId: "801991166996",
                 appId: "1:801991166996:web:b2287b110a18a36477ab01",
                 measurementId: "G-F5H7K3MXXB"
@@ -132,57 +137,57 @@
         <script src="js/auth.js" type="module"></script>
         <script src="js/index.js"></script>
         <script type="module" src="./js/draw.js"></script>
-        
+
         <!-- Chat functions -->
 
-        <div id = "message-container"> 
+        <div id="message-container">
             <div id="whoIsTyping"></div>
         </div>
 
-        <form id = "send-container">
+        <form id="send-container">
             <input type="text" id="message-input" placeholder="Type a message">
             <button type="submit" id="send-button" name="action" class="btn waves-effect waves-light">Send
                 <i class="material-icons right">send</i>
             </button>
         </form>
-    
-            
-            <button type="button" id="hide-display" class="btn-floating pink waves-effect">
-                <i class="material-icons">chat</i></button>
-        
-            <script src="js/chat.js" type="module"></script>
-            <script src="js/chalkboardGrid.js"></script>
-            <script src="js/home.js"></script>
-            <script src="js/myChalkboards.js"></script>
-            <script src="js/routerFw.js"></script>
-            <script>
-                "use strict";
-    
-                var routes = [];
-    
-                routes["#/home"] = home;
-                routes[""] = home;
-                routes['#'] = home;
-                routes['#/my-chalkboards'] = myChalkboards;
-    
-                routerFw({
-                    routes: routes,
-                    contentId: "content",
-                    startLink: "#/home"
-                });
-    
-            </script>
-            <script src="js/setupCanvas.js"></script>
-            <script>
-                window.addEventListener("hashchange", function () {
-                    if(location.path === "#/my-chalkboards") {
-                        chalkboardGrid();
-                    }else {
-                        setupCanvas();
-                    }
-                });
-            </script>
-    </div>    
+
+
+        <button type="button" id="hide-display" class="btn-floating pink waves-effect">
+            <i class="material-icons">chat</i></button>
+
+        <script src="js/chat.js" type="module"></script>
+        <script src="js/chalkboardGrid.js"></script>
+        <script src="js/home.js"></script>
+        <script src="js/myChalkboards.js"></script>
+        <script src="js/routerFw.js"></script>
+        <script>
+            "use strict";
+
+            var routes = [];
+
+            routes["#/home"] = home;
+            routes[""] = home;
+            routes['#'] = home;
+            routes['#/my-chalkboards'] = myChalkboards;
+
+            routerFw({
+                routes: routes,
+                contentId: "content",
+                startLink: "#/home"
+            });
+
+        </script>
+        <script src="js/setupCanvas.js"></script>
+        <script>
+            window.addEventListener("hashchange", function () {
+                if (location.hash == "#/my-chalkboards") {
+                    chalkboardGrid();
+                } else {
+                    setupCanvas();
+                }
+            });
+        </script>
+    </div>
 
 </body>
 

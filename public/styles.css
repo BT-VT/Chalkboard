@@ -9,6 +9,30 @@ body {
 #navbar {
     height: 10vh;
 }
+
+#header {
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+    /*border: 2px solid #ff4500;/* */
+}
+
+#title {
+    padding: 8px;
+    margin-top: 0px;
+    white-space: nowrap;
+}
+
+.brand-logo {
+    opacity: 0;
+}
+
+@media only screen and (min-width: 600px) {
+    .nav-extended .brand-logo {
+        opacity: 1;
+    }
+}
+
 #canvas-container {
     display: flex;
     flex-direction: row;

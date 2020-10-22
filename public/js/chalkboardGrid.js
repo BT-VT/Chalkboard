@@ -1,4 +1,5 @@
 function chalkboardGrid() {
+    console.log("chalkboardGrid() was called");
     // get elements
     let uploader = document.getElementById('uploader');
     let fileButton = document.getElementById('fileButton');
