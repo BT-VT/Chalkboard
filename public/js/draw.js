@@ -10,7 +10,7 @@
 // ================ END TESTING ===========================
 
 
-let socket = io();
+import {socket} from "./main.js";
 let selectedColor = "black";
 let canvas;
 let c;let painting = false;      // prevents drawing when mouse isnt clicked down

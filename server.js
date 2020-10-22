@@ -5,6 +5,10 @@ var portNum = process.env.PORT || '5000';
 var server = app.listen(portNum);
 app.use(express.static("public"));
 
+let sessions = new Map();
+
+
+
 console.log("server running on port: " + portNum);
 
 // set up socket.io on express server
@@ -41,20 +45,33 @@ io.on('connection', (socket) => {
     // chat handling
 
     // sends chat message to the chat box
-    socket.on("sendChatMessage", (message, name) => {
+    socket.on("sendChatMessage", (message, user) => {
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
-        io.emit("chat-message", name + " at " + formattedTime + ":\n" + message);
+        io.emit("chat-message", user.name + " at " + formattedTime + ":\n" + message);
     });
 
     // broadcasts a message when a user is typing
-    socket.on("typingMsg", (data, name) => {
-        socket.broadcast.emit("typing", data, name);
+    socket.on("typingMsg", (data, user) => {
+        socket.broadcast.emit("typing", data, user.name);
     });
-
+    // getting username from auth.js and passing it to the client (prob dont need to do this actually)
     socket.on("getUsernameFromAuth", (username) => {
         socket.emit("giveUsername", username);
     });
+
+    socket.on("sessionID", (sessionID) =>  {
+        
+        // checking to see if the session exists, but for now just create one if it doesn't exist
+        
+        /*  if (sessions.has(sessionID)) {
+            socket.join(sessionID);
+        }  */
+
+        sessions.set(sessionID, []);
+        socket.join(sessionID);
+    });
+
 
 
 });

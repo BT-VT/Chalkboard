@@ -1,4 +1,4 @@
-import {socket} from "./chat.js"
+import {socket} from "./main.js"
 // listen for auth status changes
 auth.onAuthStateChanged(user => {
     if (user) {
