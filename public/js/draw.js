@@ -1,4 +1,4 @@
-var selectedColor = "black";
+/*var selectedColor = "black";
 
 window.addEventListener('load', () => {
     var socket = io();
@@ -319,4 +319,4 @@ colorBtns.forEach((btn) => {
         console.log(selectedColor);
     };
 });
-
+*/
