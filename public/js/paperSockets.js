@@ -1,6 +1,5 @@
 export let socket = io();
 window.onload = function() {
-	console.log('window loaded');
 	// Setup directly from canvas id:
 	paper.setup('canvas');
 	var tool = new paper.Tool();
@@ -31,22 +30,8 @@ window.onload = function() {
 	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 
-	console.log('before connection statement');
-
-	socket.on('connection', function() {
-    	console.log("client connected");
-	});
-
-	socket.on('connect_error', function(err) {
-    	console.log("client connect_error: ", err);
-	});
-
-	socket.on('connect_timeout', function(err) {
-    	console.log("client connect_timeout: ", err);
-	});
-
-
-
+	// notify server to send existing session paths
+	socket.emit('hello');
 
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server

@@ -53,7 +53,10 @@ io.on('connection', (socket) => {
 
     // ================ CANVAS HANDLING =========================
 
-    tryToSendPaths(socket);
+    // initial message from client to request session paths
+    socket.on('hello', () => {
+        tryToSendPaths(socket);
+    });
 
     // called when new client socket finishes drawing all pre-existing
     // paths onto their canvas.
