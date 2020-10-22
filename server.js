@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
     // paths onto their canvas.
     socket.on('pathsLoaded', () => {
         console.log('paths successfully added to ' + socket.id);
-        socket.emit('unlockCanvas', LOCKED);
+        socket.emit('userInitialized', LOCKED);
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
@@ -94,8 +94,18 @@ io.on('connection', (socket) => {
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
-        io.emit('finishPath', LOCKED);
+        io.emit('finishPath', socket.id);
     });
+
+    socket.on('disconnect', async (reson) => {
+        if(LOCKED == socket.id) {
+            await checkForNewUsers(socket);
+            LOCKED = false;
+            console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock...');
+            io.emit('deleteCurPath', socket.id);
+        }
+    })
+
 
 
 

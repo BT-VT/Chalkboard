@@ -5,10 +5,10 @@ window.onload = function() {
 	var tool = new paper.Tool();
 	// When a client first joins a session, they must wait until it is their turn to
 	// load the existing session paths. Their canvas starts as locked and a special
-	// flag 'pathsLoaded' prevents them from adding paths that are currently being
+	// flag 'initialPathsReceived' prevents them from adding paths that are currently being
 	// drawn by other users.
 	let LOCKED = true;
-	let pathsLoaded = false;
+	let initialPathsReceived = false;
 	let multicolor = false;
 
 	// global array of objects containing info about each path drawn. similar to
@@ -30,9 +30,11 @@ window.onload = function() {
 	socket.on('newPoint', addPointToPath);				// extends a path
 	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
+	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
 
 	// notify server to send existing session paths
 	socket.emit('hello');
+
 
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
@@ -47,7 +49,7 @@ window.onload = function() {
 		console.log('owner: ' + owner);
 		if(owner == false || LOCKED == owner) {
 			LOCKED = false;
-		    console.log('lock is unlocked');
+		    console.log('canvas is UNLOCKED');
 		}
 		return LOCKED;
 	}
@@ -57,6 +59,8 @@ window.onload = function() {
 	// to begin to receive canvas updates when other users are drawing.
 	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	function addPaths(newPaths) {
+		LOCKED = false;
+		initialPathsReceived = true;
 		console.log('adding new paths ...... ');
 		// add each path from server to client paths array. pathObj is a Path-like
 		// object that must be converted to a Paper.js Path
@@ -68,10 +72,8 @@ window.onload = function() {
 			paths.push(pathsItem);
 			paths[paths.length-1].path.simplify();	// smooths the path
 		}
-
-		pathsLoaded = true;
 		// initial unlocking of client canvas
-		socket.emit('pathsLoaded');
+		socket.emit('initialPathsReceived');
 	}
 
 	// notify users to create a new path
@@ -129,7 +131,7 @@ window.onload = function() {
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishPath(owner) {
-		if(pathsLoaded == false) {
+		if(initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
 		}
@@ -140,7 +142,17 @@ window.onload = function() {
 			path: curPath
 		}
 		paths.push(pathsItem);
+		curPath = null;
 	    unlockCanvas(owner);
+	}
+
+	// called when socket receives "deleteCurPath" message from server. Signals that
+	// lock owner was disconnected and curPath should be removed & LOCK should be unlocked.
+	function deleteCurPath(owner) {
+		console.log('socket ' + owner + ' disconnected while drawing, releasing lock...');
+		curPath.remove();
+		curPath = null;
+		unlockCanvas(owner);
 	}
 
 	// returns an object of path attributes
