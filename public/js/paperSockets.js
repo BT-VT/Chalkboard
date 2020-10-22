@@ -42,6 +42,8 @@ window.onload = function() {
 	}
 
 	function unlockCanvas(owner) {
+		console.log('LOCKED: ' + LOCKED);
+		console.log('owner: ' + owner);
 		if(owner == false || LOCKED == owner) {
 			LOCKED = false;
 		    console.log('lock is unlocked');
