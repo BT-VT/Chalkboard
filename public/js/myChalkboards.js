@@ -17,6 +17,7 @@ function myChalkboards () {
         `;
         var ele = document.createElement("div");
         ele.innerHTML = content;
+        ele.setAttribute("id", "my-chalkboards");
         return ele;
     }
     
