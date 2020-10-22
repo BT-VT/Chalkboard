@@ -39,8 +39,8 @@ function tryToSendPaths(socket) {
 function checkForNewUsers(socket) {
     return new Promise((response, reject) => {
         while(newUsers.length) {
-            console.log('sending paths to socket ' + socket.id);
             let newSocket = newUsers.shift();
+            console.log('sending paths to socket ' + newSocket.id);
             socket.broadcast.to(newSocket.id).emit('addPaths', paths); // send paths to next new user in queue
         }
         response(newUsers.length);
@@ -70,6 +70,7 @@ io.on('connection', (socket) => {
     // created by getPathAttributes() function on client-side.
     socket.on('beginDrawing', (pathAttr) => {
         LOCKED = socket.id;
+        console.log('begin drawing, LOCKED set to: ' + LOCKED);
         io.emit('lockCanvas', socket.id);       // broadcast to all sockets except sender who triggered event
         io.emit('newPath', pathAttr);           // broadcast to all sockets, including sender who triggered event
     });
@@ -77,7 +78,6 @@ io.on('connection', (socket) => {
     // called when mousedrag event is detecte by client. loc is an object
     // with x and y keys corresponding to float coordinates.
     socket.on('draw', (loc) => {
-        //socket.broadcast.emit('lock');
         io.emit('newPoint', loc);
     });
 
@@ -93,6 +93,7 @@ io.on('connection', (socket) => {
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
         io.emit('finishPath');
     });
 
