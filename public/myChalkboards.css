@@ -25,6 +25,7 @@
 .top {
     /*border-style: solid;/**/
     /*border-color: green;/**/
+    border-bottom: 1px solid gray;
     background-color: #fff;
     display: flex;
     min-height: 20vh;
