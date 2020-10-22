@@ -1,7 +1,7 @@
 // set up express server
 var express = require("express");
 var app = express();
-var portNum = process.env.PORT || '4000';
+var portNum = process.env.PORT || '5000';
 var server = app.listen(portNum);
 app.use(express.static("public"));
 app.use(express.static(__dirname + "/node_modules/paper/dist"));
