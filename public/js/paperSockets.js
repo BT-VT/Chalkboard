@@ -10,8 +10,9 @@ window.onload = function() {
 	let LOCKED = true;
 	let pathsLoaded = false;
 
-	// global obj that contains all paths that are drawn. Matches paths array on server
-	let paths = {};
+	// global array of objects containing info about each path drawn. similar to
+	// paths array on server
+	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
 	let curPath;
 	let curPathName;
 	let selectedColor = '#000000';
@@ -44,11 +45,16 @@ window.onload = function() {
 	function addPaths(newPaths) {
 		console.log('adding new paths ...... ');
 		LOCKED = false;
+		// add each path from server to client paths array. pathObj is a Path-like
+		// object that must be converted to a Paper.js Path
 		for(let [pathName, pathObj] of newPaths) {
-			// use the same keys for path that are found in newPaths
-			paths.pathName = new paper.Path(pathObj);
-			paths.pathName.simplify();
-			curPath = paths.pathName;
+			let pathsItem = {
+				pathName: pathName,
+				path: new paper.Path(pathObj)
+			}
+			paths.push(pathsItem);
+			paths[paths.length-1].path.simplify();	// smooths the path
+			curPath = paths[paths.length-1].path;
 		}
 		// initial unlocking of client canvas
 		pathsLoaded = true;
@@ -73,7 +79,6 @@ window.onload = function() {
 			console.log('waiting to load paths');
 			return;
 		}
-		console.log(pathAttr);
 		// create new path
 		curPath = new paper.Path();
 		//set the color
@@ -85,9 +90,13 @@ window.onload = function() {
 		// curPath.strokeColor = new Color(selectedColor);
 
 		// rotateColors();
-		// add new path to paths object
-		curPathName = 'path'+ Object.keys(paths).length;
-		paths[curPathName] = curPath;
+		// add new path to paths array
+		let pathsItem = {
+			pathName: 'path' + paths.length,
+			path: curPath
+		}
+		curPathName = pathsItem.pathName;
+		paths.push(pathsItem);
 		console.log(paths);
 	}
 
@@ -148,17 +157,16 @@ window.onload = function() {
 
 	// rotate colors of existing paths
 	function rotateColors() {
-		// create array of paths obj keys
-		let keys = Object.keys(paths);
-		if(keys.length > 1) {
+		if(paths.length > 1) {
 			// save color of first path
-			let path0Color = paths[keys[0]].strokeColor;
-			// change the rest of the colors
-			for(let i = 0; i < keys.length-1; i++) {
-				paths[keys[i]].strokeColor = paths[keys[i+1]].strokeColor;
+			let path0Color = paths[0].path.strokeColor;
+			// change the rest of the colors by shifting them to the left
+			// (to the left to the left, the color that you own pass to the Path on your left)
+			for(let i = 0; i < paths.length-1; i++) {
+				paths[i].path.strokeColor = paths[i+1].path.strokeColor;
 			}
 			// last path gets firt paths original color
-			paths[keys[keys.length-1]].strokeColor = path0Color;
+			paths[i].path.strokeColor = path0Color;
 		}
 	}
 

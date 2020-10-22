@@ -18,29 +18,45 @@ app.get('/', (req,res) => {
     res.send('Welcome to Chalkboard');
 });
 
+function tryToSendPaths(socket) {
+    return new Promise((response, reject) => {
+        if(!LOCKED) {
+            console.log('sending paths to socket ' + socket.id);
+            socket.emit('addPaths', paths);
+            response(socket);
+        }
+        else {
+            console.log('adding socket ' + socket.id + ' to queue');
+            newUsers.push(socket);
+            reject(socket);
+        }
+    });
+}
+
 // called when new client socket connects to server
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log("new connection: " + socket.id);
 
     // ================ CANVAS HANDLING =========================
-    console.log('LOCKED: ' + LOCKED);
     if(!LOCKED) {
+        console.log('sending paths to socket ' + socket.id);
         LOCKED = socket.id;
         socket.broadcast.emit('lockCanvas', socket.id);     // lock canvas for all other users
         socket.emit('addPaths', paths);                     // notify new socket to add existing paths
     }
     else {
+        console.log('adding socket ' + socket.id + ' to queue');
         // add new users to queue
-        newUsers.push(socket.id);
+        newUsers.push(socket);
     }
 
     // called before a socket broadcasts an unlock message when done drawing.
     // If new user is waiting to draw existing paths, release lock to them.
     function checkForNewUsers(socket) {
         if(newUsers.length > 0) {
-            let socketid = newUsers.shift();
-            socket.emit('lockCanvas', socketid);                   // lock canvas for socket that just finished drawing
-            socket.broadcast.to(socketid).emit('addPaths', paths); // notify longest waiting newcomer to add existing paths
+            let newSocket = newUsers.shift();
+            socket.emit('lockCanvas', newSocket.id);                   // lock canvas for socket that just finished drawing
+            socket.broadcast.to(newSocket.id).emit('addPaths', paths); // notify longest waiting newcomer to add existing paths
             return true;
         }
         return false
