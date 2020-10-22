@@ -55,6 +55,7 @@ io.on('connection', (socket) => {
 
     // initial message from client to request session paths
     socket.on('hello', () => {
+        if(LOCKED) { socket.emit('lockCanvas', LOCKED); }
         tryToSendPaths(socket);
     });
 
@@ -62,16 +63,15 @@ io.on('connection', (socket) => {
     // paths onto their canvas.
     socket.on('pathsLoaded', () => {
         console.log('paths successfully added to ' + socket.id);
-        socket.emit('unlockCanvas');
+        socket.emit('unlockCanvas', LOCKED);
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
     // created by getPathAttributes() function on client-side.
     socket.on('beginDrawing', (pathAttr) => {
-        console.log(pathAttr);
         LOCKED = socket.id;
-        socket.broadcast.emit('lockCanvas', socket.id);  // broadcast to all sockets except sender who triggered event
-        io.emit('newPath', pathAttr);                    // broadcast to all sockets, including sender who triggered event
+        io.emit('lockCanvas', socket.id);       // broadcast to all sockets except sender who triggered event
+        io.emit('newPath', pathAttr);           // broadcast to all sockets, including sender who triggered event
     });
 
     // called when mousedrag event is detecte by client. loc is an object

@@ -37,13 +37,15 @@ window.onload = function() {
 	// prevents other clients from emitting drawing coordinates to server
 	function lockCanvas(owner) {
 	    LOCKED = owner;
-	    console.log('*********** lock is LOCKED');
+	    console.log('canvas LOCKED by socket ' + owner);
 	    return LOCKED;
 	}
 
-	function unlockCanvas(event) {
-		LOCKED = false;
-	    console.log('lock is unlocked');
+	function unlockCanvas(owner) {
+		if(owner == false || LOCKED == owner) {
+			LOCKED = false;
+		    console.log('lock is unlocked');
+		}
 		return LOCKED;
 	}
 
@@ -71,13 +73,14 @@ window.onload = function() {
 
 	// notify users to create a new path
 	tool.onMouseDown = function(event) {
-		if(LOCKED == true) {
-	        console.log('cant start new path, lock is locked');
-	        return;
+		if(!LOCKED || LOCKED == socket.id) {
+			let pathAttr = getPathAttributes();
+			socket.emit('beginDrawing', pathAttr);
+			return;
 	    }
-
-		let pathAttr = getPathAttributes();
-		socket.emit('beginDrawing', pathAttr);
+		console.log('my socket id: ' + socket.id);
+		console.log('cant start new path, lock is locked to socket ' + LOCKED);
+		return;
 	}
 
 	// callback, called when newPath socket message is received. Make a new path,
@@ -99,7 +102,7 @@ window.onload = function() {
 
 	// notifies users to add new point to curPath
 	tool.onMouseDrag = function(event) {
-		if(LOCKED == true) { return; }
+		if(LOCKED != socket.id) { return; }
 		let loc = { x: event.point.x, y: event.point.y }
 	    socket.emit('draw', loc);
 	}
@@ -114,7 +117,7 @@ window.onload = function() {
 
 	// called when user releases a click, used to notify server of event
 	tool.onMouseUp = function(event) {
-		if(LOCKED == true) { return; }
+		if(LOCKED != socket.id) { return; }
 		let pathData = {
 			pathName: "path" + paths.length,
 			path: curPath
