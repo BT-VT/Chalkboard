@@ -129,7 +129,7 @@ window.onload = function() {
 
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
-	function finishPath(event) {
+	function finishPath(owner) {
 		if(pathsLoaded == false) {
 			console.log('waiting to load paths');
 			return;
@@ -141,7 +141,7 @@ window.onload = function() {
 			path: curPath
 		}
 		paths.push(pathsItem);
-	    unlockCanvas();
+	    unlockCanvas(owner);
 	}
 
 	// returns an object of path attributes

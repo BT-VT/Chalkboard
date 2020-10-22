@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
-        io.emit('finishPath');
+        io.emit('finishPath', LOCKED);
     });
 
 
