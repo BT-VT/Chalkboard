@@ -28,8 +28,12 @@
                     <li class="logged-in" style="display: none;">
                         <a href="#" class="grey-text modal-trigger">My chalkboards</a>
                     </li>
+                   
                     <li class="logged-in" style="display: none;">
                         <a href="#" class="grey-text modal-trigger">Create new</a>
+                    </li> 
+                    <li>
+                        <a href="#" class="grey-text modal-trigger" data-target="modal-session">Join a Session</a> 
                     </li>
                     <li class="logged-in" style="display: none;">
                         <a href="#" class=" modal-trigger" id="navEmail" data-target="modal-account" style="color: #02A6C1"></a>
@@ -40,6 +44,9 @@
                     <li class="logged-out" style="display: none;">
                         <a href="#" class="modal-trigger" data-target="modal-signup" style="color: #02A6C1">Sign up</a>
                     </li>
+
+                    
+
                     </span>
                 </ul>
             </div>
@@ -89,6 +96,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Join a Session modal -->
+        <div id=modal-session class="modal">
+            <div class="modal-content center align">
+                <h4>Enter Session ID</h4>
+                <form id="session-form">
+                    <div class="input-field">
+                        <input type="text" id ="session-id" required />
+                        <label for="session-id">Session ID</label>
+                    </div>
+                    <button class="btn cyan darken-2 z-depth-0">Enter</button>
+                </form>
+            </div>
+        </div>
+
+
         <div id="canvas-container">
             <!-- tool box on left panel -->
             <div class="toolbox left">
@@ -195,6 +218,7 @@
 
         <script src="js/auth.js" type="module"></script>
         <script src="js/index.js"></script>
+        <script src="js/session.js"></script>
         
         <!-- Chat functions -->
 
