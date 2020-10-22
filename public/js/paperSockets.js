@@ -9,6 +9,7 @@ window.onload = function() {
 	// drawn by other users.
 	let LOCKED = true;
 	let pathsLoaded = false;
+	let multicolor = false;
 
 	// global array of objects containing info about each path drawn. similar to
 	// paths array on server
@@ -76,7 +77,7 @@ window.onload = function() {
 	// notify users to create a new path
 	tool.onMouseDown = function(event) {
 		if(!LOCKED || LOCKED == socket.id) {
-			let pathAttr = getPathAttributes();
+			let pathAttr = getPathAttributes(multicolor);
 			socket.emit('beginDrawing', pathAttr);
 			return;
 	    }
@@ -96,9 +97,7 @@ window.onload = function() {
 		let b = pathAttr.strokeColor[3];
 		curPath.strokeColor = new paper.Color(r,g,b);
 
-		// curPath.strokeColor = new Color(selectedColor);
-
-		// rotateColors();
+		if(multicolor) { rotateColors(); }
 		console.log(paths);
 	}
 
@@ -171,7 +170,7 @@ window.onload = function() {
 				paths[i].path.strokeColor = paths[i+1].path.strokeColor;
 			}
 			// last path gets firt paths original color
-			paths[i].path.strokeColor = path0Color;
+			paths[paths.length - 1].path.strokeColor = path0Color;
 		}
 	}
 
@@ -197,6 +196,8 @@ window.onload = function() {
 
 	        //set color to button color
 	        selectedColor = btn.attributes["data-color"].value;
+			if(selectedColor == '#c46f0f') { multicolor = true; }
+			else { multicolor = false; }
 	        console.log(selectedColor);
 	    };
 	});
