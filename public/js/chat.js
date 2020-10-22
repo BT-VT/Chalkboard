@@ -67,7 +67,6 @@ messageInput.addEventListener("keyup", () => {
 
 // get the username when the user is signed in, username is -1 if not logged in
 socket.on("giveUsername" , (username) => {
-    console.log("username is working")
     if (username != -1) {
         name = username;
     } else {

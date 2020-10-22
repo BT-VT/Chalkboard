@@ -70,7 +70,7 @@ io.on('connection', async (socket) => {
         if(checkForNewUsers(socket)) { return; }
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
-        io.emit('unlockCanvas');
+        socket.broadcast.emit('unlockCanvas');
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
@@ -102,7 +102,7 @@ io.on('connection', async (socket) => {
         if(checkForNewUsers(socket)) { return; }
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
-        io.emit('unlockCanvas');
+        io.emit('finishPath');
     });
 
 

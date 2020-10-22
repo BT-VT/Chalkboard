@@ -13,8 +13,7 @@ window.onload = function() {
 	// global array of objects containing info about each path drawn. similar to
 	// paths array on server
 	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
-	let curPath;
-	let curPathName;
+	let curPath = new paper.Path();
 	let selectedColor = '#000000';
 	// global settings for all paths, can (and will) be overridden
 	paper.project.currentStyle = {
@@ -28,7 +27,8 @@ window.onload = function() {
 	socket.on('lockCanvas', lockCanvas);				// prevents user from drawing
 	socket.on('newPath', createNewPath);				// starts a path
 	socket.on('newPoint', addPointToPath);				// extends a path
-	socket.on('unlockCanvas', unlockCanvas);			// ends a path, allows new user to draw
+	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
+	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
@@ -36,6 +36,12 @@ window.onload = function() {
 	    LOCKED = owner;
 	    console.log('*********** lock is LOCKED');
 	    return LOCKED;
+	}
+
+	function unlockCanvas(event) {
+		LOCKED = false;
+	    console.log('lock is unlocked');
+		return LOCKED;
 	}
 
 	// called when socket receives an 'addPaths' message from server. Adds all
@@ -54,8 +60,8 @@ window.onload = function() {
 			}
 			paths.push(pathsItem);
 			paths[paths.length-1].path.simplify();	// smooths the path
-			curPath = paths[paths.length-1].path;
 		}
+
 		// initial unlocking of client canvas
 		pathsLoaded = true;
 		socket.emit('pathsLoaded');
@@ -90,13 +96,6 @@ window.onload = function() {
 		// curPath.strokeColor = new Color(selectedColor);
 
 		// rotateColors();
-		// add new path to paths array
-		let pathsItem = {
-			pathName: 'path' + paths.length,
-			path: curPath
-		}
-		curPathName = pathsItem.pathName;
-		paths.push(pathsItem);
 		console.log(paths);
 	}
 
@@ -121,22 +120,27 @@ window.onload = function() {
 	// called when user releases a click, used to notify server of event
 	tool.onMouseUp = function(event) {
 		let pathData = {
-			pathName: curPathName,
+			pathName: "path" + paths.length,
 			path: curPath
 		}
 	    socket.emit('endDrawing', pathData);
 	}
 
-	// called when socket receives "unlockCanvas" message. Smooths the path
-	// and unlocks the canvas for drawing.
-	function unlockCanvas(event) {
+	// called when socket receives "finishPath" message. Smooths the path, adds
+	// finished path to paths array, and unlocks the canvas for drawing.
+	function finishPath(event) {
 		if(!pathsLoaded) {
 			console.log('waiting to load paths');
 			return;
 		}
-		if(curPath != null) { curPath.simplify(); }
-	    LOCKED = false;
-	    console.log('lock is unlocked');
+		curPath.simplify();
+		// add new path to paths array
+		let pathsItem = {
+			pathName: 'path' + paths.length,
+			path: curPath
+		}
+		paths.push(pathsItem);
+	    unlockCanvas();
 	}
 
 	// returns an object of path attributes
