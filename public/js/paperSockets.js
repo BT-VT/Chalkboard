@@ -1,5 +1,6 @@
 export let socket = io();
 window.onload = function() {
+	console.log('window loaded');
 	// Setup directly from canvas id:
 	paper.setup('canvas');
 	var tool = new paper.Tool();
@@ -30,6 +31,23 @@ window.onload = function() {
 	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 
+	console.log('before connection statement');
+
+	socket.on('connection', function() {
+    	console.log("client connected");
+	});
+
+	socket.on('connect_error', function(err) {
+    	console.log("client connect_error: ", err);
+	});
+
+	socket.on('connect_timeout', function(err) {
+    	console.log("client connect_timeout: ", err);
+	});
+
+
+
+
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
 	function lockCanvas(owner) {
@@ -50,7 +68,6 @@ window.onload = function() {
 	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	function addPaths(newPaths) {
 		console.log('adding new paths ...... ');
-		LOCKED = false;
 		// add each path from server to client paths array. pathObj is a Path-like
 		// object that must be converted to a Paper.js Path
 		for(let [pathName, pathObj] of newPaths) {
@@ -62,15 +79,15 @@ window.onload = function() {
 			paths[paths.length-1].path.simplify();	// smooths the path
 		}
 
-		// initial unlocking of client canvas
 		pathsLoaded = true;
+		// initial unlocking of client canvas
 		socket.emit('pathsLoaded');
 	}
 
 	// notify users to create a new path
 	tool.onMouseDown = function(event) {
-		if(LOCKED) {
-	        console.log('cant draw, lock is locked');
+		if(LOCKED == true) {
+	        console.log('cant start new path, lock is locked');
 	        return;
 	    }
 
@@ -81,10 +98,6 @@ window.onload = function() {
 	// callback, called when newPath socket message is received. Make a new path,
 	// set it as curPath, add it to the paths obj.
 	function createNewPath(pathAttr) {
-		if(!pathsLoaded) {
-			console.log('waiting to load paths');
-			return;
-		}
 		// create new path
 		curPath = new paper.Path();
 		//set the color
@@ -101,17 +114,14 @@ window.onload = function() {
 
 	// notifies users to add new point to curPath
 	tool.onMouseDrag = function(event) {
-	    let loc = { x: event.point.x, y: event.point.y }
+		if(LOCKED == true) { return; }
+		let loc = { x: event.point.x, y: event.point.y }
 	    socket.emit('draw', loc);
 	}
 
 	// called when socket receives "newPoint" message. adds the supplied
 	// point to the current path (which draws it)
 	function addPointToPath(loc) {
-		if(!pathsLoaded) {
-			console.log('waiting to load paths');
-			return;
-		}
 	    // Add a segment to the path at the position of the mouse:
 	    let point = new paper.Point(loc.x, loc.y);
 	    curPath.add(point);
@@ -119,6 +129,7 @@ window.onload = function() {
 
 	// called when user releases a click, used to notify server of event
 	tool.onMouseUp = function(event) {
+		if(LOCKED == true) { return; }
 		let pathData = {
 			pathName: "path" + paths.length,
 			path: curPath
@@ -129,7 +140,7 @@ window.onload = function() {
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishPath(event) {
-		if(!pathsLoaded) {
+		if(pathsLoaded == false) {
 			console.log('waiting to load paths');
 			return;
 		}

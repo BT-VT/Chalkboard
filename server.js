@@ -18,6 +18,7 @@ app.get('/', (req,res) => {
     res.send('Welcome to Chalkboard');
 });
 
+// called when new client socket connection first established
 function tryToSendPaths(socket) {
     return new Promise((response, reject) => {
         if(!LOCKED) {
@@ -33,44 +34,32 @@ function tryToSendPaths(socket) {
     });
 }
 
+// called when user finishes drawing. Attempts to send session paths to new
+// users who are waiting to receive them in the newUsers queue.
+function checkForNewUsers(socket) {
+    return new Promise((response, reject) => {
+        while(newUsers.length) {
+            console.log('sending paths to socket ' + socket.id);
+            let newSocket = newUsers.shift();
+            socket.broadcast.to(newSocket.id).emit('addPaths', paths); // send paths to next new user in queue
+        }
+        response(newUsers.length);
+    });
+}
+
 // called when new client socket connects to server
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
     // ================ CANVAS HANDLING =========================
-    if(!LOCKED) {
-        console.log('sending paths to socket ' + socket.id);
-        LOCKED = socket.id;
-        socket.broadcast.emit('lockCanvas', socket.id);     // lock canvas for all other users
-        socket.emit('addPaths', paths);                     // notify new socket to add existing paths
-    }
-    else {
-        console.log('adding socket ' + socket.id + ' to queue');
-        // add new users to queue
-        newUsers.push(socket);
-    }
 
-    // called before a socket broadcasts an unlock message when done drawing.
-    // If new user is waiting to draw existing paths, release lock to them.
-    function checkForNewUsers(socket) {
-        if(newUsers.length > 0) {
-            let newSocket = newUsers.shift();
-            socket.emit('lockCanvas', newSocket.id);                   // lock canvas for socket that just finished drawing
-            socket.broadcast.to(newSocket.id).emit('addPaths', paths); // notify longest waiting newcomer to add existing paths
-            return true;
-        }
-        return false
-    }
+    tryToSendPaths(socket);
 
     // called when new client socket finishes drawing all pre-existing
     // paths onto their canvas.
     socket.on('pathsLoaded', () => {
-        // if there are new users waiting, pass lock to them and leave
-        // all other user canvas's locked.
-        if(checkForNewUsers(socket)) { return; }
-        // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        socket.broadcast.emit('unlockCanvas');
+        console.log('paths successfully added to ' + socket.id);
+        socket.emit('unlockCanvas');
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
@@ -92,14 +81,13 @@ io.on('connection', async (socket) => {
     // called when mouseup event is detected by client. Adds finished path to
     // paths list and determines how to release lock.
     // pathData = { pathName: "pathN", path: ["Path", obj] }
-    socket.on('endDrawing', (pathData) => {
+    socket.on('endDrawing', async (pathData) => {
 
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         paths.push([pathName, pathObj]);
-        // if there are new users waiting, pass lock to them and leave
-        // all other user canvas's locked.
-        if(checkForNewUsers(socket)) { return; }
+
+        await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         io.emit('finishPath');
