@@ -10,7 +10,6 @@ let hideBTn = document.getElementById("hide-display");
 let typingMsg = document.getElementById("whoIsTyping");
 let showHideNum = 0;
 let isTyping = 0;
-let name;
 
 
 
@@ -51,7 +50,7 @@ hideBTn.onclick = function() {
 
 socket.on("typing", (data, user) => {
     if (data === 1) {
-        typingMsg.innerHTML = user.name + " is typing...";
+        typingMsg.innerHTML = user + " is typing...";
     } else {
         typingMsg.innerHTML = "";
     }

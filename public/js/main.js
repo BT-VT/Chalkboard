@@ -38,17 +38,19 @@ sessionForm.addEventListener("submit", (e) => {
 
      user.sessionID = sessionId;
 
-    socket.emit("sessionID", user);
+     console.log(user);
+     socket.emit("joinSession", user);
 
     //console.log(sessionId);
 });
 
 // get the username when the user is signed in, username is -1 if not logged in
 socket.on("giveUsername" , (username) => {
-    console.log("username is working")
     if (username != -1) {
         user.name = username;
     } else {
         name =  "Guest" +  Math.floor( Math.random() * 10000);
     }
 });
+
+

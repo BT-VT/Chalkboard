@@ -23,6 +23,8 @@ io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
     socket.send("hello");
 
+    //join the default session when they first join
+    socket.join("default");
 
     socket.on('startPos', (data) => {
         socket.broadcast.emit('lock');        // broadcast to all sockets except sender who triggered event
@@ -46,30 +48,33 @@ io.on('connection', (socket) => {
 
     // sends chat message to the chat box
     socket.on("sendChatMessage", (message, user) => {
+        console.log(user.sessionID);
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
-        io.emit("chat-message", user.name + " at " + formattedTime + ":\n" + message);
+        io.to(user.sessionID).emit("chat-message", user.name + " at " + formattedTime + ":\n" + message);
     });
 
     // broadcasts a message when a user is typing
     socket.on("typingMsg", (data, user) => {
-        socket.broadcast.emit("typing", data, user.name);
+       // console.log(name);
+        socket.to(user.sessionID).emit("typing", data, user.name);
     });
     // getting username from auth.js and passing it to the client (prob dont need to do this actually)
     socket.on("getUsernameFromAuth", (username) => {
         socket.emit("giveUsername", username);
     });
 
-    socket.on("sessionID", (sessionID) =>  {
-        
+    socket.on("joinSession", (user) =>  {
         // checking to see if the session exists, but for now just create one if it doesn't exist
-        
-        /*  if (sessions.has(sessionID)) {
-            socket.join(sessionID);
-        }  */
-
-        sessions.set(sessionID, []);
-        socket.join(sessionID);
+          if (sessions.has(user.sessionID)) {
+            sessions.get(user.sessionID).push(user);
+            socket.join(user.sessionID);
+            console.log(sessions.get(user.sessionID))
+        } else {
+            sessions.set(user.sessionID, [user]);
+            socket.join(user.sessionID);
+            console.log(sessions.get(user.sessionID))
+        }
     });
 
 
