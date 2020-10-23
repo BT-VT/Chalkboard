@@ -10,7 +10,7 @@
 // ================ END TESTING ===========================
 
 
-import {socket} from "./main.js";
+import {socket, user} from "./main.js";
 let selectedColor = "black";
 let canvas;
 let c;let painting = false;      // prevents drawing when mouse isnt clicked down
@@ -102,7 +102,7 @@ function startPosition(e) {
         pos: c.startPos,
         attr: attr
     }
-    socket.emit('startPos', data);       // this emit is only necessary for drawing single points
+    socket.emit('startPos', data, user);       // this emit is only necessary for drawing single points
 }
 
 // called when socket detects incoming data labeled as 'startPos', indicating that
@@ -116,7 +116,7 @@ function remoteStartPosition(data) {
 function finishPosition(e) {
     c.currentPos = getMouseCoordsOnCanvas(canvas, e);
     painting = false;
-    socket.emit('finishPos');
+    socket.emit('finishPos', user);
 }
 
 // called when socket detects incoming data labeled as 'finishPos', indicating that
@@ -161,7 +161,7 @@ function line(e) {
         attr: attr
     }
     c.beginPath();
-    socket.emit('mousePos', data);
+    socket.emit('mousePos', data, user);
 
 }
 
@@ -239,7 +239,7 @@ function pencil(e) {
         pos: pos,
         attr: attr
     }
-    socket.emit('mousePos', data);
+    socket.emit('mousePos', data, user);
 }
 
 function remotePencil(data) {

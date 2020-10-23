@@ -26,22 +26,22 @@ io.on('connection', (socket) => {
     //join the default session when they first join
     socket.join("default");
 
-    socket.on('startPos', (data) => {
-        socket.broadcast.emit('lock');        // broadcast to all sockets except sender who triggered event
+    socket.on('startPos', (data, user) => {
+        console.log(user.sessionID);
+        socket.to(user.sessionID).emit('lock');        // broadcast to all sockets except sender who triggered event
         console.log("Start position");
-        io.emit('startPos', data);            // broadcast to all sockets, including sender who triggered event
+        io.to(user.sessionID).emit('startPos', data);            // broadcast to all sockets, including sender who triggered event
     });
 
-    socket.on('mousePos', (data) => {
-        socket.broadcast.emit('lock');
-        console.log("Start position");
-        io.emit('mousePos', data);
+    socket.on('mousePos', (data, user) => {
+        socket.to(user.sessionID).emit('lock');
+        io.to(user.sessionID).emit('mousePos', data);
     });
 
-    socket.on('finishPos', () => {
+    socket.on('finishPos', (user) => {
         console.log("Start position");
 
-        io.emit('finishPos');
+        io.to(user.sessionID).emit('finishPos');
     });
 
     // chat handling
@@ -64,8 +64,11 @@ io.on('connection', (socket) => {
         socket.emit("giveUsername", username);
     });
 
-    socket.on("joinSession", (user) =>  {
+    socket.on("joinSession", (user, prevSession) =>  {
         // checking to see if the session exists, but for now just create one if it doesn't exist
+            
+            socket.leave(prevSession);
+            
           if (sessions.has(user.sessionID)) {
             sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
