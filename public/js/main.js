@@ -36,10 +36,11 @@ sessionForm.addEventListener("submit", (e) => {
      M.Modal.getInstance(modal).close();
      sessionForm.reset();
 
+     let prevSession = user.sessionID;
      user.sessionID = sessionId;
 
      console.log(user);
-     socket.emit("joinSession", user);
+     socket.emit("joinSession", user, prevSession);
 
     //console.log(sessionId);
 });
