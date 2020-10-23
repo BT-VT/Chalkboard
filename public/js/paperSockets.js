@@ -30,6 +30,7 @@ window.onload = function() {
 	socket.on('newPoint', addPointToPath);				// extends a path
 	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
+	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
 
 	// notify server to send existing session paths
@@ -145,6 +146,19 @@ window.onload = function() {
 		curPath = null;
 	    unlockCanvas(owner);
 	}
+	// called when socket receives 'deleteLastPath' message from server. sent
+	// when 'undo' button is clicked by user. Pops last drawn path from paths
+	// array and removes path from canvas.
+	// paths = [ {pathName: "pathN", path: Path} ]
+	function deleteLastPath(pathName) {
+		let pathObj = paths[paths.length - 1];
+		// confirm path to be removed
+		if(pathObj && pathObj.pathName == pathName) {
+			paths.pop();
+			pathObj.path.remove();
+			console.log('removed ' + pathObj.pathName);
+		}
+	}
 
 	// called when socket receives "deleteCurPath" message from server. Signals that
 	// lock owner was disconnected and curPath should be removed & LOCK should be unlocked.
@@ -213,4 +227,15 @@ window.onload = function() {
 	        console.log(selectedColor);
 	    };
 	});
+
+	var undoBtn = document.querySelector(".undo");
+	if(undoBtn) {
+		undoBtn.onclick = function() {
+			if(!LOCKED) {
+				console.log('undo clicked!');
+				socket.emit('undo');
+			}
+		}
+	}
+	else { console.log('undo button not found'); }
 }

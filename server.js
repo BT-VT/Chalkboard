@@ -97,6 +97,17 @@ io.on('connection', (socket) => {
         io.emit('finishPath', socket.id);
     });
 
+    // received by client when 'undo' button is clicked. If there is a path to
+    // undo, pop it from the paths array and send message for clients to remove
+    // the path. paths = [[pathName, obj], ... , [pathName, obj]]
+    socket.on('undo', () => {
+        if(paths.length > 0) {
+            let pathArray = paths.pop();
+            console.log('removing ' + pathArray[0]);
+            io.emit('deleteLastPath', pathArray[0]);
+        }
+    });
+
     socket.on('disconnect', async (reson) => {
         if(LOCKED == socket.id) {
             await checkForNewUsers(socket);
