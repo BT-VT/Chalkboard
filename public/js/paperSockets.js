@@ -60,6 +60,7 @@ window.onload = function() {
 	// to begin to receive canvas updates when other users are drawing.
 	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	function addPaths(newPaths) {
+		console.log("CHECK ADDPATHS!")
 		LOCKED = false;
 		initialPathsReceived = true;
 		console.log('adding new paths ...... ');
@@ -227,6 +228,22 @@ window.onload = function() {
 	        console.log(selectedColor);
 	    };
 	});
+
+	var commandBtn = document.querySelector(".download");
+	if (commandBtn){
+		commandBtn.onclick = function() {
+			//console.log("testing download");
+			var canvas = document.getElementById("canvas");
+			var image = canvas
+				.toDataURL("image/png", 1.0)
+				.replace("image/png", "image/octet-stream");
+			var link = document.createElement("a");
+			link.download = "my-image.png";
+			link.href = image;
+			link.click();
+		}
+	}
+	
 
 	var undoBtn = document.querySelector(".undo");
 	if(undoBtn) {

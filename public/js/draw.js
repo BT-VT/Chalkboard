@@ -32,7 +32,7 @@ window.addEventListener('load', () => {
     // window.addEventListener('resize', resizeCanvas);
 
     //add event listener to call toolSelections when a new button is selected.
-    toolSelection("pencil");
+    toolSelection("download");
 
     // socket listeners
     socket.on('startPos', remoteStartPosition);
@@ -269,6 +269,31 @@ function remoteEraser(data) {
 
 
 }
+
+/*
+====================================================================================
+                                    DOWNLOAD LOCAL
+====================================================================================
+*/
+
+document.querySelectorAll("[data-command]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      let command = el.getAttribute("data-command");
+
+      if (command == "undo") {
+        paint.undoPaint();
+      } else if (command == "download") {
+        var canvas = document.getElementById("canvas");
+        var image = canvas
+          .toDataURL("image/png", 1.0)
+          .replace("image/png", "image/octet-stream");
+        var link = document.createElement("a");
+        link.download = "my-image.png";
+        link.href = image;
+        link.click();
+      }
+    });
+  });
 
 // function  getMousePos(canvas, e) {
 //     // getBoundingClientRect returns dimensions of an HTML obj (like a div, or canvas)
