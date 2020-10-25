@@ -55,7 +55,7 @@ project.currentStyle = {
 	strokeCap: 'round',
 	strokeColor: '#FFF'
 } 
-
+ 
 // socket listeners
 socket.on('addPaths', addPaths);
 socket.on('lockCanvas', lockCanvas);
