@@ -18,6 +18,7 @@ function chalkboardGrid() {
             // create storage ref to empty storage object
             // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
             let storageRef = firebase.storage().ref('chalkboards/' + file.name);
+
             // upload file to storage ref location
             let task = storageRef.put(file);
             // update progress bar and save download URL

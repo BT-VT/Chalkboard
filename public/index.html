@@ -103,6 +103,7 @@
         <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-storage.js"></script>
 
         <!-- TODO: Add SDKs for Firebase products that you want to use
     https://firebase.google.com/docs/web/setup#available-libraries -->
@@ -116,7 +117,7 @@
                 authDomain: "chalkboard-ce2b6.firebaseapp.com",
                 databaseURL: "https://chalkboard-ce2b6.firebaseio.com",
                 projectId: "chalkboard-ce2b6",
-                storageBucket: "gs://chalkboard-ce2b6.appspot.com/",
+                storageBucket: "gs://chalkboard-ce2b6.appspot.com",
                 messagingSenderId: "801991166996",
                 appId: "1:801991166996:web:b2287b110a18a36477ab01",
                 measurementId: "G-F5H7K3MXXB"
@@ -128,7 +129,7 @@
             //make auth and firestore references
             var auth = firebase.auth();
             var db = firebase.firestore();
-
+            var storage = firebase.storage();
         </script>
 
         <!-- Compiled and minified JavaScript for materialize-->
