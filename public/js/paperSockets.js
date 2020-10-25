@@ -1,3 +1,46 @@
+window.globalVar = ""
+window.selectedColor = ""
+// Simple example, see optional options for more configuration.
+const pickr = Pickr.create({
+    el: '.color-picker',
+    theme: 'classic', // or 'monolith', or 'nano'
+    default: '#ffffff',
+    swatches: [
+        'rgba(255, 0, 0, 1)',
+        'rgba(255, 127, 0, 1)',
+        'rgba(255, 255, 0, 1)',
+        'rgba(0, 255, 0, 1)',
+        'rgba(0, 0, 255, 1)',
+        'rgba(46, 43, 95, 1)',
+        'rgba(139, 0, 255, 1)',
+    ],
+
+    components: {
+
+        // Main components
+        preview: true,
+        opacity: true,
+        hue: true,
+
+        // Input / output Options
+        interaction: {
+            hex: true,
+            rgba: true,
+            input: true,
+            clear: true,
+            save: true
+        }
+    }
+});
+
+pickr.on('change', (color, instance) => {
+    var hexColor = color.toHEXA().toString();
+    console.log(hexColor)
+    window.globalVar = hexColor;
+    window.selectedColor=hexColor.toString()
+   
+})
+
 let socket = io();
 let LOCKED = false;
 
@@ -5,14 +48,14 @@ let LOCKED = false;
 let paths = {};
 let curPath;
 let curPathName;
-let selectedColor = '#000000';
+console.log("SELECTED: "+selectedColor)
 // global settings for all paths, can (and will) be overridden
 project.currentStyle = {
 	strokeWidth: 5,
 	strokeCap: 'round',
-	strokeColor: 'black'
+	strokeColor: '#FFF'
 }
- 
+
 // socket listeners
 socket.on('addPaths', addPaths);
 socket.on('lockCanvas', lockCanvas);
@@ -166,3 +209,4 @@ colorBtns.forEach((btn) => {
         console.log(selectedColor);
     };
 });
+
