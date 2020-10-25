@@ -9,6 +9,7 @@ app.use(express.static(__dirname + "/node_modules/paper/dist"));
 var io = require("socket.io")(server);
 var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
 var newUsers = []; // new socket connections waiting to add existing paths
+let curPathData = null;
 let LOCKED = false;
 
 console.log("server running on port: " + portNum);
@@ -75,10 +76,21 @@ io.on('connection', (socket) => {
         io.emit('newPath', pathAttr);           // broadcast to all sockets, including sender who triggered event
     });
 
+    socket.on('requestLock', () => {
+        LOCKED = socket.id;
+        console.log('lock given to ' + LOCKED);
+        io.emit('lockCanvas', socket.id);
+    });
+
     // called when mousedrag event is detecte by client. loc is an object
     // with x and y keys corresponding to float coordinates.
     socket.on('draw', (loc) => {
         io.emit('newPoint', loc);
+    });
+
+    socket.on('requestTrackingCircle', (circleAttr) => {
+        curPathData = circleAttr;
+        io.emit('drawTrackingCircle', circleAttr);
     });
 
     // called when mouseup event is detected by client. Adds finished path to
@@ -95,6 +107,23 @@ io.on('connection', (socket) => {
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
         io.emit('finishPath', socket.id);
+    });
+
+    // pathData = { pathName: 'circleN', path: [ 'Path', obj ] }
+    socket.on('requestFinishCircle', () => {
+        io.emit('finishCircle', socket.id);
+    });
+
+    socket.on('confirmCircleDone', async (circleName) => {
+        let pathName = circleName;
+        curPathData.dashArray = null;
+        paths.push([pathName, curPathData]);
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.emit('unlockCanvas', socket.id);
     });
 
     // received by client when 'undo' button is clicked. If there is a path to
