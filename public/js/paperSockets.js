@@ -296,4 +296,15 @@ window.onload = function() {
 		}
 	}
 	else { console.log('undo button not found'); }
+
+	let circleBtn = document.querySelector("#circle");
+	if(circleBtn) {
+		circleBtn.onclick = function() {
+			if(!LOCKED) {
+				console.log('circle selected!');
+
+			}
+		}
+	}
+	else { console.log('circle button not found'); }
 }
