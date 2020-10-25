@@ -12,7 +12,7 @@ project.currentStyle = {
 	strokeCap: 'round',
 	strokeColor: 'black'
 }
-
+ 
 // socket listeners
 socket.on('addPaths', addPaths);
 socket.on('lockCanvas', lockCanvas);
