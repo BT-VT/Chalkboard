@@ -9,26 +9,22 @@ window.onload = function() {
 	// drawn by other users.
 	let LOCKED = true;
 	let initialPathsReceived = false;
-	let multicolor = false;
 
 	// global array of objects containing info about each path drawn. similar to
 	// paths array on server
 	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
 	let curPath = new paper.Path();
 	let curCircle = new paper.Path.Circle(0,0,0);
-	let selectedColor = '#000000';
+
+	let attributes = {
+		selectedColor: '#000000',
+		multicolor: false
+	}
 
 	let drawingTools = {
 		circle: true,
 		marker: false
 	}
-
-	// global settings for all paths, can (and will) be overridden
-	// paper.project.currentStyle = {
-	// 	strokeWidth: 5,
-	// 	strokeCap: 'round',
-	// 	strokeColor: 'black'
-	// }
 
 	// socket listeners
 	socket.on('addPaths', addPaths);					// initializes the canvas
@@ -92,7 +88,7 @@ window.onload = function() {
 	tool.onMouseDown = function(event) {
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
-				let pathAttr = getPathAttributes(multicolor);
+				let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('beginDrawing', pathAttr);
 			}
 			else if(drawingTools.circle) {
@@ -109,14 +105,8 @@ window.onload = function() {
 	// set it as curPath, add it to the paths obj.
 	function createNewPath(pathAttr) {
 		// create new path
-		curPath = new paper.Path();
-		//set the color
-		let r = pathAttr.strokeColor[1];
-		let g = pathAttr.strokeColor[2];
-		let b = pathAttr.strokeColor[3];
-		curPath.strokeColor = new paper.Color(r,g,b);
-
-		if(multicolor) { rotateColors(); }
+		curPath = new paper.Path(pathAttr);
+		if(attributes.multicolor) { rotateColors(); }
 		console.log(paths);
 	}
 
@@ -132,7 +122,7 @@ window.onload = function() {
 			    position: [event.downPoint.x, event.downPoint.y],
 			    radius: Math.round(event.downPoint.subtract(event.point).length),
 			    dashArray: [2, 2],
-		        strokeColor: selectedColor
+		        strokeColor: attributes.selectedColor
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
 		}
@@ -231,16 +221,31 @@ window.onload = function() {
 	function getPathAttributes(rand = false) {
 		let strokeColor;
 		if(rand == true) {
-			strokeColor = new paper.Color(Math.random(), Math.random(), Math.random());
+			strokeColor = rgbToHex(Math.random(), Math.random(), Math.random());
+			console.log(strokeColor);
 		}
 		else {
-			strokeColor = new paper.Color(selectedColor);
+			strokeColor = attributes.selectedColor;
 		}
 
 		let attr = {
-			strokeColor: strokeColor
+			strokeColor: strokeColor,
+			strokeWidth: 5,
+			strokeCap: 'round'
 		};
 		return attr;
+	}
+
+	function rgbToHex(r,g,b) {
+		r = Math.round(r*255).toString(16);
+		g = Math.round(g*255).toString(16);
+		b = Math.round(b*255).toString(16);
+
+		if (r.length == 1) { r = "0" + r; }
+		if (g.length == 1) { g = "0" + g; }
+		if (b.length == 1) { b = "0" + b; }
+
+  		return "#" + r + g + b;
 	}
 
 	// rotate colors of existing paths
@@ -296,10 +301,10 @@ window.onload = function() {
 	        btn.className += " active";
 
 	        //set color to button color
-	        selectedColor = btn.attributes["data-color"].value;
-			if(selectedColor == '#c46f0f') { multicolor = true; }
-			else { multicolor = false; }
-	        console.log(selectedColor);
+	        attributes.selectedColor = btn.attributes["data-color"].value;
+			if(attributes.selectedColor == '#c46f0f') { attributes.multicolor = true; }
+			else { attributes.multicolor = false; }
+	        console.log(attributes.selectedColor);
 	    };
 	});
 
