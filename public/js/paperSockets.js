@@ -258,6 +258,23 @@ window.onload = function() {
 		}
 	}
 
+	// set all drawing tools to false except the one passed as argument.
+	function setDrawingTool(toolChosen) {
+		for(let tool in drawingTools) {
+			drawingTools[tool] = false;
+		}
+		drawingTools[toolChosen] = true;
+		return drawingTools[toolChosen];
+	}
+
+	// returns the tool (string name) that is currently selected, else false.
+	function getDrawingTool() {
+		for(let tool in drawingTools) {
+			if(drawingTools[tool]) { return tool; }
+		}
+		return false;
+	}
+
 	function removeClass(el, className){
 	    var elClass = el.className;
 	    while(elClass.indexOf(className) != -1) {
@@ -297,13 +314,25 @@ window.onload = function() {
 	}
 	else { console.log('undo button not found'); }
 
+	let markerBtn = document.querySelector("#marker");
+	if(markerBtn) {
+		markerBtn.onclick = function() {
+			if(setDrawingTool('marker')) {
+				console.log('marker selected');
+			}
+			else { console.log('failed to select marker'); }
+		}
+	}
+	else { console.log('marker button not found'); }
+
 	let circleBtn = document.querySelector("#circle");
 	if(circleBtn) {
 		circleBtn.onclick = function() {
-			if(!LOCKED) {
+			if(setDrawingTool('circle')) {
 				console.log('circle selected!');
 
 			}
+			else { console.log('failed to select circle'); }
 		}
 	}
 	else { console.log('circle button not found'); }
