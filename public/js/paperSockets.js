@@ -54,7 +54,7 @@ project.currentStyle = {
 	strokeWidth: 5,
 	strokeCap: 'round',
 	strokeColor: '#FFF'
-}
+} 
 
 // socket listeners
 socket.on('addPaths', addPaths);
