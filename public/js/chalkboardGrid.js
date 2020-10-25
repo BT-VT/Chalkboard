@@ -5,6 +5,7 @@ function chalkboardGrid() {
     let fileButton = document.getElementById('fileButton');
     let uploadLabel = document.getElementById('uploadLabel');
     var img = document.getElementById('my-img');
+    var numChalkboards = 0;
 
     let fileUrls = {};
     // listen for file selection
@@ -53,11 +54,37 @@ function chalkboardGrid() {
             return new Promise((resolve, reject) => {
                 let img = document.createElement("img");
                 img.src = url;
-                document.getElementById("grid").appendChild(img);
+                //document.getElementById("grid").appendChild(img);
                 resolve('image displayed');
+                //create a new row if there are an even number of chalkboards
+                if (numChalkboards % 2 == 0) {
+                    console.log("# of chalkboards: " + numChalkboards);
+                    var row = document.createElement("div");
+                    row.classList.add("row");
+                    //row.setAttribute("id", "first");
+                    img.src = url;
+                    document.getElementById("grid").appendChild(row);
+                    var col = document.createElement("div");
+                    col.classList.add("col50");
+                    col.appendChild(img);
+                    row.appendChild(col);
+                    numChalkboards += 1;
+                    resolve('image displayed');
+                }
+                //or append to existing row
+                else {
+                    console.log("# of chalkboards: " + numChalkboards);
+                    var arr = document.getElementById("grid").getElementsByClassName("row");
+                    console.log(arr);
+                    var row = arr[arr.length-1];
+                    var col = document.createElement("div");
+                    col.classList.add("col50");
+                    row.appendChild(col);
+                    //row.getElementById("first");
+                    img.src = url;
+                    col.appendChild(img);
+                    numChalkboards += 1;
+                    resolve('image displayed');
+                }
             })
-
-        }
-
-    });
-}
+        }})}
