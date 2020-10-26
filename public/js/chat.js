@@ -1,6 +1,4 @@
-
-
-export var socket = io();
+import {socket} from "./paperSockets.js"
 
 let sendContainer = document.getElementById("send-container");
 let messageInput = document.getElementById("message-input");
@@ -69,7 +67,6 @@ messageInput.addEventListener("keyup", () => {
 
 // get the username when the user is signed in, username is -1 if not logged in
 socket.on("giveUsername" , (username) => {
-    console.log("username is working")
     if (username != -1) {
         name = username;
     } else {

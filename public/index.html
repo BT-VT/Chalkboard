@@ -10,10 +10,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- For material icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <script src="/socket.io/socket.io.js"></script>
     <link href="styles.css" rel="stylesheet">
     <link href="myChalkboards.css" rel="stylesheet">
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- Load the libraries -->
+    <!-- alternate way to load paper.js from node_modules:
+    <script type="text/javascript" src="paper-full.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.0.4/acorn.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.js"></script>
+    <script src = "/socket.io/socket.io.js"></script>
+    <!-- Load chalkboard scripts -->
+    <script type="module" src="js/paperSockets.js"></script>
 </head>
 
 <body>
@@ -139,11 +145,10 @@
 
         <script src="js/auth.js" type="module"></script>
         <script src="js/index.js"></script>
-        <script type="module" src="./js/draw.js"></script>
 
         <!-- Chat functions -->
 
-        <div id="message-container">
+        <div id = "message-container">
             <div id="whoIsTyping"></div>
         </div>
 
@@ -181,12 +186,13 @@
 
         </script>
         <script src="js/setupCanvas.js"></script>
+        <script src="js/paperSockets.js"></script>
         <script>
             window.addEventListener("hashchange", function () {
                 if (location.hash == "#/my-chalkboards") {
                     chalkboardGrid();
                 } else {
-                    setupCanvas();
+                    paperSockets();
                 }
             });
         </script>

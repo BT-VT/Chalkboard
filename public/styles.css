@@ -113,32 +113,32 @@ body {
     left: 2%;
     position:fixed;
   }
-  
+
   #send-container {
       position: fixed;
       bottom:10%;
       width: 250px;
       left: 2%;
   }
-  
+
   #hide-display {
       position: fixed;
       bottom: 6%;
       left: 2%;
   }
-  
+
   #whoIsTyping {
       position: fixed;
       color: white;
       bottom: 13.5%;
       left: 2%;
   }
-  
+
   #send-button {
       position: fixed;
-      
+
   }
 
   #message-input {
-      color:white;
+      color: white;
   }
