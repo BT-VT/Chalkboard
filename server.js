@@ -1,4 +1,5 @@
 // set up express server
+const { v4: uuidv4 } = require('uuid');
 var express = require("express");
 var app = express();
 var portNum = process.env.PORT || '5000';
@@ -15,7 +16,6 @@ let LOCKED = false;
 console.log("server running on port: " + portNum);
 
 app.get('/', (req,res) => {
-    console.log("Test");
     res.send('Welcome to Chalkboard');
 });
 
@@ -107,12 +107,14 @@ io.on('connection', (socket) => {
     // paths list and determines how to release lock.
     // pathData = { pathName: "pathN", path: ["Path", obj] }
     socket.on('requestFinishDrawing', () => {
-        io.emit('finishDrawing', socket.id);
+        let pathID = uuidv4();
+        io.emit('finishDrawing', pathID);
     });
 
     // pathData = { pathName: 'circleN', path: [ 'Path', obj ] }
     socket.on('requestFinishCircle', () => {
-        io.emit('finishCircle', socket.id);
+        let pathID = uuidv4();
+        io.emit('finishCircle', pathID);
     });
 
     socket.on('requestFinishErasing', async () => {
@@ -123,6 +125,7 @@ io.on('connection', (socket) => {
         io.emit('unlockCanvas', socket.id);
     });
 
+    // pathData = { pathName: path-pathID, path: ['Path', pathObj] }
     socket.on('confirmDrawingDone', async (pathData) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
@@ -135,11 +138,12 @@ io.on('connection', (socket) => {
         io.emit('unlockCanvas', socket.id);
     });
 
-
-    socket.on('confirmCircleDone', async (circleName) => {
-        let pathName = circleName;
-        curPathData.dashArray = null;
-        paths.push([pathName, curPathData]);
+    // pathData = { pathName: circle-pathID, path: ['Path'], pathObj] }
+    socket.on('confirmCircleDone', async (pathData) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path[1];
+        pathObj.dashArray = null;
+        paths.push([pathName, pathObj]);
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.

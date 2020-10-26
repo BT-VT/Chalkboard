@@ -75,10 +75,12 @@ window.onload = function() {
 		for(let [pathName, pathObj] of newPaths) {
 			let pathsItem = { pathName: pathName }
 			if(pathName.search('path') > -1) {
+				console.log('adding path' + pathsItem.pathName);
 				pathsItem.path = new paper.Path(pathObj);
 				pathsItem.path.simplify();
 			}
 			else if(pathName.search('circle') > -1) {
+				console.log('adding circle' + pathsItem.pathName);
 				pathsItem.path = new paper.Path.Circle(pathObj);
 			}
 			paths.push(pathsItem);
@@ -113,7 +115,6 @@ window.onload = function() {
 		// create new path
 		curPath = new paper.Path(pathAttr);
 		if(attributes.multicolor) { rotateColors(); }
-		console.log(paths);
 	}
 
 	// notifies users to add new point to curPath
@@ -161,15 +162,24 @@ window.onload = function() {
 		let pathRemoved = null;
 		for(let i = 0; i < paths.length; i++) {
 			// if path is found try to remove it from canvas
-			if(paths[i].pathName == pathName && paths[i].path.remove()) {
-				console.log('erased ' + pathName);
-				// if removed successfully, remove from paths list
-				paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
-				if(LOCKED == socket.id) {
-					// have lock owner confirm removal with server
-					socket.emit('confirmErasePath', pathName);
+			console.log(paths[i].pathName);
+			console.log(pathName);
+			console.log('equal: ');
+			console.log(paths[i].pathName == pathName);
+			if(paths[i].pathName == pathName) {
+				console.log('found path in paths');
+				if(paths[i].path.remove()) {
+
+
+					console.log('erased ' + pathName);
+					// if removed successfully, remove from paths list
+					paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
+					if(LOCKED == socket.id) {
+						// have lock owner confirm removal with server
+						socket.emit('confirmErasePath', pathName);
+					}
+					break;
 				}
-				break;
 			}
 		}
 	}
@@ -193,7 +203,7 @@ window.onload = function() {
 
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
-	function finishDrawing(owner) {
+	function finishDrawing(pathID) {
 		if(initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
@@ -201,25 +211,29 @@ window.onload = function() {
 		curPath.simplify();
 		// add new path to paths array
 		let pathsItem = {
-			pathName: 'path-' + uuidv4(),
+			pathName: 'path-' + pathID,
 			path: curPath
 		}
 		paths.push(pathsItem);
 		curPath = null;
-	    socket.emit('confirmDrawingDone', pathsItem);
+		console.log(paths);
+		if(LOCKED == socket.id) {
+			socket.emit('confirmDrawingDone', pathsItem);
+		}
 	}
 
-	function finishCircle(event) {
+	function finishCircle(pathID) {
 		curCircle.dashArray = null;
 		let pathsItem = {
-			pathName: 'circle-' + uuidv4(),
+			pathName: 'circle-' + pathID,
 			path: curCircle
 		}
 		paths.push(pathsItem);
+		console.log(paths);
 		curCircle = new paper.Path.Circle();
 
 		if(LOCKED == socket.id) {
-			socket.emit('confirmCircleDone', pathsItem.pathName);
+			socket.emit('confirmCircleDone', pathsItem);
 		}
 	}
 
@@ -276,13 +290,6 @@ window.onload = function() {
 		if (b.length == 1) { b = "0" + b; }
 
   		return "#" + r + g + b;
-	}
-
-	// random string ID
-	function uuidv4() {
-		return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-		);
 	}
 
 	// rotate colors of existing paths
