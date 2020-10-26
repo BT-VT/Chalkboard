@@ -1,4 +1,5 @@
 // set up express server
+const { v4: uuidv4 } = require('uuid');
 var express = require("express");
 var app = express();
 var portNum = process.env.PORT || '5000';
@@ -15,7 +16,6 @@ let LOCKED = false;
 console.log("server running on port: " + portNum);
 
 app.get('/', (req,res) => {
-    console.log("Test");
     res.send('Welcome to Chalkboard');
 });
 
@@ -93,32 +93,57 @@ io.on('connection', (socket) => {
         io.emit('drawTrackingCircle', circleAttr);
     });
 
+    socket.on('requestErase', (pathName) => {
+        console.log('request erase ' + pathName);
+        io.emit('erasePath', pathName);
+    });
+    socket.on('confirmErasePath', async (pathName) => {
+        console.log('confirm erase ' + pathName);
+        // remove path from paths item array
+        paths = paths.filter(pathsItem => pathsItem[0] != pathName);
+    });
+
     // called when mouseup event is detected by client. Adds finished path to
     // paths list and determines how to release lock.
     // pathData = { pathName: "pathN", path: ["Path", obj] }
-    socket.on('requestFinishDrawing', async (pathData) => {
+    socket.on('requestFinishDrawing', () => {
+        let pathID = uuidv4();
+        io.emit('finishDrawing', pathID);
+    });
 
+    // pathData = { pathName: 'circleN', path: [ 'Path', obj ] }
+    socket.on('requestFinishCircle', () => {
+        let pathID = uuidv4();
+        io.emit('finishCircle', pathID);
+    });
+
+    socket.on('requestFinishErasing', async () => {
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.emit('unlockCanvas', socket.id);
+    });
+
+    // pathData = { pathName: path-pathID, path: ['Path', pathObj] }
+    socket.on('confirmDrawingDone', async (pathData) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         paths.push([pathName, pathObj]);
-        console.log(paths);
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
-        io.emit('finishDrawing', socket.id);
+        io.emit('unlockCanvas', socket.id);
     });
 
-    // pathData = { pathName: 'circleN', path: [ 'Path', obj ] }
-    socket.on('requestFinishCircle', () => {
-        io.emit('finishCircle', socket.id);
-    });
-
-    socket.on('confirmCircleDone', async (circleName) => {
-        let pathName = circleName;
-        curPathData.dashArray = null;
-        paths.push([pathName, curPathData]);
+    // pathData = { pathName: circle-pathID, path: ['Path'], pathObj] }
+    socket.on('confirmCircleDone', async (pathData) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path[1];
+        pathObj.dashArray = null;
+        paths.push([pathName, pathObj]);
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
