@@ -145,7 +145,8 @@
 
         <script src="js/auth.js" type="module"></script>
         <script src="js/index.js"></script>
-
+        <script type="module" src="js/setup.js"></script>
+        
         <!-- Chat functions -->
 
         <div id = "message-container">
@@ -186,15 +187,8 @@
 
         </script>
         <script src="js/setupCanvas.js"></script>
-        <script src="js/paperSockets.js"></script>
         <script>
-            window.addEventListener("hashchange", function () {
-                if (location.hash == "#/my-chalkboards") {
-                    chalkboardGrid();
-                } else {
-                    paperSockets();
-                }
-            });
+            
         </script>
     </div>
 
