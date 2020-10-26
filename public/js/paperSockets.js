@@ -73,7 +73,8 @@ window.onload = function() {
 		for(let [pathName, pathObj] of newPaths) {
 			let pathsItem = { pathName: pathName }
 			if(pathName.search('path') > -1) {
-				pathsItem.path = new paper.Path(pathObj).simplify();
+				pathsItem.path = new paper.Path(pathObj);
+				pathsItem.path.simplify();
 			}
 			else if(pathName.search('circle') > -1) {
 				pathsItem.path = new paper.Path.Circle(pathObj);

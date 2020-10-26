@@ -101,6 +101,7 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         paths.push([pathName, pathObj]);
+        console.log(paths);
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
