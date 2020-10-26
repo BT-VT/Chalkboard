@@ -22,8 +22,9 @@ window.onload = function() {
 	}
 
 	let drawingTools = {
-		circle: true,
-		marker: false
+		marker: true,
+		circle: false,
+		erase: false
 	}
 
 	// socket listeners
@@ -340,4 +341,15 @@ window.onload = function() {
 		}
 	}
 	else { console.log('circle button not found'); }
+
+	var eraserBtn = document.querySelector("#eraser");
+	if(eraserBtn) {
+		eraserBtn.onclick = function() {
+			if(setDrawingTool("eraser")) {
+				console.log('eraser selected');
+			}
+			else { console.log('failed to select eraser'); }
+		}
+	}
+	else { console.log('eraser button not found'); }
 }
