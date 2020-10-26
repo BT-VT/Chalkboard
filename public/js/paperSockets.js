@@ -29,10 +29,10 @@ window.onload = function() {
 	// socket listeners
 	socket.on('addPaths', addPaths);					// initializes the canvas
 	socket.on('lockCanvas', lockCanvas);				// prevents user from drawing
-	socket.on('newPath', createNewPath);				// starts a path
+	socket.on('createNewDrawing', createNewDrawing);	// starts a path
 	socket.on('drawTrackingCircle', drawTrackingCircle);
-	socket.on('newPoint', addPointToPath);				// extends a path
-	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
+	socket.on('drawSegment', drawSegment);				// extends a path
+	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
@@ -90,7 +90,7 @@ window.onload = function() {
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
 				let pathAttr = getPathAttributes(attributes.multicolor);
-				socket.emit('beginDrawing', pathAttr);
+				socket.emit('requestNewDrawing', pathAttr);
 			}
 			else if(drawingTools.circle) {
 				socket.emit('requestLock');
@@ -104,7 +104,7 @@ window.onload = function() {
 
 	// callback, called when newPath socket message is received. Make a new path,
 	// set it as curPath, add it to the paths obj.
-	function createNewPath(pathAttr) {
+	function createNewDrawing(pathAttr) {
 		// create new path
 		curPath = new paper.Path(pathAttr);
 		if(attributes.multicolor) { rotateColors(); }
@@ -116,7 +116,7 @@ window.onload = function() {
 		if(LOCKED != socket.id) { return; }
 		if(drawingTools.marker) {
 			let loc = { x: event.point.x, y: event.point.y }
-		    socket.emit('draw', loc);
+		    socket.emit('requestSegment', loc);
 		}
 		else if(drawingTools.circle) {
 			let circleAttr = {
@@ -131,7 +131,7 @@ window.onload = function() {
 
 	// called when socket receives "newPoint" message. adds the supplied
 	// point to the current path (which draws it)
-	function addPointToPath(loc) {
+	function drawSegment(loc) {
 	    // Add a segment to the path at the position of the mouse:
 	    let point = new paper.Point(loc.x, loc.y);
 	    curPath.add(point);
@@ -151,13 +151,31 @@ window.onload = function() {
 				pathName: "path" + paths.length,
 				path: curPath
 			}
-		    socket.emit('endDrawing', pathData);
+		    socket.emit('requestFinishDrawing', pathData);
 			return;
 		}
 		else if(drawingTools.circle) {
 			socket.emit('requestFinishCircle');
 			return;
 		}
+	}
+
+	// called when socket receives "finishPath" message. Smooths the path, adds
+	// finished path to paths array, and unlocks the canvas for drawing.
+	function finishDrawing(owner) {
+		if(initialPathsReceived == false) {
+			console.log('waiting to load paths');
+			return;
+		}
+		curPath.simplify();
+		// add new path to paths array
+		let pathsItem = {
+			pathName: 'path' + paths.length,
+			path: curPath
+		}
+		paths.push(pathsItem);
+		curPath = null;
+	    unlockCanvas(owner);
 	}
 
 	function finishCircle(event) {
@@ -172,26 +190,6 @@ window.onload = function() {
 		if(LOCKED == socket.id) {
 			socket.emit('confirmCircleDone', pathsItem.pathName);
 		}
-	}
-
-
-
-	// called when socket receives "finishPath" message. Smooths the path, adds
-	// finished path to paths array, and unlocks the canvas for drawing.
-	function finishPath(owner) {
-		if(initialPathsReceived == false) {
-			console.log('waiting to load paths');
-			return;
-		}
-		curPath.simplify();
-		// add new path to paths array
-		let pathsItem = {
-			pathName: 'path' + paths.length,
-			path: curPath
-		}
-		paths.push(pathsItem);
-		curPath = null;
-	    unlockCanvas(owner);
 	}
 
 
