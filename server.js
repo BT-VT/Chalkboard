@@ -93,20 +93,20 @@ io.on('connection', (socket) => {
         io.emit('drawTrackingCircle', circleAttr);
     });
 
+    socket.on('requestErase', (pathName) => {
+        console.log('request erase ' + pathName);
+        io.emit('erasePath', pathName);
+    });
+    socket.on('confirmErasePath', async (pathName) => {
+        console.log('confirm erase ' + pathName);
+        // remove path from paths item array
+        paths = paths.filter(pathsItem => pathsItem[0] != pathName);
+    });
+
     // called when mouseup event is detected by client. Adds finished path to
     // paths list and determines how to release lock.
     // pathData = { pathName: "pathN", path: ["Path", obj] }
-    socket.on('requestFinishDrawing', async (pathData) => {
-
-        let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
-        paths.push([pathName, pathObj]);
-        console.log(paths);
-
-        await checkForNewUsers(socket);
-        // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+    socket.on('requestFinishDrawing', () => {
         io.emit('finishDrawing', socket.id);
     });
 
@@ -114,6 +114,27 @@ io.on('connection', (socket) => {
     socket.on('requestFinishCircle', () => {
         io.emit('finishCircle', socket.id);
     });
+
+    socket.on('requestFinishErasing', async () => {
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.emit('unlockCanvas', socket.id);
+    });
+
+    socket.on('confirmDrawingDone', async (pathData) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path[1];
+        paths.push([pathName, pathObj]);
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.emit('unlockCanvas', socket.id);
+    });
+
 
     socket.on('confirmCircleDone', async (circleName) => {
         let pathName = circleName;

@@ -24,15 +24,16 @@ window.onload = function() {
 	let drawingTools = {
 		marker: true,
 		circle: false,
-		erase: false
+		eraser: false
 	}
 
 	// socket listeners
 	socket.on('addPaths', addPaths);					// initializes the canvas
 	socket.on('lockCanvas', lockCanvas);				// prevents user from drawing
 	socket.on('createNewDrawing', createNewDrawing);	// starts a path
-	socket.on('drawTrackingCircle', drawTrackingCircle);
 	socket.on('drawSegment', drawSegment);				// extends a path
+	socket.on('drawTrackingCircle', drawTrackingCircle);
+	socket.on('erasePath', erasePath);
 	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
@@ -96,6 +97,9 @@ window.onload = function() {
 			else if(drawingTools.circle) {
 				socket.emit('requestLock');
 			}
+			else if(drawingTools.eraser) {
+				socket.emit('requestLock');
+			}
 			return;
 	    }
 		console.log('my socket id: ' + socket.id);
@@ -128,6 +132,14 @@ window.onload = function() {
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
 		}
+		// paths = [ {pathName: "pathN", path: Path} ]
+		else if(drawingTools.eraser && event.item) {
+			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
+			if(pathsItemArr.length == 1) {
+				socket.emit('requestErase', pathsItemArr[0].pathName);
+			}
+		}
+		return;
 	}
 
 	// called when socket receives "newPoint" message. adds the supplied
@@ -144,19 +156,37 @@ window.onload = function() {
 
 	}
 
+	function erasePath(pathName) {
+		console.log('attempt to erase ' + pathName);
+		let pathRemoved = null;
+		for(let i = 0; i < paths.length; i++) {
+			// if path is found try to remove it from canvas
+			if(paths[i].pathName == pathName && paths[i].path.remove()) {
+				console.log('erased ' + pathName);
+				// if removed successfully, remove from paths list
+				paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
+				if(LOCKED == socket.id) {
+					// have lock owner confirm removal with server
+					socket.emit('confirmErasePath', pathName);
+				}
+				break;
+			}
+		}
+	}
+
 	// called when user releases a click, used to notify server of event
 	tool.onMouseUp = function(event) {
 		if(LOCKED != socket.id) { return; }
 		if(drawingTools.marker) {
-			let pathData = {
-				pathName: "path" + paths.length,
-				path: curPath
-			}
-		    socket.emit('requestFinishDrawing', pathData);
+		    socket.emit('requestFinishDrawing');
 			return;
 		}
 		else if(drawingTools.circle) {
 			socket.emit('requestFinishCircle');
+			return;
+		}
+		else if(drawingTools.eraser) {
+			socket.emit('requestFinishErasing');
 			return;
 		}
 	}
@@ -171,18 +201,18 @@ window.onload = function() {
 		curPath.simplify();
 		// add new path to paths array
 		let pathsItem = {
-			pathName: 'path' + paths.length,
+			pathName: 'path-' + uuidv4(),
 			path: curPath
 		}
 		paths.push(pathsItem);
 		curPath = null;
-	    unlockCanvas(owner);
+	    socket.emit('confirmDrawingDone', pathsItem);
 	}
 
 	function finishCircle(event) {
 		curCircle.dashArray = null;
 		let pathsItem = {
-			pathName: 'circle' + paths.length,
+			pathName: 'circle-' + uuidv4(),
 			path: curCircle
 		}
 		paths.push(pathsItem);
@@ -246,6 +276,13 @@ window.onload = function() {
 		if (b.length == 1) { b = "0" + b; }
 
   		return "#" + r + g + b;
+	}
+
+	// random string ID
+	function uuidv4() {
+		return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+		);
 	}
 
 	// rotate colors of existing paths
