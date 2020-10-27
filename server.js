@@ -90,6 +90,10 @@ io.on('connection', (socket) => {
         io.emit('drawTrackingRect', rectAttr);
     });
 
+    socket.on('requestTrackingTriangle', (triangleAttr) => {
+        io.emit('drawTrackingTriangle', triangleAttr);
+    });
+
     socket.on('requestErase', (pathName) => {
         console.log('request erase ' + pathName);
         io.emit('erasePath', pathName);
@@ -117,6 +121,11 @@ io.on('connection', (socket) => {
         io.emit('finishRect', pathID, isEllipse);
     });
 
+    socket.on('requestFinishTriangle', () => {
+        let pathID = uuidv4();
+        io.emit('finishTriangle', pathID);
+    })
+
     socket.on('requestFinishErasing', async () => {
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -124,6 +133,8 @@ io.on('connection', (socket) => {
         console.log('end drawing, LOCKED set to: ' + LOCKED);
         io.emit('unlockCanvas', socket.id);
     });
+
+    // REPITITION TO KEEP SHAPE DATA FLOW SEPERATE FOR DEBUGGING
 
     // pathData = { pathName: path-pathID, path: ['Path', pathObj] }
     socket.on('confirmDrawingDone', async (pathData) => {
@@ -154,6 +165,20 @@ io.on('connection', (socket) => {
 
     // pathData = { pathName: rect-pathID, path: ['Path', pathObj] }
     socket.on('confirmRectDone', async (pathData) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path[1];
+        pathObj.dashArray = null;
+        paths.push([pathName, pathObj]);
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.emit('unlockCanvas', socket.id);
+    });
+
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
+    socket.on('confirmTriangleDone', async (pathData) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;

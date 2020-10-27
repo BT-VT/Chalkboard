@@ -14,8 +14,6 @@ window.onload = function() {
 	// paths array on server
 	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
 	let curPath = new paper.Path();
-	let curCircle = new paper.Path.Circle();
-	let curRect = new paper.Path.Rectangle();
 
 	let attributes = {
 		selectedColor: '#000000',
@@ -38,10 +36,12 @@ window.onload = function() {
 	socket.on('drawSegment', drawSegment);				// extends a path
 	socket.on('drawTrackingCircle', drawTrackingCircle);
 	socket.on('drawTrackingRect', drawTrackingRect);
+	socket.on('drawTrackingTriangle', drawTrackingTriangle);
 	socket.on('erasePath', erasePath);
 	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
 	socket.on('finishRect', finishRect);
+	socket.on('finishTriangle', finishTriangle);
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
@@ -80,22 +80,22 @@ window.onload = function() {
 		// object that must be converted to a Paper.js Path
 		for(let [pathName, pathObj] of newPaths) {
 			let pathsItem = { pathName: pathName }
+			console.log('adding path ' + pathsItem.pathName);
 			if(pathName.search('path') > -1) {
-				console.log('adding path ' + pathsItem.pathName);
 				pathsItem.path = new paper.Path(pathObj);
 				pathsItem.path.simplify();
 			}
 			else if(pathName.search('circle') > -1) {
-				console.log('adding circle ' + pathsItem.pathName);
 				pathsItem.path = new paper.Path.Circle(pathObj);
 			}
 			else if(pathName.search('rect') > -1) {
-				console.log('adding rect ' + pathsItem.pathName);
 				pathsItem.path = new paper.Path.Rectangle(pathObj);
 			}
 			else if(pathName.search('ellipse') > -1) {
-				console.log('adding elipse ' + pathsItem.pathName);
 				pathsItem.path = new paper.Path.Ellipse(pathObj);
+			}
+			else if(pathName.search('triangle') > -1) {
+				pathsItem.path = new paper.Path(pathObj);
 			}
 			paths.push(pathsItem);
 		}
@@ -112,6 +112,9 @@ window.onload = function() {
 				socket.emit('requestLock');
 			}
 			else if(drawingTools.rect || drawingTools.ellipse) {
+				socket.emit('requestLock');
+			}
+			else if(drawingTools.triangle) {
 				socket.emit('requestLock');
 			}
 			else if(drawingTools.eraser) {
@@ -158,6 +161,19 @@ window.onload = function() {
 			}
 			socket.emit('requestTrackingRect', rectAttr);
 		}
+		else if(drawingTools.triangle) {
+			let triangleAttr = {
+				segments: [
+					[event.downPoint.x, event.downPoint.y],
+					[event.point.x, event.point.y],
+					[event.downPoint.x, event.point.y]
+				],
+				dashArray: [2, 2],
+				strokeColor: attributes.selectedColor,
+				closed: true
+			}
+			socket.emit('requestTrackingTriangle', triangleAttr);
+		}
 		// paths = [ {pathName: "pathN", path: Path} ]
 		else if(drawingTools.eraser && event.item) {
 			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
@@ -177,31 +193,26 @@ window.onload = function() {
 	}
 
 	function drawTrackingCircle(circleAttr) {
-		curCircle.remove();
-		curCircle = new paper.Path.Circle(circleAttr);
+		curPath.remove();
+		curPath = new paper.Path.Circle(circleAttr);
 	}
 
 	function drawTrackingRect(rectAttr) {
-		curRect.remove();
-		if(rectAttr.isEllipse) { curRect = new paper.Path.Ellipse(rectAttr); }
-		else { curRect = new paper.Path.Rectangle(rectAttr); }
+		curPath.remove();
+		if(rectAttr.isEllipse) { curPath = new paper.Path.Ellipse(rectAttr); }
+		else { curPath = new paper.Path.Rectangle(rectAttr); }
+	}
 
+	function drawTrackingTriangle(triangleAttr) {
+		curPath.remove();
+		curPath = new paper.Path(triangleAttr);
 	}
 
 	function erasePath(pathName) {
-		console.log('attempt to erase ' + pathName);
 		let pathRemoved = null;
 		for(let i = 0; i < paths.length; i++) {
 			// if path is found try to remove it from canvas
-			console.log(paths[i].pathName);
-			console.log(pathName);
-			console.log('equal: ');
-			console.log(paths[i].pathName == pathName);
-			if(paths[i].pathName == pathName) {
-				console.log('found path in paths');
-				if(paths[i].path.remove()) {
-
-
+			if(paths[i].pathName == pathName && paths[i].path.remove()) {
 					console.log('erased ' + pathName);
 					// if removed successfully, remove from paths list
 					paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
@@ -210,7 +221,6 @@ window.onload = function() {
 						socket.emit('confirmErasePath', pathName);
 					}
 					break;
-				}
 			}
 		}
 	}
@@ -228,6 +238,10 @@ window.onload = function() {
 		}
 		else if(drawingTools.rect || drawingTools.ellipse) {
 			socket.emit('requestFinishRect', drawingTools.ellipse);
+			return;
+		}
+		else if(drawingTools.triangle) {
+			socket.emit('requestFinishTriangle');
 			return;
 		}
 		else if(drawingTools.eraser) {
@@ -250,7 +264,7 @@ window.onload = function() {
 			path: curPath
 		}
 		paths.push(pathsItem);
-		curPath = null;
+		curPath = new paper.Path();
 		console.log(paths);
 		if(LOCKED == socket.id) {
 			socket.emit('confirmDrawingDone', pathsItem);
@@ -258,14 +272,14 @@ window.onload = function() {
 	}
 
 	function finishCircle(pathID) {
-		curCircle.dashArray = null;
+		curPath.dashArray = null;
 		let pathsItem = {
 			pathName: 'circle-' + pathID,
-			path: curCircle
+			path: curPath
 		}
 		paths.push(pathsItem);
 		console.log(paths);
-		curCircle = new paper.Path.Circle();
+		curPath = new paper.Path.Circle();
 
 		if(LOCKED == socket.id) {
 			socket.emit('confirmCircleDone', pathsItem);
@@ -273,19 +287,34 @@ window.onload = function() {
 	}
 
 	function finishRect(pathID, isEllipse) {
-		curRect.dashArray = null;
+		curPath.dashArray = null;
 		let type = isEllipse ? 'ellipse-' : 'rect-';
 
 		let pathsItem = {
 			pathName: type + pathID,
-			path: curRect
+			path: curPath
 		}
 		paths.push(pathsItem);
 		console.log(paths);
-		curRect = new paper.Path.Rectangle();
+		curPath = new paper.Path.Rectangle();
 
 		if(LOCKED == socket.id) {
 			socket.emit('confirmRectDone', pathsItem);
+		}
+	}
+
+	function finishTriangle(pathID) {
+		curPath.dashArray = null;
+		let pathsItem = {
+			pathName: 'triangle-' + pathID,
+			path: curPath
+		}
+		paths.push(pathsItem);
+		console.log(paths);
+		curPath = new paper.Path();
+
+		if(LOCKED == socket.id) {
+			socket.emit('confirmTriangleDone', pathsItem);
 		}
 	}
 
@@ -309,7 +338,7 @@ window.onload = function() {
 	function deleteCurPath(owner) {
 		console.log('socket ' + owner + ' disconnected while drawing, releasing lock...');
 		curPath.remove();
-		curPath = null;
+		curPath = new paper.Path();
 		unlockCanvas(owner);
 	}
 
@@ -458,6 +487,17 @@ window.onload = function() {
 		}
 	}
 	else { console.log('rectangle button not found'); }
+
+	let triangleBtn = document.querySelector("#triangle");
+	if(triangleBtn) {
+		triangleBtn.onclick = function() {
+			if(setDrawingTool('triangle')) {
+				console.log('triangle selected!');
+			}
+			else { console.log('failed to select triangle'); }
+		}
+	}
+	else { console.log('triangle button not found'); }
 
 	let eraserBtn = document.querySelector("#eraser");
 	if(eraserBtn) {
