@@ -10,7 +10,6 @@ app.use(express.static(__dirname + "/node_modules/paper/dist"));
 var io = require("socket.io")(server);
 var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
 var newUsers = []; // new socket connections waiting to add existing paths
-let curPathData = null;
 let LOCKED = false;
 
 console.log("server running on port: " + portNum);
@@ -60,11 +59,12 @@ io.on('connection', (socket) => {
         tryToSendPaths(socket);
     });
 
-    // called when new client socket finishes drawing all pre-existing
-    // paths onto their canvas.
-    socket.on('pathsLoaded', () => {
-        console.log('paths successfully added to ' + socket.id);
-        socket.emit('userInitialized', LOCKED);
+    // called by a user who has caused a mouseDown event to fire. set LOCKED to
+    // callers socket ID on server and broadcast notification to lock client canvas's
+    socket.on('requestLock', () => {
+        LOCKED = socket.id;
+        console.log('lock given to ' + LOCKED);
+        io.emit('lockCanvas', socket.id);
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
@@ -76,12 +76,6 @@ io.on('connection', (socket) => {
         io.emit('createNewDrawing', pathAttr);  // broadcast to all sockets, including sender who triggered event
     });
 
-    socket.on('requestLock', () => {
-        LOCKED = socket.id;
-        console.log('lock given to ' + LOCKED);
-        io.emit('lockCanvas', socket.id);
-    });
-
     // called when mousedrag event is detecte by client. loc is an object
     // with x and y keys corresponding to float coordinates.
     socket.on('requestSegment', (loc) => {
@@ -89,8 +83,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('requestTrackingCircle', (circleAttr) => {
-        curPathData = circleAttr;
         io.emit('drawTrackingCircle', circleAttr);
+    });
+
+    socket.on('requestTrackingRect', (rectAttr) => {
+        io.emit('drawTrackingRect', rectAttr);
     });
 
     socket.on('requestErase', (pathName) => {
@@ -103,18 +100,21 @@ io.on('connection', (socket) => {
         paths = paths.filter(pathsItem => pathsItem[0] != pathName);
     });
 
-    // called when mouseup event is detected by client. Adds finished path to
-    // paths list and determines how to release lock.
-    // pathData = { pathName: "pathN", path: ["Path", obj] }
+    // called when mouseup event is detected by client. creates pathID and
+    // broadcasts instructions to end path and save it to paths list
     socket.on('requestFinishDrawing', () => {
         let pathID = uuidv4();
         io.emit('finishDrawing', pathID);
     });
 
-    // pathData = { pathName: 'circleN', path: [ 'Path', obj ] }
     socket.on('requestFinishCircle', () => {
         let pathID = uuidv4();
         io.emit('finishCircle', pathID);
+    });
+
+    socket.on('requestFinishRect', () => {
+        let pathID = uuidv4();
+        io.emit('finishRect', pathID);
     });
 
     socket.on('requestFinishErasing', async () => {
@@ -138,8 +138,22 @@ io.on('connection', (socket) => {
         io.emit('unlockCanvas', socket.id);
     });
 
-    // pathData = { pathName: circle-pathID, path: ['Path'], pathObj] }
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmCircleDone', async (pathData) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path[1];
+        pathObj.dashArray = null;
+        paths.push([pathName, pathObj]);
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.emit('unlockCanvas', socket.id);
+    });
+
+    // pathData = { pathName: rect-pathID, path: ['Path', pathObj] }
+    socket.on('confirmRectDone', async (pathData) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;
