@@ -137,6 +137,7 @@
                 video.classList.add("video")
                 video.srcObject = stream;
                 video.play()
+                video.muted=true;
                 document.getElementById("ourVideo").append(video)
             }
         });
