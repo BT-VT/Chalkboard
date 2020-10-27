@@ -1,5 +1,6 @@
 export let socket = io();
-window.onload = function() {
+export function paperSockets() {
+//window.onload = function() {
 	// Setup directly from canvas id:
 	paper.setup('canvas');
 	var tool = new paper.Tool();
@@ -22,17 +23,19 @@ window.onload = function() {
 	}
 
 	let drawingTools = {
-		circle: true,
-		marker: false
+		marker: true,
+		circle: false,
+		eraser: false
 	}
 
 	// socket listeners
 	socket.on('addPaths', addPaths);					// initializes the canvas
 	socket.on('lockCanvas', lockCanvas);				// prevents user from drawing
-	socket.on('newPath', createNewPath);				// starts a path
+	socket.on('createNewDrawing', createNewDrawing);	// starts a path
+	socket.on('drawSegment', drawSegment);				// extends a path
 	socket.on('drawTrackingCircle', drawTrackingCircle);
-	socket.on('newPoint', addPointToPath);				// extends a path
-	socket.on('finishPath', finishPath);				// ends a path and unlocks canvas
+	socket.on('erasePath', erasePath);
+	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
@@ -74,9 +77,12 @@ window.onload = function() {
 		for(let [pathName, pathObj] of newPaths) {
 			let pathsItem = { pathName: pathName }
 			if(pathName.search('path') > -1) {
-				pathsItem.path = new paper.Path(pathObj).simplify();
+				console.log('adding path' + pathsItem.pathName);
+				pathsItem.path = new paper.Path(pathObj);
+				pathsItem.path.simplify();
 			}
 			else if(pathName.search('circle') > -1) {
+				console.log('adding circle' + pathsItem.pathName);
 				pathsItem.path = new paper.Path.Circle(pathObj);
 			}
 			paths.push(pathsItem);
@@ -90,9 +96,12 @@ window.onload = function() {
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
 				let pathAttr = getPathAttributes(attributes.multicolor);
-				socket.emit('beginDrawing', pathAttr);
+				socket.emit('requestNewDrawing', pathAttr);
 			}
 			else if(drawingTools.circle) {
+				socket.emit('requestLock');
+			}
+			else if(drawingTools.eraser) {
 				socket.emit('requestLock');
 			}
 			return;
@@ -104,11 +113,10 @@ window.onload = function() {
 
 	// callback, called when newPath socket message is received. Make a new path,
 	// set it as curPath, add it to the paths obj.
-	function createNewPath(pathAttr) {
+	function createNewDrawing(pathAttr) {
 		// create new path
 		curPath = new paper.Path(pathAttr);
 		if(attributes.multicolor) { rotateColors(); }
-		console.log(paths);
 	}
 
 	// notifies users to add new point to curPath
@@ -116,7 +124,7 @@ window.onload = function() {
 		if(LOCKED != socket.id) { return; }
 		if(drawingTools.marker) {
 			let loc = { x: event.point.x, y: event.point.y }
-		    socket.emit('draw', loc);
+		    socket.emit('requestSegment', loc);
 		}
 		else if(drawingTools.circle) {
 			let circleAttr = {
@@ -127,11 +135,19 @@ window.onload = function() {
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
 		}
+		// paths = [ {pathName: "pathN", path: Path} ]
+		else if(drawingTools.eraser && event.item) {
+			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
+			if(pathsItemArr.length == 1) {
+				socket.emit('requestErase', pathsItemArr[0].pathName);
+			}
+		}
+		return;
 	}
 
 	// called when socket receives "newPoint" message. adds the supplied
 	// point to the current path (which draws it)
-	function addPointToPath(loc) {
+	function drawSegment(loc) {
 	    // Add a segment to the path at the position of the mouse:
 	    let point = new paper.Point(loc.x, loc.y);
 	    curPath.add(point);
@@ -143,42 +159,53 @@ window.onload = function() {
 
 	}
 
+	function erasePath(pathName) {
+		console.log('attempt to erase ' + pathName);
+		let pathRemoved = null;
+		for(let i = 0; i < paths.length; i++) {
+			// if path is found try to remove it from canvas
+			console.log(paths[i].pathName);
+			console.log(pathName);
+			console.log('equal: ');
+			console.log(paths[i].pathName == pathName);
+			if(paths[i].pathName == pathName) {
+				console.log('found path in paths');
+				if(paths[i].path.remove()) {
+
+
+					console.log('erased ' + pathName);
+					// if removed successfully, remove from paths list
+					paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
+					if(LOCKED == socket.id) {
+						// have lock owner confirm removal with server
+						socket.emit('confirmErasePath', pathName);
+					}
+					break;
+				}
+			}
+		}
+	}
+
 	// called when user releases a click, used to notify server of event
 	tool.onMouseUp = function(event) {
 		if(LOCKED != socket.id) { return; }
 		if(drawingTools.marker) {
-			let pathData = {
-				pathName: "path" + paths.length,
-				path: curPath
-			}
-		    socket.emit('endDrawing', pathData);
+		    socket.emit('requestFinishDrawing');
 			return;
 		}
 		else if(drawingTools.circle) {
 			socket.emit('requestFinishCircle');
 			return;
 		}
-	}
-
-	function finishCircle(event) {
-		curCircle.dashArray = null;
-		let pathsItem = {
-			pathName: 'circle' + paths.length,
-			path: curCircle
-		}
-		paths.push(pathsItem);
-		curCircle = new paper.Path.Circle();
-
-		if(LOCKED == socket.id) {
-			socket.emit('confirmCircleDone', pathsItem.pathName);
+		else if(drawingTools.eraser) {
+			socket.emit('requestFinishErasing');
+			return;
 		}
 	}
-
-
 
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
-	function finishPath(owner) {
+	function finishDrawing(pathID) {
 		if(initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
@@ -186,12 +213,30 @@ window.onload = function() {
 		curPath.simplify();
 		// add new path to paths array
 		let pathsItem = {
-			pathName: 'path' + paths.length,
+			pathName: 'path-' + pathID,
 			path: curPath
 		}
 		paths.push(pathsItem);
 		curPath = null;
-	    unlockCanvas(owner);
+		console.log(paths);
+		if(LOCKED == socket.id) {
+			socket.emit('confirmDrawingDone', pathsItem);
+		}
+	}
+
+	function finishCircle(pathID) {
+		curCircle.dashArray = null;
+		let pathsItem = {
+			pathName: 'circle-' + pathID,
+			path: curCircle
+		}
+		paths.push(pathsItem);
+		console.log(paths);
+		curCircle = new paper.Path.Circle();
+
+		if(LOCKED == socket.id) {
+			socket.emit('confirmCircleDone', pathsItem);
+		}
 	}
 
 
@@ -358,4 +403,15 @@ window.onload = function() {
 		}
 	}
 	else { console.log('circle button not found'); }
+
+	var eraserBtn = document.querySelector("#eraser");
+	if(eraserBtn) {
+		eraserBtn.onclick = function() {
+			if(setDrawingTool("eraser")) {
+				console.log('eraser selected');
+			}
+			else { console.log('failed to select eraser'); }
+		}
+	}
+	else { console.log('eraser button not found'); }
 }

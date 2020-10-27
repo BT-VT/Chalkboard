@@ -9,9 +9,9 @@
     <title>Chalkboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- For material icons -->
-    <link rel = "stylesheet" href = "https://fonts.googleapis.com/icon?family=Material+Icons">
-    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link href="styles.css" rel="stylesheet">
+    <link href="myChalkboards.css" rel="stylesheet">
     <!-- Load the libraries -->
     <!-- alternate way to load paper.js from node_modules:
     <script type="text/javascript" src="paper-full.js"></script> -->
@@ -24,33 +24,38 @@
 
 <body>
     <!--NAV BAR-->
-        <!--NA2322V BAR-->
-        <div id="page">
-        <nav class="z-depth-0 grey lighten-4">
-            <div style="padding-left: 18px; padding-right: 18px; width: 100%">
-                <a href="#" class="brand-logo">
-                    <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
-                </a>
-                <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li class="logged-in" style="display: none;">
-                        <a href="#" class="grey-text modal-trigger">My chalkboards</a>
-                    </li>
-                    <li class="logged-in" style="display: none;">
-                        <a href="#" class="grey-text modal-trigger">Create new</a>
-                    </li>
-                    <li class="logged-in" style="display: none;">
-                        <a href="#" class=" modal-trigger" id="navEmail" data-target="modal-account" style="color: #02A6C1"></a>
-                    </li>
-                    <li class="logged-out" style="display: none;">
-                        <a href="#" class="modal-trigger" data-target="modal-login" style="color: #02A6C1">Log in</a>
-                    </li>
-                    <li class="logged-out" style="display: none;">
-                        <a href="#" class="modal-trigger" data-target="modal-signup" style="color: #02A6C1">Sign up</a>
-                    </li>
-                    </span>
-                </ul>
-            </div>
-        </nav>
+    <!--NA2322V BAR-->
+    <div id="page">
+        <div class="navbar-fixed">
+            <nav class="z-depth-0 grey lighten-4 nav-extended">
+                <div style="padding-left: 18px; padding-right: 18px; width: 100%">
+                    <a href="#/home" class="brand-logo">
+                        <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
+                    </a>
+                    <ul id="nav-mobile" class="right">
+                        <li class="logged-in" style="display: none;">
+                            <a href="#/my-chalkboards" class="grey-text modal-trigger">My chalkboards</a>
+                        </li>
+                        <li class="logged-in" style="display: none;">
+                            <a href="#/home" class="grey-text modal-trigger">Create new</a>
+                        </li>
+                        <li class="logged-in" style="display: none;">
+                            <a href="#modal" class="modal-trigger" id="navEmail" data-target="modal-account"
+                                style="color: #157080"></a>
+                        </li>
+                        <li class="logged-out" style="display: none;">
+                            <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1">Log
+                                in</a>
+                        </li>
+                        <li class="logged-out" style="display: none;">
+                            <a href="#modal" class="modal-trigger" data-target="modal-signup"
+                                style="color: #02A6C1">Sign up</a>
+                        </li>
+                        </span>
+                    </ul>
+                </div>
+            </nav>
+        </div>
         <!--SIGNUP MODAL-->
         <div id="modal-signup" class="modal">
             <div class="modal-content">
@@ -65,6 +70,7 @@
                         <label for="signup-password">Choose password</label>
                     </div>
                     <button class="btn cyan darken-2 z-depth-0">Sign up</button>
+                    <p class="error red-text center-align"></p>
                 </form>
             </div>
         </div>
@@ -82,6 +88,7 @@
                         <label for="login-password">Your password</label>
                     </div>
                     <button class="btn cyan darken-2 z-depth-0">Login</button>
+                    <p class="error red-text center-align"></p>
                 </form>
             </div>
         </div>
@@ -96,81 +103,15 @@
                 </div>
             </div>
         </div>
-        <div id="canvas-container">
-            <!-- tool box on left panel -->
-            <div class="toolbox left">
-                <div class="group commands">
-                    <div class="item undo" data-command="undo" title="Undo">
-                        <img src="images/undo-icon.png" />
-                    </div>
-                    <div class="item download" data-command="download" title="Download">
-                        <img src="images/download-icon.png" />
-                    </div>
-                    <div class="item upload" data-command="upload" title="Upload">
-                        <img src="images/upload-icon.png" />
-                    </div>
-                </div>
-                <div class="group tools">
-                    <div class="item" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
-                    <div class="item active" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png">
-                    </div>
-                    <div class="item" id="circle" data-tool="circle" title="Circle Tool"><img src="images/circle-icon.png"></div>
-                    <div class="item" data-tool="triangle" title="Triangle Tool"><img src="images/tri-icon.png"></div>
-                </div>
-                <div class="group tools">
-                    <div class="item" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
-                    <div class="item" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
-                </div>
-            </div>
-            <!-- Paint sheet where we draw-->
-            <canvas id="canvas" width="1000" height="500"></canvas>
-            <!-- right toolbox with colors-->
-            <div class="toolbox right">
-                <div class="group colors">
-                    <div class="item color-box" data-color="#ffffff">
-                        <div class="swatch" style="background-color:#fff"></div>
-                    </div>
-                    <div class="item active color-box" data-color="#000000">
-                        <div class="swatch" style="background-color:#000"></div>
-                    </div>
-                    <div class="item color-box" data-color="#ff0000">
-                        <div class="swatch" style="background-color:red"></div>
-                    </div>
-                    <div class="item color-box" data-color="#00ff00">
-                        <div class="swatch" style="background-color:#0f0"></div>
-                    </div>
-                    <div class="item color-box" data-color="#0000ff">
-                        <div class="swatch" style="background-color:#00f"></div>
-                    </div>
-                    <div class="item color-box" data-color="#00ffff">
-                        <div class="swatch" style="background-color:#0ff"></div>
-                    </div>
-                    <div class="item color-box" data-color="#ff00ff">
-                        <div class="swatch" style="background-color:#f0f"></div>
-                    </div>
-                    <div class="item color-box" data-color="#ffff00">
-                        <div class="swatch" style="background-color:#ff0"></div>
-                    </div>
-                    <div class="item color-box" data-color="#c46f0f">
-                        <div class="swatch" style="background-color:#c46f0f"></div>
-                    </div>
-                    <div class="item color-box" data-color="#fd8f27">
-                        <div class="swatch" style="background-color:#fd8f27"></div>
-                    </div>
-                    <div class="item color-box" data-color="#0099ff">
-                        <div class="swatch" style="background-color:#09f"></div>
-                    </div>
-                    <div class="item color-box" data-color="#ff009d">
-                        <div class="swatch" style="background-color:#ff009d"></div>
-                    </div>
-                </div>
-            </div>
+        <div id="content" style="z-index: -1;">
+
         </div>
 
         <!-- The core Firebase JS SDK is always required and must be listed first -->
         <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-storage.js"></script>
 
         <!-- TODO: Add SDKs for Firebase products that you want to use
     https://firebase.google.com/docs/web/setup#available-libraries -->
@@ -184,7 +125,7 @@
                 authDomain: "chalkboard-ce2b6.firebaseapp.com",
                 databaseURL: "https://chalkboard-ce2b6.firebaseio.com",
                 projectId: "chalkboard-ce2b6",
-                storageBucket: "chalkboard-ce2b6.appspot.com",
+                storageBucket: "gs://chalkboard-ce2b6.appspot.com",
                 messagingSenderId: "801991166996",
                 appId: "1:801991166996:web:b2287b110a18a36477ab01",
                 measurementId: "G-F5H7K3MXXB"
@@ -196,7 +137,7 @@
             //make auth and firestore references
             var auth = firebase.auth();
             var db = firebase.firestore();
-
+            var storage = firebase.storage();
         </script>
 
         <!-- Compiled and minified JavaScript for materialize-->
@@ -204,14 +145,15 @@
 
         <script src="js/auth.js" type="module"></script>
         <script src="js/index.js"></script>
-
+        <script type="module" src="js/setup.js"></script>
+        
         <!-- Chat functions -->
 
         <div id = "message-container">
             <div id="whoIsTyping"></div>
         </div>
 
-        <form id = "send-container">
+        <form id="send-container">
             <input type="text" id="message-input" placeholder="Type a message">
             <button type="submit" id="send-button" name="action" class="btn waves-effect waves-light">Send
                 <i class="material-icons right">send</i>
@@ -219,10 +161,35 @@
         </form>
 
 
-            <button type="button" id="hide-display" class="btn-floating pink waves-effect">
-                <i class="material-icons">chat</i></button>
+        <button type="button" id="hide-display" class="btn-floating pink waves-effect">
+            <i class="material-icons">chat</i></button>
 
-            <script src="js/chat.js" type="module"></script>
+        <script src="js/chat.js" type="module"></script>
+        <script src="js/chalkboardGrid.js"></script>
+        <script src="js/home.js"></script>
+        <script src="js/myChalkboards.js"></script>
+        <script src="js/routerFw.js"></script>
+        <script>
+            "use strict";
+
+            var routes = [];
+
+            routes["#/home"] = home;
+            routes[""] = home;
+            routes['#'] = home;
+            routes['#/my-chalkboards'] = myChalkboards;
+
+            routerFw({
+                routes: routes,
+                contentId: "content",
+                startLink: "#/home"
+            });
+
+        </script>
+        <script src="js/setupCanvas.js"></script>
+        <script>
+            
+        </script>
     </div>
 
 </body>
