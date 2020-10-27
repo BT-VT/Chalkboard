@@ -20,6 +20,7 @@ window.onload = function() {
 		multicolor: false,
 		strokeWidth: 5,
 		strokeCap: 'round',
+		dashOffset: 1,
 		scale: 2
 	}
 
@@ -205,7 +206,7 @@ window.onload = function() {
 		curPath.remove();
 		curPath = new paper.Path.Circle(circleAttr);
 		curPath.onFrame = function(event) {
-			this.rotate(1);
+			this.dashOffset += attributes.dashOffset;
 		}
 	}
 
@@ -215,6 +216,7 @@ window.onload = function() {
 		if(rectAttr.isEllipse) { curPath = new paper.Path.Ellipse(rectAttr); }
 		else { curPath = new paper.Path.Rectangle(rectAttr); }
 		curPath.onFrame = function(event) {
+			this.dashOffset += attributes.dashOffset;
 		}
 	}
 
@@ -223,6 +225,7 @@ window.onload = function() {
 		curPath.remove();
 		curPath = new paper.Path(triangleAttr);
 		curPath.onFrame = function(event) {
+			this.dashOffset += attributes.dashOffset;
 		}
 	}
 
