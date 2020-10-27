@@ -416,42 +416,39 @@ window.onload = function() {
 		}
 		// called when path is clicked on
 		path.onMouseDown = function(event) {
-			// if no one else is drawing, do yo thang
-			if(!LOCKED || LOCKED == socket.id) {
-				// search paths array for path selected
-				for(let i = 0; i < paths.length; i++) {
-					if(paths[i].path == path) {
-						// save index of path in paths array
-						pathInd = i;
-						// set drawingTool to selector
-						setDrawingTool('selector');
-						socket.emit('requestLock');
-						break;
-					}
+			// if you arent the lock owner, gtfo
+			if(LOCKED && LOCKED != socket.id) { return; }
+			// search paths array for path selected
+			for(let i = 0; i < paths.length; i++) {
+				if(paths[i].path == path) {
+					// save index of path in paths array
+					pathInd = i;
+					// set drawingTool to selector
+					setDrawingTool('selector');
+					socket.emit('requestLock');
+					break;
 				}
 			}
 		}
 		// called when path is clicked on and dragged
 		path.onMouseDrag = function(event) {
 			//console.log(event.downPoint);
-			if(LOCKED == socket.id) {
-				// get new position of path based on new position of mouse
-				let x = path.position.x + event.delta.x;
-				let y = path.position.y + event.delta.y;
-				// send notification to update location of path at specified index
-				socket.emit('requestPathMove', [x, y], pathInd);
-			}
+			if(LOCKED != socket.id) { return; }
+			// get new position of path based on new position of mouse
+			let x = event.point.x;
+			let y = event.point.y;
+			// send notification to update location of path at specified index
+			socket.emit('requestPathMove', [x, y], pathInd);
 		}
 		// called when path is 'released' from drag
 		path.onMouseUp = function(event) {
-			if(LOCKED == socket.id) {
-				// get final coords of path location and send to server so server
-				// can update its records. Sending now prevents server from doing
-				// unnecessary updates of path locations while path is still moving.
-				let x = paths[pathInd].path.position.x;
-				let y = paths[pathInd].path.position.y;
-				socket.emit('confirmPathMoved', [x, y], pathInd);
-			}
+			if(LOCKED != socket.id) { return; }
+			// get final coords of path location and send to server so server
+			// can update its records. Sending now prevents server from doing
+			// unnecessary updates of path locations while path is still moving.
+			let x = paths[pathInd].path.position.x;
+			let y = paths[pathInd].path.position.y;
+			socket.emit('confirmPathMoved', [x, y], pathInd);
 		}
 	}
 
