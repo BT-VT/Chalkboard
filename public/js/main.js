@@ -41,8 +41,14 @@ sessionForm.addEventListener("submit", (e) => {
 
      console.log(user);
      socket.emit("joinSession", user, prevSession);
+     window.location.replace(window.location.origin + "/" + user.sessionID);
 
     //console.log(sessionId);
+});
+
+socket.on("updateRoom", (room) => {
+    user.sessionID = room;
+    socket.emit("joinSession", user);
 });
 
 // get the username when the user is signed in, username is -1 if not logged in
@@ -50,7 +56,7 @@ socket.on("giveUsername" , (username) => {
     if (username != -1) {
         user.name = username;
     } else {
-        name =  "Guest" +  Math.floor( Math.random() * 10000);
+        user.name =  "Guest" +  Math.floor( Math.random() * 10000);
     }
 });
 

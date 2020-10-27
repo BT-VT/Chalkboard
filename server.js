@@ -6,6 +6,7 @@ var server = app.listen(portNum);
 app.use(express.static("public"));
 
 let sessions = new Map();
+let webRoom = "default";
 
 
 
@@ -17,14 +18,21 @@ var io = require("socket.io")(server);
 app.get('/', (req,res) => {
     console.log("Test");
     res.send('Welcome to Chalkboard');
+    webRoom = "default";
+});
+
+app.get("/:room", (req, res) => {
+    webRoom = req.params.room;
+    res.sendFile(__dirname + "/public/index.html");
 });
 
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
     socket.send("hello");
-
+    
     //join the default session when they first join
-    socket.join("default");
+    socket.emit("updateRoom", webRoom);
+    
 
     socket.on('startPos', (data, user) => {
         console.log(user.sessionID);
@@ -59,23 +67,25 @@ io.on('connection', (socket) => {
        // console.log(name);
         socket.to(user.sessionID).emit("typing", data, user.name);
     });
-    // getting username from auth.js and passing it to the client (prob dont need to do this actually)
+    // getting username from auth.js and passing it to the client (there is prob a better way to do this)
     socket.on("getUsernameFromAuth", (username) => {
         socket.emit("giveUsername", username);
     });
 
     socket.on("joinSession", (user, prevSession) =>  {
-        // checking to see if the session exists, but for now just create one if it doesn't exist
-            
-            socket.leave(prevSession);
-            
+            if (prevSession != null)
+                socket.leave(prevSession);
+
+    // checking to see if the session exists, but for now just create one if it doesn't exist
           if (sessions.has(user.sessionID)) {
             sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
+            io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
             console.log(sessions.get(user.sessionID))
         } else {
             sessions.set(user.sessionID, [user]);
             socket.join(user.sessionID);
+            io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
             console.log(sessions.get(user.sessionID))
         }
     });
