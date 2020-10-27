@@ -17,7 +17,10 @@ window.onload = function() {
 
 	let attributes = {
 		selectedColor: '#000000',
-		multicolor: false
+		multicolor: false,
+		strokeWidth: 5,
+		strokeCap: 'round',
+		scale: 2
 	}
 
 	let drawingTools = {
@@ -97,6 +100,7 @@ window.onload = function() {
 			else if(pathName.search('triangle') > -1) {
 				pathsItem.path = new paper.Path(pathObj);
 			}
+			setPathFunctions(pathsItem.path, attributes.scale);
 			paths.push(pathsItem);
 		}
 	}
@@ -147,7 +151,8 @@ window.onload = function() {
 			    position: [event.downPoint.x, event.downPoint.y],
 			    radius: Math.round(event.downPoint.subtract(event.point).length),
 			    dashArray: [2, 2],
-		        strokeColor: attributes.selectedColor
+		        strokeColor: attributes.selectedColor,
+				selectedColor: 'red'
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
 		}
@@ -195,17 +200,24 @@ window.onload = function() {
 	function drawTrackingCircle(circleAttr) {
 		curPath.remove();
 		curPath = new paper.Path.Circle(circleAttr);
+		curPath.onFrame = function(event) {
+			this.rotate(1);
+		}
 	}
 
 	function drawTrackingRect(rectAttr) {
 		curPath.remove();
 		if(rectAttr.isEllipse) { curPath = new paper.Path.Ellipse(rectAttr); }
 		else { curPath = new paper.Path.Rectangle(rectAttr); }
+		curPath.onFrame = function(event) {
+		}
 	}
 
 	function drawTrackingTriangle(triangleAttr) {
 		curPath.remove();
 		curPath = new paper.Path(triangleAttr);
+		curPath.onFrame = function(event) {
+		}
 	}
 
 	function erasePath(pathName) {
@@ -258,6 +270,7 @@ window.onload = function() {
 			return;
 		}
 		curPath.simplify();
+		setPathFunctions(curPath, attributes.scale);
 		// add new path to paths array
 		let pathsItem = {
 			pathName: 'path-' + pathID,
@@ -266,6 +279,7 @@ window.onload = function() {
 		paths.push(pathsItem);
 		curPath = new paper.Path();
 		console.log(paths);
+		console.log(pathsItem.path);
 		if(LOCKED == socket.id) {
 			socket.emit('confirmDrawingDone', pathsItem);
 		}
@@ -273,6 +287,8 @@ window.onload = function() {
 
 	function finishCircle(pathID) {
 		curPath.dashArray = null;
+		curPath.onFrame = null;
+		setPathFunctions(curPath, attributes.scale);
 		let pathsItem = {
 			pathName: 'circle-' + pathID,
 			path: curPath
@@ -288,6 +304,7 @@ window.onload = function() {
 
 	function finishRect(pathID, isEllipse) {
 		curPath.dashArray = null;
+		setPathFunctions(curPath, attributes.scale);
 		let type = isEllipse ? 'ellipse-' : 'rect-';
 
 		let pathsItem = {
@@ -305,6 +322,7 @@ window.onload = function() {
 
 	function finishTriangle(pathID) {
 		curPath.dashArray = null;
+		setPathFunctions(curPath, attributes.scale);
 		let pathsItem = {
 			pathName: 'triangle-' + pathID,
 			path: curPath
@@ -355,10 +373,30 @@ window.onload = function() {
 
 		let attr = {
 			strokeColor: strokeColor,
-			strokeWidth: 5,
-			strokeCap: 'round'
+			strokeWidth: attributes.strokeWidth,
+			strokeCap: attributes.strokeCap
 		};
 		return attr;
+	}
+
+	// sets path state other than attributes
+	function setPathFunctions(path, scale) {
+		let entered = false;
+		path.onMouseEnter = function(event) {
+			if(!entered) {
+				entered = true;
+				path.strokeWidth = path.strokeWidth + attributes.scale;
+			}
+		}
+		path.onMouseLeave = function(event) {
+			if(entered) {
+				entered = false;
+				path.strokeWidth = path.strokeWidth - attributes.scale;
+			}
+		}
+		path.catdog = function() {
+			console.log('catdog');
+		}
 	}
 
 	function rgbToHex(r,g,b) {
