@@ -18,7 +18,7 @@ var io = require("socket.io")(server);
 app.get('/', (req,res) => {
     console.log("Test");
     res.send('Welcome to Chalkboard');
-    webRoom = "default";
+    
 });
 
 app.get("/:room", (req, res) => {
@@ -30,8 +30,12 @@ io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
     socket.send("hello");
     
-    //join the default session when they first join
-    socket.emit("updateRoom", webRoom);
+    //delays moving to the room initially to give time to update the username first
+    setTimeout( () => {
+        socket.emit("updateRoom", webRoom);
+        webRoom = "default";
+    }, 500)
+    
     
 
     socket.on('startPos', (data, user) => {

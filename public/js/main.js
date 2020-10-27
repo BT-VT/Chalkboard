@@ -39,10 +39,9 @@ sessionForm.addEventListener("submit", (e) => {
      let prevSession = user.sessionID;
      user.sessionID = sessionId;
 
-     console.log(user);
+     console.log(user.name);
      socket.emit("joinSession", user, prevSession);
      window.location.replace(window.location.origin + "/" + user.sessionID);
-
     //console.log(sessionId);
 });
 
