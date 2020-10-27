@@ -40,6 +40,10 @@ pickr.on('change', (color, instance) => {
     window.selectedColor=hexColor.toString()
    
 })
+pickr.on('save',(color,instance)=>{
+    pickr.addSwatch(color.toHEXA().toString());
+})
+
 
 let socket = io();
 let LOCKED = false;
