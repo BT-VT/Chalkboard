@@ -111,7 +111,7 @@ window.onload = function() {
 			else if(drawingTools.circle) {
 				socket.emit('requestLock');
 			}
-			else if(drawingTools.rect) {
+			else if(drawingTools.rect || drawingTools.ellipse) {
 				socket.emit('requestLock');
 			}
 			else if(drawingTools.eraser) {
@@ -148,12 +148,13 @@ window.onload = function() {
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
 		}
-		else if(drawingTools.rect) {
+		else if(drawingTools.rect || drawingTools.ellipse) {
 			let rectAttr = {
 				from: [event.downPoint.x, event.downPoint.y],
 				to: [event.point.x, event.point.y],
 				dashArray: [2, 2],
-				strokeColor: attributes.selectedColor
+				strokeColor: attributes.selectedColor,
+				isEllipse: drawingTools.ellipse
 			}
 			socket.emit('requestTrackingRect', rectAttr);
 		}
@@ -182,7 +183,9 @@ window.onload = function() {
 
 	function drawTrackingRect(rectAttr) {
 		curRect.remove();
-		curRect = new paper.Path.Rectangle(rectAttr);
+		if(rectAttr.isEllipse) { curRect = new paper.Path.Ellipse(rectAttr); }
+		else { curRect = new paper.Path.Rectangle(rectAttr); }
+
 	}
 
 	function erasePath(pathName) {
@@ -223,8 +226,8 @@ window.onload = function() {
 			socket.emit('requestFinishCircle');
 			return;
 		}
-		else if(drawingTools.rect) {
-			socket.emit('requestFinishRect');
+		else if(drawingTools.rect || drawingTools.ellipse) {
+			socket.emit('requestFinishRect', drawingTools.ellipse);
 			return;
 		}
 		else if(drawingTools.eraser) {
@@ -269,10 +272,12 @@ window.onload = function() {
 		}
 	}
 
-	function finishRect(pathID) {
+	function finishRect(pathID, isEllipse) {
 		curRect.dashArray = null;
+		let type = isEllipse ? 'ellipse-' : 'rect-';
+
 		let pathsItem = {
-			pathName: 'rect-' + pathID,
+			pathName: type + pathID,
 			path: curRect
 		}
 		paths.push(pathsItem);
@@ -280,7 +285,7 @@ window.onload = function() {
 		curRect = new paper.Path.Rectangle();
 
 		if(LOCKED == socket.id) {
-			socket.emit('confirmCircleDone', pathsItem);
+			socket.emit('confirmRectDone', pathsItem);
 		}
 	}
 
@@ -431,6 +436,17 @@ window.onload = function() {
 		}
 	}
 	else { console.log('circle button not found'); }
+
+	let ellipseBtn = document.querySelector("#ellipse");
+	if(ellipseBtn) {
+		ellipseBtn.onclick = function() {
+			if(setDrawingTool('ellipse')) {
+				console.log('ellipse selected!');
+			}
+			else { console.log('failed to select ellipse'); }
+		}
+	}
+	else { console.log('ellipse button not found'); }
 
 	let rectBtn = document.querySelector("#rect");
 	if(rectBtn) {

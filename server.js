@@ -112,9 +112,9 @@ io.on('connection', (socket) => {
         io.emit('finishCircle', pathID);
     });
 
-    socket.on('requestFinishRect', () => {
+    socket.on('requestFinishRect', (isEllipse) => {
         let pathID = uuidv4();
-        io.emit('finishRect', pathID);
+        io.emit('finishRect', pathID, isEllipse);
     });
 
     socket.on('requestFinishErasing', async () => {
