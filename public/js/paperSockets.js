@@ -29,6 +29,7 @@ window.onload = function() {
 		rect: false,
 		ellipse: false,
 		triangle: false,
+		selector: false,
 		eraser: false
 	}
 
@@ -48,6 +49,7 @@ window.onload = function() {
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
+	socket.on('movePath', movePath);
 
 	// notify server to send existing session paths
 	socket.emit('hello');
@@ -100,12 +102,12 @@ window.onload = function() {
 			else if(pathName.search('triangle') > -1) {
 				pathsItem.path = new paper.Path(pathObj);
 			}
-			setPathFunctions(pathsItem.path, attributes.scale);
+			setPathFunctions(pathsItem, attributes.scale);
 			paths.push(pathsItem);
 		}
 	}
 
-	// notify users to create a new path
+	// notify users to create a new path. Repetitive for debugging purposes
 	tool.onMouseDown = function(event) {
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
@@ -192,12 +194,14 @@ window.onload = function() {
 	// called when socket receives "newPoint" message. adds the supplied
 	// point to the current path (which draws it)
 	function drawSegment(loc) {
+		if(!initialPathsReceived) { return; }
 	    // Add a segment to the path at the position of the mouse:
 	    let point = new paper.Point(loc.x, loc.y);
 	    curPath.add(point);
 	}
 
 	function drawTrackingCircle(circleAttr) {
+		if(!initialPathsReceived) { return; }
 		curPath.remove();
 		curPath = new paper.Path.Circle(circleAttr);
 		curPath.onFrame = function(event) {
@@ -206,6 +210,7 @@ window.onload = function() {
 	}
 
 	function drawTrackingRect(rectAttr) {
+		if(!initialPathsReceived) { return; }
 		curPath.remove();
 		if(rectAttr.isEllipse) { curPath = new paper.Path.Ellipse(rectAttr); }
 		else { curPath = new paper.Path.Rectangle(rectAttr); }
@@ -214,6 +219,7 @@ window.onload = function() {
 	}
 
 	function drawTrackingTriangle(triangleAttr) {
+		if(!initialPathsReceived) { return; }
 		curPath.remove();
 		curPath = new paper.Path(triangleAttr);
 		curPath.onFrame = function(event) {
@@ -221,6 +227,7 @@ window.onload = function() {
 	}
 
 	function erasePath(pathName) {
+		if(!initialPathsReceived) { return; }
 		let pathRemoved = null;
 		for(let i = 0; i < paths.length; i++) {
 			// if path is found try to remove it from canvas
@@ -270,12 +277,12 @@ window.onload = function() {
 			return;
 		}
 		curPath.simplify();
-		setPathFunctions(curPath, attributes.scale);
 		// add new path to paths array
 		let pathsItem = {
 			pathName: 'path-' + pathID,
 			path: curPath
 		}
+		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		curPath = new paper.Path();
 		console.log(paths);
@@ -286,13 +293,14 @@ window.onload = function() {
 	}
 
 	function finishCircle(pathID) {
+		if(!initialPathsReceived) { return; }
 		curPath.dashArray = null;
 		curPath.onFrame = null;
-		setPathFunctions(curPath, attributes.scale);
 		let pathsItem = {
 			pathName: 'circle-' + pathID,
 			path: curPath
 		}
+		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
 		curPath = new paper.Path.Circle();
@@ -303,14 +311,15 @@ window.onload = function() {
 	}
 
 	function finishRect(pathID, isEllipse) {
+		if(!initialPathsReceived) { return; }
 		curPath.dashArray = null;
-		setPathFunctions(curPath, attributes.scale);
 		let type = isEllipse ? 'ellipse-' : 'rect-';
 
 		let pathsItem = {
 			pathName: type + pathID,
 			path: curPath
 		}
+		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
 		curPath = new paper.Path.Rectangle();
@@ -321,12 +330,13 @@ window.onload = function() {
 	}
 
 	function finishTriangle(pathID) {
+		if(!initialPathsReceived) { return; }
 		curPath.dashArray = null;
-		setPathFunctions(curPath, attributes.scale);
 		let pathsItem = {
 			pathName: 'triangle-' + pathID,
 			path: curPath
 		}
+		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
 		curPath = new paper.Path();
@@ -336,12 +346,18 @@ window.onload = function() {
 		}
 	}
 
+	function movePath(newPosition, index) {
+		if(!initialPathsReceived) { return; }
+		console.log('index of path to move: ' + index);
+		paths[index].path.position = newPosition;
+	}
 
 	// called when socket receives 'deleteLastPath' message from server. sent
 	// when 'undo' button is clicked by user. Pops last drawn path from paths
 	// array and removes path from canvas.
 	// paths = [ {pathName: "pathN", path: Path} ]
 	function deleteLastPath(pathName) {
+		if(!initialPathsReceived) { return; }
 		let pathObj = paths[paths.length - 1];
 		// confirm path to be removed
 		if(pathObj && pathObj.pathName == pathName) {
@@ -354,6 +370,7 @@ window.onload = function() {
 	// called when socket receives "deleteCurPath" message from server. Signals that
 	// lock owner was disconnected and curPath should be removed & LOCK should be unlocked.
 	function deleteCurPath(owner) {
+		if(!initialPathsReceived) { return; }
 		console.log('socket ' + owner + ' disconnected while drawing, releasing lock...');
 		curPath.remove();
 		curPath = new paper.Path();
@@ -380,8 +397,11 @@ window.onload = function() {
 	}
 
 	// sets path state other than attributes
-	function setPathFunctions(path, scale) {
-		let entered = false;
+	function setPathFunctions(pathsItem, scale) {
+		let path = pathsItem.path;
+		let pathName = pathsItem.pathName;
+		let pathInd = null;			// index of path in paths array on client and server
+		let entered = false;		// stops 'leave' event from firing when object is created
 		path.onMouseEnter = function(event) {
 			if(!entered) {
 				entered = true;
@@ -394,8 +414,44 @@ window.onload = function() {
 				path.strokeWidth = path.strokeWidth - attributes.scale;
 			}
 		}
-		path.catdog = function() {
-			console.log('catdog');
+		// called when path is clicked on
+		path.onMouseDown = function(event) {
+			// if no one else is drawing, do yo thang
+			if(!LOCKED || LOCKED == socket.id) {
+				// search paths array for path selected
+				for(let i = 0; i < paths.length; i++) {
+					if(paths[i].path == path) {
+						// save index of path in paths array
+						pathInd = i;
+						// set drawingTool to selector
+						setDrawingTool('selector');
+						socket.emit('requestLock');
+						break;
+					}
+				}
+			}
+		}
+		// called when path is clicked on and dragged
+		path.onMouseDrag = function(event) {
+			//console.log(event.downPoint);
+			if(LOCKED == socket.id) {
+				// get new position of path based on new position of mouse
+				let x = path.position.x + event.delta.x;
+				let y = path.position.y + event.delta.y;
+				// send notification to update location of path at specified index
+				socket.emit('requestPathMove', [x, y], pathInd);
+			}
+		}
+		// called when path is 'released' from drag
+		path.onMouseUp = function(event) {
+			if(LOCKED == socket.id) {
+				// get final coords of path location and send to server so server
+				// can update its records. Sending now prevents server from doing
+				// unnecessary updates of path locations while path is still moving.
+				let x = paths[pathInd].path.position.x;
+				let y = paths[pathInd].path.position.y;
+				socket.emit('confirmPathMoved', [x, y], pathInd);
+			}
 		}
 	}
 

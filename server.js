@@ -192,6 +192,23 @@ io.on('connection', (socket) => {
         io.emit('unlockCanvas', socket.id);
     });
 
+    socket.on('requestPathMove', (newPosition, index) => {
+        io.emit('movePath',newPosition, index);
+    });
+
+    // called when lock owner releases a path that was being moved. notifies
+    // server that a path location needs to be updated in the paths array.
+    // paths = [[pathName, obj], ... , [pathName, obj]]
+    socket.on('confirmPathMoved', async (newPosition, index) => {
+
+        paths[index][1].position = newPosition;
+        // always check for new users before letting a client release the lock
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        io.emit('unlockCanvas', socket.id);
+    });
+
     // received by client when 'undo' button is clicked. If there is a path to
     // undo, pop it from the paths array and send message for clients to remove
     // the path. paths = [[pathName, obj], ... , [pathName, obj]]
