@@ -47,6 +47,53 @@ function chalkboardGrid() {
         })
     };
 
+    function displayChalkboard(data) {
+        return new Promise((resolve, reject) => {
+            let img = document.createElement("img");
+            img.src = data.img;
+            //document.getElementById("grid").appendChild(img);
+            resolve('image displayed');
+            //create a new row if there are an even number of chalkboards
+            if (numChalkboards % 2 == 0) {
+                console.log("# of chalkboards: " + numChalkboards);
+                var row = document.createElement("div");
+                row.classList.add("row");
+                //row.setAttribute("id", "first");
+                img.src = data.img;
+                document.getElementById("grid").appendChild(row);
+                var col = document.createElement("div");
+                col.classList.add("col50");
+                col.appendChild(img);
+                var date = document.createElement("p");
+                let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
+                date.innerHTML = dateSaved;
+                col.appendChild(date);
+                row.appendChild(col);
+                numChalkboards += 1;
+                resolve('image displayed');
+            }
+            //or append to existing row
+            else {
+                console.log("# of chalkboards: " + numChalkboards);
+                var arr = document.getElementById("grid").getElementsByClassName("row");
+                console.log(arr);
+                var row = arr[arr.length - 1];
+                var col = document.createElement("div");
+                col.classList.add("col50");
+                row.appendChild(col);
+                //row.getElementById("first");
+                img.src = data.img;
+                col.appendChild(img);
+                var date = document.createElement("p");
+                let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
+                date.innerHTML = dateSaved;
+                col.appendChild(date);
+                numChalkboards += 1;
+                resolve('image displayed');
+            }
+        })
+    }
+
     async function getChalkboards() {
         db.collection("chalkboards").where("owner", "==", auth.currentUser.email)
             .get()
@@ -54,7 +101,7 @@ function chalkboardGrid() {
                 querySnapshot.forEach(function (doc) {
                     // doc.data() is never undefined for query doc snapshots
                     console.log(doc.id, " => ", doc.data());
-                    displayImg(doc.data().img);
+                    displayChalkboard(doc.data());
                 });
             })
             .catch(function (error) {
