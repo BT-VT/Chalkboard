@@ -383,13 +383,13 @@ export function paperSockets() {
 				.toDataURL("image/png", 1.0);
 				//.replace("image/png", "image/octet-stream");
 			console.log(typeof(image));
-			console.log(image);
+			//console.log(image);
 			
 
        
             // create storage ref to empty storage object
             // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
-            let storageRef = firebase.storage().ref('chalkboards/' + "testUpload-930PM.png");
+            let storageRef = firebase.storage().ref('chalkboards/');
 
 			// upload file to storage ref location
 			image = image.split(',');

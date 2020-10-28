@@ -3,9 +3,10 @@
     display: flex;
     flex-direction: column;
     width: 48%;
-    /*border: 1px solid #0845d3;/**/
+    border: 1px solid gray;/**/
     padding: 8px;
     margin: 4px;
+    background-color: #fff;
 }
 
 .row {
@@ -14,10 +15,13 @@
     display: flex; 
     justify-content: space-between;
     width: 100%;
+    height: 200px;
 }
 
 .row img {
     aspect-ratio: 1/1;
+    height: 80%;
+    border: 2px solid gray;/**/
 }
 
 #grid {
@@ -52,7 +56,7 @@
     align-content: flex-start;
 }
 .chalkboards {
-    background-color: #fff;
+    background-color: lightgray;
     /*border-style: solid;/**/
     /*border-color: blue;/**/
     min-height: 100vh;
