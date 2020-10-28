@@ -68,6 +68,7 @@ export function paperSockets() {
 	// to begin to receive canvas updates when other users are drawing.
 	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	function addPaths(newPaths) {
+		console.log("CHECK ADDPATHS!")
 		LOCKED = false;
 		initialPathsReceived = true;
 		console.log('adding new paths ...... ');
@@ -352,6 +353,80 @@ export function paperSockets() {
 	        console.log(attributes.selectedColor);
 	    };
 	});
+
+	var commandBtn = document.querySelector(".download");
+	if (commandBtn){
+		commandBtn.onclick = function() {
+			console.log("testing download");
+			var canvas = document.getElementById("canvas");
+			var image = canvas
+				.toDataURL("image/png", 1.0)
+				.replace("image/png", "image/octet-stream");
+			var link = document.createElement("a");
+			link.download = "my-image.png";
+			link.href = image;
+			link.click();
+		}
+	}
+
+
+	var uploadBtn = document.querySelector(".upload");
+	var selectedFile; 
+	if (uploadBtn){
+		uploadBtn.addEventListener('click', (e) => {
+			console.log("test uploadbtn with events");
+			//selectedFile = e.target.files[0];
+			//let i = 0;
+
+			var canvas = document.getElementById("canvas");
+			var image = canvas
+				.toDataURL("image/png", 1.0);
+				//.replace("image/png", "image/octet-stream");
+			console.log(typeof(image));
+			console.log(image);
+			
+
+       
+            // create storage ref to empty storage object
+            // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+            let storageRef = firebase.storage().ref('chalkboards/' + "testUpload-930PM.png");
+
+			// upload file to storage ref location
+			image = image.split(',');
+			
+            let task = storageRef.putString(image[1],"base64", {contentType:'image/png'});
+            // update progress bar and save download URL
+            // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
+            task.on('state_changed',
+                // called when upload fails
+                function error(err) {
+                    console.log(err);
+                },
+                // called when upload finishes, get URL and display corresponding image
+                async function complete() {
+                    try {
+                        let url = await storageRef.getDownloadURL();
+                        let displayResponse = await displayImg(url);
+                        console.log(displayResponse);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+            );
+	});
+}
+
+
+	// var testBtn = document.querySelector(".upload");
+	// if (testBtn){
+	// 	testBtn.onclick = function() {
+	// 		//console.log("testing download");
+	// 		var storageRef = firebase.storage().ref('chalkboards/');
+	// 		var filename = 
+	// 	}
+	// }
+
+
 
 	var undoBtn = document.querySelector(".undo");
 	if(undoBtn) {
