@@ -1,5 +1,13 @@
-// set up express server
+// random dependancies
 const { v4: uuidv4 } = require('uuid');
+// set up firestore connection
+const admin = require('firebase-admin');
+const serviceAccount = require('./private/ServiceAccountKey.json');
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+const db = admin.firestore();
+// set up express server
 var express = require("express");
 var app = express();
 var portNum = process.env.PORT || '5000';
@@ -8,6 +16,7 @@ app.use(express.static("public"));
 app.use(express.static(__dirname + "/node_modules/paper/dist"));
 // set up socket.io on express server
 var io = require("socket.io")(server);
+
 var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
 var newUsers = []; // new socket connections waiting to add existing paths
 let LOCKED = false;
@@ -17,6 +26,29 @@ console.log("server running on port: " + portNum);
 app.get('/', (req,res) => {
     res.send('Welcome to Chalkboard');
 });
+
+process.on('SIGINT', handleShutdown);
+process.on('SIGTERM', handleShutdown);
+
+// called when server shuts down. put tasks for graceful shutdown in here.
+async function handleShutdown() {
+    console.log('\nclosing server');
+    // save paths array to db
+    const pathsRef = db.collection('ChalkboardStates').doc('chalkboard1');
+    try {
+        await pathsRef.set({
+            sessionID: 'chalkboard1',
+            paths: 'ArrayOfPathsObjs'
+        });
+        console.log('saved chalkboard state to database');
+    }
+    catch(err) {
+        console.log('error saving chalkboard state to databse...');
+        console.log(err);
+    };
+
+    process.exit();
+}
 
 // called when new client socket connection first established
 function tryToSendPaths(socket) {
