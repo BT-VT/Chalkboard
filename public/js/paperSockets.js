@@ -418,7 +418,7 @@ export function paperSockets() {
 			// Add a new chalkboard with a generated id.
 			let today = new Date();
 			let url = await storageRef.getDownloadURL();
-			console.log("ready to save to db");
+			console.log("ready to save chalkboard to database");
 			db.collection("chalkboards").add({
 				owner: auth.currentUser.email,
 				guests: null,

@@ -1,4 +1,4 @@
-import {socket} from "./paperSockets.js"
+import { socket } from "./paperSockets.js"
 // listen for auth status changes
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -27,9 +27,25 @@ signupForm.addEventListener('submit', (e) => {
         M.Modal.getInstance(modal).close();
         signupForm.reset();
         signupForm.querySelector(".error").innerHTML = "";
+
+        //create new user document in database ONLY if signup is successful
+        let today = new Date();
+        console.log("ready to save user to database");
+        db.collection("users").doc(email).set({
+            email: email,
+            chalkboards: null,
+            username: null
+        })
+            .then(function (docRef) {
+                console.log("SUCCESS: Document written with ID: ", docRef.id);
+            })
+            .catch(function (error) {
+                console.error("Error adding document: ", error);
+            });
     }).catch(err => {
         signupForm.querySelector(".error").innerHTML = err.message;
     });
+
 });
 
 // logout
