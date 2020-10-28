@@ -1,6 +1,6 @@
 export let socket = io();
 export function paperSockets() {
-//window.onload = function() {
+	//window.onload = function() {
 	// Setup directly from canvas id:
 	paper.setup('canvas');
 	var tool = new paper.Tool();
@@ -15,7 +15,7 @@ export function paperSockets() {
 	// paths array on server
 	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
 	let curPath = new paper.Path();
-	let curCircle = new paper.Path.Circle(0,0,0);
+	let curCircle = new paper.Path.Circle(0, 0, 0);
 
 	let attributes = {
 		selectedColor: '#000000',
@@ -48,17 +48,17 @@ export function paperSockets() {
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
 	function lockCanvas(owner) {
-	    LOCKED = owner;
-	    console.log('canvas LOCKED by socket ' + owner);
-	    return LOCKED;
+		LOCKED = owner;
+		console.log('canvas LOCKED by socket ' + owner);
+		return LOCKED;
 	}
 
 	function unlockCanvas(owner) {
 		console.log('LOCKED: ' + LOCKED);
 		console.log('owner: ' + owner);
-		if(owner == false || LOCKED == owner) {
+		if (owner == false || LOCKED == owner) {
 			LOCKED = false;
-		    console.log('canvas is UNLOCKED');
+			console.log('canvas is UNLOCKED');
 		}
 		return LOCKED;
 	}
@@ -74,14 +74,14 @@ export function paperSockets() {
 		console.log('adding new paths ...... ');
 		// add each path from server to client paths array. pathObj is a Path-like
 		// object that must be converted to a Paper.js Path
-		for(let [pathName, pathObj] of newPaths) {
+		for (let [pathName, pathObj] of newPaths) {
 			let pathsItem = { pathName: pathName }
-			if(pathName.search('path') > -1) {
+			if (pathName.search('path') > -1) {
 				console.log('adding path' + pathsItem.pathName);
 				pathsItem.path = new paper.Path(pathObj);
 				pathsItem.path.simplify();
 			}
-			else if(pathName.search('circle') > -1) {
+			else if (pathName.search('circle') > -1) {
 				console.log('adding circle' + pathsItem.pathName);
 				pathsItem.path = new paper.Path.Circle(pathObj);
 			}
@@ -92,20 +92,20 @@ export function paperSockets() {
 	}
 
 	// notify users to create a new path
-	tool.onMouseDown = function(event) {
-		if(!LOCKED || LOCKED == socket.id) {
-			if(drawingTools.marker) {
+	tool.onMouseDown = function (event) {
+		if (!LOCKED || LOCKED == socket.id) {
+			if (drawingTools.marker) {
 				let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestNewDrawing', pathAttr);
 			}
-			else if(drawingTools.circle) {
+			else if (drawingTools.circle) {
 				socket.emit('requestLock');
 			}
-			else if(drawingTools.eraser) {
+			else if (drawingTools.eraser) {
 				socket.emit('requestLock');
 			}
 			return;
-	    }
+		}
 		console.log('my socket id: ' + socket.id);
 		console.log('cant start new path, lock is locked to socket ' + LOCKED);
 		return;
@@ -116,29 +116,29 @@ export function paperSockets() {
 	function createNewDrawing(pathAttr) {
 		// create new path
 		curPath = new paper.Path(pathAttr);
-		if(attributes.multicolor) { rotateColors(); }
+		if (attributes.multicolor) { rotateColors(); }
 	}
 
 	// notifies users to add new point to curPath
-	tool.onMouseDrag = function(event) {
-		if(LOCKED != socket.id) { return; }
-		if(drawingTools.marker) {
+	tool.onMouseDrag = function (event) {
+		if (LOCKED != socket.id) { return; }
+		if (drawingTools.marker) {
 			let loc = { x: event.point.x, y: event.point.y }
-		    socket.emit('requestSegment', loc);
+			socket.emit('requestSegment', loc);
 		}
-		else if(drawingTools.circle) {
+		else if (drawingTools.circle) {
 			let circleAttr = {
-			    position: [event.downPoint.x, event.downPoint.y],
-			    radius: Math.round(event.downPoint.subtract(event.point).length),
-			    dashArray: [2, 2],
-		        strokeColor: attributes.selectedColor
+				position: [event.downPoint.x, event.downPoint.y],
+				radius: Math.round(event.downPoint.subtract(event.point).length),
+				dashArray: [2, 2],
+				strokeColor: attributes.selectedColor
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
 		}
 		// paths = [ {pathName: "pathN", path: Path} ]
-		else if(drawingTools.eraser && event.item) {
+		else if (drawingTools.eraser && event.item) {
 			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
-			if(pathsItemArr.length == 1) {
+			if (pathsItemArr.length == 1) {
 				socket.emit('requestErase', pathsItemArr[0].pathName);
 			}
 		}
@@ -148,9 +148,9 @@ export function paperSockets() {
 	// called when socket receives "newPoint" message. adds the supplied
 	// point to the current path (which draws it)
 	function drawSegment(loc) {
-	    // Add a segment to the path at the position of the mouse:
-	    let point = new paper.Point(loc.x, loc.y);
-	    curPath.add(point);
+		// Add a segment to the path at the position of the mouse:
+		let point = new paper.Point(loc.x, loc.y);
+		curPath.add(point);
 	}
 
 	function drawTrackingCircle(circleAttr) {
@@ -162,21 +162,21 @@ export function paperSockets() {
 	function erasePath(pathName) {
 		console.log('attempt to erase ' + pathName);
 		let pathRemoved = null;
-		for(let i = 0; i < paths.length; i++) {
+		for (let i = 0; i < paths.length; i++) {
 			// if path is found try to remove it from canvas
 			console.log(paths[i].pathName);
 			console.log(pathName);
 			console.log('equal: ');
 			console.log(paths[i].pathName == pathName);
-			if(paths[i].pathName == pathName) {
+			if (paths[i].pathName == pathName) {
 				console.log('found path in paths');
-				if(paths[i].path.remove()) {
+				if (paths[i].path.remove()) {
 
 
 					console.log('erased ' + pathName);
 					// if removed successfully, remove from paths list
 					paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
-					if(LOCKED == socket.id) {
+					if (LOCKED == socket.id) {
 						// have lock owner confirm removal with server
 						socket.emit('confirmErasePath', pathName);
 					}
@@ -187,17 +187,17 @@ export function paperSockets() {
 	}
 
 	// called when user releases a click, used to notify server of event
-	tool.onMouseUp = function(event) {
-		if(LOCKED != socket.id) { return; }
-		if(drawingTools.marker) {
-		    socket.emit('requestFinishDrawing');
+	tool.onMouseUp = function (event) {
+		if (LOCKED != socket.id) { return; }
+		if (drawingTools.marker) {
+			socket.emit('requestFinishDrawing');
 			return;
 		}
-		else if(drawingTools.circle) {
+		else if (drawingTools.circle) {
 			socket.emit('requestFinishCircle');
 			return;
 		}
-		else if(drawingTools.eraser) {
+		else if (drawingTools.eraser) {
 			socket.emit('requestFinishErasing');
 			return;
 		}
@@ -206,7 +206,7 @@ export function paperSockets() {
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishDrawing(pathID) {
-		if(initialPathsReceived == false) {
+		if (initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
 		}
@@ -219,7 +219,7 @@ export function paperSockets() {
 		paths.push(pathsItem);
 		curPath = null;
 		console.log(paths);
-		if(LOCKED == socket.id) {
+		if (LOCKED == socket.id) {
 			socket.emit('confirmDrawingDone', pathsItem);
 		}
 	}
@@ -234,7 +234,7 @@ export function paperSockets() {
 		console.log(paths);
 		curCircle = new paper.Path.Circle();
 
-		if(LOCKED == socket.id) {
+		if (LOCKED == socket.id) {
 			socket.emit('confirmCircleDone', pathsItem);
 		}
 	}
@@ -247,7 +247,7 @@ export function paperSockets() {
 	function deleteLastPath(pathName) {
 		let pathObj = paths[paths.length - 1];
 		// confirm path to be removed
-		if(pathObj && pathObj.pathName == pathName) {
+		if (pathObj && pathObj.pathName == pathName) {
 			paths.pop();
 			pathObj.path.remove();
 			console.log('removed ' + pathObj.pathName);
@@ -266,7 +266,7 @@ export function paperSockets() {
 	// returns an object of path attributes
 	function getPathAttributes(rand = false) {
 		let strokeColor;
-		if(rand == true) {
+		if (rand == true) {
 			strokeColor = rgbToHex(Math.random(), Math.random(), Math.random());
 			console.log(strokeColor);
 		}
@@ -282,27 +282,27 @@ export function paperSockets() {
 		return attr;
 	}
 
-	function rgbToHex(r,g,b) {
-		r = Math.round(r*255).toString(16);
-		g = Math.round(g*255).toString(16);
-		b = Math.round(b*255).toString(16);
+	function rgbToHex(r, g, b) {
+		r = Math.round(r * 255).toString(16);
+		g = Math.round(g * 255).toString(16);
+		b = Math.round(b * 255).toString(16);
 
 		if (r.length == 1) { r = "0" + r; }
 		if (g.length == 1) { g = "0" + g; }
 		if (b.length == 1) { b = "0" + b; }
 
-  		return "#" + r + g + b;
+		return "#" + r + g + b;
 	}
 
 	// rotate colors of existing paths
 	function rotateColors() {
-		if(paths.length > 1) {
+		if (paths.length > 1) {
 			// save color of first path
 			let path0Color = paths[0].path.strokeColor;
 			// change the rest of the colors by shifting them to the left
 			// (to the left to the left, the color that you own pass to the Path on your left)
-			for(let i = 0; i < paths.length-1; i++) {
-				paths[i].path.strokeColor = paths[i+1].path.strokeColor;
+			for (let i = 0; i < paths.length - 1; i++) {
+				paths[i].path.strokeColor = paths[i + 1].path.strokeColor;
 			}
 			// last path gets firt paths original color
 			paths[paths.length - 1].path.strokeColor = path0Color;
@@ -311,7 +311,7 @@ export function paperSockets() {
 
 	// set all drawing tools to false except the one passed as argument.
 	function setDrawingTool(toolChosen) {
-		for(let tool in drawingTools) {
+		for (let tool in drawingTools) {
 			drawingTools[tool] = false;
 		}
 		drawingTools[toolChosen] = true;
@@ -320,43 +320,43 @@ export function paperSockets() {
 
 	// returns the tool (string name) that is currently selected, else false.
 	function getDrawingTool() {
-		for(let tool in drawingTools) {
-			if(drawingTools[tool]) { return tool; }
+		for (let tool in drawingTools) {
+			if (drawingTools[tool]) { return tool; }
 		}
 		return false;
 	}
 
-	function removeClass(el, className){
-	    var elClass = el.className;
-	    while(elClass.indexOf(className) != -1) {
-	        elClass = elClass.replace(className, '');
-	        elClass = elClass.trim();
-	    }
-	    el.className = elClass;
+	function removeClass(el, className) {
+		var elClass = el.className;
+		while (elClass.indexOf(className) != -1) {
+			elClass = elClass.replace(className, '');
+			elClass = elClass.trim();
+		}
+		el.className = elClass;
 	}
 
 	var colorBtns = document.querySelectorAll(".color-box");
 	colorBtns.forEach((btn) => {
-	    btn.onclick = function () {
-	        //make all buttons inactive
-	        colorBtns.forEach((btn) =>{
-	            removeClass(btn, "active");
-	        });
+		btn.onclick = function () {
+			//make all buttons inactive
+			colorBtns.forEach((btn) => {
+				removeClass(btn, "active");
+			});
 
-	        //make selected button active
-	        btn.className += " active";
+			//make selected button active
+			btn.className += " active";
 
-	        //set color to button color
-	        attributes.selectedColor = btn.attributes["data-color"].value;
-			if(attributes.selectedColor == '#c46f0f') { attributes.multicolor = true; }
+			//set color to button color
+			attributes.selectedColor = btn.attributes["data-color"].value;
+			if (attributes.selectedColor == '#c46f0f') { attributes.multicolor = true; }
 			else { attributes.multicolor = false; }
-	        console.log(attributes.selectedColor);
-	    };
+			console.log(attributes.selectedColor);
+		};
 	});
 
 	var commandBtn = document.querySelector(".download");
-	if (commandBtn){
-		commandBtn.onclick = function() {
+	if (commandBtn) {
+		commandBtn.onclick = function () {
 			console.log("testing download");
 			var canvas = document.getElementById("canvas");
 			var image = canvas
@@ -371,9 +371,9 @@ export function paperSockets() {
 
 
 	var uploadBtn = document.querySelector(".upload");
-	var selectedFile; 
-	if (uploadBtn){
-		uploadBtn.addEventListener('click', (e) => {
+	var selectedFile;
+	if (uploadBtn) {
+		uploadBtn.addEventListener('click', async (e) => {
 			console.log("test uploadbtn with events");
 			//selectedFile = e.target.files[0];
 			//let i = 0;
@@ -381,57 +381,66 @@ export function paperSockets() {
 			var canvas = document.getElementById("canvas");
 			var image = canvas
 				.toDataURL("image/png", 1.0);
-				//.replace("image/png", "image/octet-stream");
-			console.log(typeof(image));
+			//.replace("image/png", "image/octet-stream");
+			console.log(typeof (image));
 			//console.log(image);
-			
 
-       
-            // create storage ref to empty storage object
-            // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
-            let storageRef = firebase.storage().ref('chalkboards/');
+
+
+			// create storage ref to empty storage object
+			// https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+			let storageRef = firebase.storage().ref('chalkboards/');
 
 			// upload file to storage ref location
 			image = image.split(',');
-			
-            let task = storageRef.putString(image[1],"base64", {contentType:'image/png'});
-            // update progress bar and save download URL
-            // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
-            task.on('state_changed',
-                // called when upload fails
-                function error(err) {
-                    console.log(err);
-                },
-                // called when upload finishes, get URL and display corresponding image
-                async function complete() {
-                    try {
-                        let url = await storageRef.getDownloadURL();
-                        let displayResponse = await displayImg(url);
-                        console.log(displayResponse);
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-            );
-	});
-}
 
+			let task = storageRef.putString(image[1], "base64", { contentType: 'image/png' });
+			// update progress bar and save download URL
+			// https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
+			task.on('state_changed',
+				// called when upload fails
+				function error(err) {
+					console.log(err);
+				},
+				// called when upload finishes, get URL and display corresponding image
+				async function complete() {
+					try {
+						let url = await storageRef.getDownloadURL();
+						//let displayResponse = await displayImg(url);
+						//console.log(displayResponse);
 
-	// var testBtn = document.querySelector(".upload");
-	// if (testBtn){
-	// 	testBtn.onclick = function() {
-	// 		//console.log("testing download");
-	// 		var storageRef = firebase.storage().ref('chalkboards/');
-	// 		var filename = 
-	// 	}
-	// }
-
-
+					} catch (err) {
+						console.log(err);
+						alert(err);
+					}
+				}
+			);
+			// Add a new chalkboard with a generated id.
+			let today = new Date();
+			let url = await storageRef.getDownloadURL();
+			console.log("ready to save to db");
+			db.collection("chalkboards").add({
+				owner: auth.currentUser.email,
+				guests: null,
+				img: url,
+				edits: null,
+				title: null,
+				date_saved: today
+			})
+				.then(function (docRef) {
+					console.log("SUCCESS: Document written with ID: ", docRef.id);
+				})
+				.catch(function (error) {
+					console.error("Error adding document: ", error);
+					alert("Error adding document: ", error);
+				});
+		});
+	}
 
 	var undoBtn = document.querySelector(".undo");
-	if(undoBtn) {
-		undoBtn.onclick = function() {
-			if(!LOCKED) {
+	if (undoBtn) {
+		undoBtn.onclick = function () {
+			if (!LOCKED) {
 				console.log('undo clicked!');
 				socket.emit('undo');
 			}
@@ -440,9 +449,9 @@ export function paperSockets() {
 	else { console.log('undo button not found'); }
 
 	let markerBtn = document.querySelector("#marker");
-	if(markerBtn) {
-		markerBtn.onclick = function() {
-			if(setDrawingTool('marker')) {
+	if (markerBtn) {
+		markerBtn.onclick = function () {
+			if (setDrawingTool('marker')) {
 				console.log('marker selected');
 			}
 			else { console.log('failed to select marker'); }
@@ -451,9 +460,9 @@ export function paperSockets() {
 	else { console.log('marker button not found'); }
 
 	let circleBtn = document.querySelector("#circle");
-	if(circleBtn) {
-		circleBtn.onclick = function() {
-			if(setDrawingTool('circle')) {
+	if (circleBtn) {
+		circleBtn.onclick = function () {
+			if (setDrawingTool('circle')) {
 				console.log('circle selected!');
 
 			}
@@ -463,9 +472,9 @@ export function paperSockets() {
 	else { console.log('circle button not found'); }
 
 	var eraserBtn = document.querySelector("#eraser");
-	if(eraserBtn) {
-		eraserBtn.onclick = function() {
-			if(setDrawingTool("eraser")) {
+	if (eraserBtn) {
+		eraserBtn.onclick = function () {
+			if (setDrawingTool("eraser")) {
 				console.log('eraser selected');
 			}
 			else { console.log('failed to select eraser'); }
