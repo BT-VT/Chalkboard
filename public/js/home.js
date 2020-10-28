@@ -7,10 +7,14 @@ function home () {
             <div class="item undo" data-command="undo" title="Undo">
                 <img src="images/undo-icon.png" />
             </div>
-            <div class="item" data-command="download" title="Download">
+            <div class="item download" data-command="download" title="Download">
                 <img src="images/download-icon.png" />
             </div>
+            <div class="item upload" data-command="upload" title="Upload">
+                <img src="images/upload-icon.png" />   
+            </div>
         </div>
+             
         <div class="group tools">
             <div class="item" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
             <div class="item active" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png">
