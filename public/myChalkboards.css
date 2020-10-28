@@ -3,10 +3,11 @@
     display: flex;
     flex-direction: column;
     width: 48%;
-    border: 1px solid gray;/**/
+    /*border: 1px solid gray;/**/
     padding: 8px;
     margin: 4px;
     background-color: #fff;
+    box-shadow: 2px 3px darkgray;
 }
 
 .row {
@@ -61,7 +62,8 @@
     /*border-color: blue;/**/
     min-height: 100vh;
     width: 90%;
-    padding: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
     margin: 0;
     position: relative;
 }

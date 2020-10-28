@@ -4,7 +4,7 @@ function myChalkboards () {
 
     <div class="content">
         <div class="chalkboards" id="grid">
-            <h3>My Chalkboards</h3>
+            <h3 style="font-size: 32px">My Chalkboards</h3>
         </div>
     </div>
         `;
