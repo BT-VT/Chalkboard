@@ -8,7 +8,6 @@ let hideBTn = document.getElementById("hide-display");
 let typingMsg = document.getElementById("whoIsTyping");
 let showHideNum = 0;
 let isTyping = 0;
-let name;
 
 
 
@@ -22,7 +21,7 @@ socket.on("chat-message", (msg) => {
 sendContainer.addEventListener("submit", e => {
     e.preventDefault();
     let message = messageInput.value;
-    socket.emit("sendChatMessage", message, name);
+    socket.emit("sendChatMessage", message, user);
     messageInput.value = "";
 })
 
@@ -47,9 +46,9 @@ hideBTn.onclick = function() {
 }
 
 
-socket.on("typing", (data, name) => {
+socket.on("typing", (data, user) => {
     if (data === 1) {
-        typingMsg.innerHTML = name + " is typing...";
+        typingMsg.innerHTML = user + " is typing...";
     } else {
         typingMsg.innerHTML = "";
     }
@@ -61,15 +60,6 @@ messageInput.addEventListener("keyup", () => {
     } else {
         isTyping = 0;
     }
-    socket.emit("typingMsg", isTyping, name);
+    socket.emit("typingMsg", isTyping, user);
 });
 
-
-// get the username when the user is signed in, username is -1 if not logged in
-socket.on("giveUsername" , (username) => {
-    if (username != -1) {
-        name = username;
-    } else {
-        name =  "Guest" +  Math.floor( Math.random() * 10000);
-    }
-});

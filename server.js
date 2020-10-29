@@ -6,6 +6,14 @@ var portNum = process.env.PORT || '5000';
 var server = app.listen(portNum);
 app.use(express.static("public"));
 app.use(express.static(__dirname + "/node_modules/paper/dist"));
+
+let sessions = new Map();
+let webRoom = "default";
+
+
+
+console.log("server running on port: " + portNum);
+
 // set up socket.io on express server
 var io = require("socket.io")(server);
 var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
@@ -16,6 +24,12 @@ console.log("server running on port: " + portNum);
 
 app.get('/', (req,res) => {
     res.send('Welcome to Chalkboard');
+    
+});
+
+app.get("/:room", (req, res) => {
+    webRoom = req.params.room;
+    res.sendFile(__dirname + "/public/index.html");
 });
 
 // called when new client socket connection first established
@@ -235,20 +249,41 @@ io.on('connection', (socket) => {
     // =============== CHAT HANDLING ============================
 
     // sends chat message to the chat box
-    socket.on("sendChatMessage", (message, name) => {
+    socket.on("sendChatMessage", (message, user) => {
+        console.log(user.sessionID);
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
-        io.emit("chat-message", name + " at " + formattedTime + ":\n" + message);
+        io.to(user.sessionID).emit("chat-message", user.name + " at " + formattedTime + ":\n" + message);
     });
 
     // broadcasts a message when a user is typing
-    socket.on("typingMsg", (data, name) => {
-        socket.broadcast.emit("typing", data, name);
+    socket.on("typingMsg", (data, user) => {
+       // console.log(name);
+        socket.to(user.sessionID).emit("typing", data, user.name);
     });
-
+    // getting username from auth.js and passing it to the client (there is prob a better way to do this)
     socket.on("getUsernameFromAuth", (username) => {
         socket.emit("giveUsername", username);
     });
+
+    socket.on("joinSession", (user, prevSession) =>  {
+            if (prevSession != null)
+                socket.leave(prevSession);
+
+    // checking to see if the session exists, but for now just create one if it doesn't exist
+          if (sessions.has(user.sessionID)) {
+            sessions.get(user.sessionID).push(user);
+            socket.join(user.sessionID);
+            io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+            console.log(sessions.get(user.sessionID))
+        } else {
+            sessions.set(user.sessionID, [user]);
+            socket.join(user.sessionID);
+            io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+            console.log(sessions.get(user.sessionID))
+        }
+    });
+
 
 
 });
