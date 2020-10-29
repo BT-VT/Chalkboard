@@ -1,54 +1,55 @@
-// window.globalVar = ""
-// window.selectedColor = ""
+window.globalVar = ""
+window.selectedColor = ""
 
 export let socket = io();
+
+// Simple example, see optional options for more configuration.
+const pickr = Pickr.create({
+	el: '.color-picker',
+	theme: 'classic', // or 'monolith', or 'nano'
+	default: '#ff0000',
+	swatches: [
+		'rgba(255, 0, 0, 1)',
+		'rgba(255, 127, 0, 1)',
+		'rgba(255, 255, 0, 1)',
+		'rgba(0, 255, 0, 1)',
+		'rgba(0, 0, 255, 1)',
+		'rgba(46, 43, 95, 1)',
+		'rgba(139, 0, 255, 1)',
+	],
+
+	components: {
+
+		// Main components
+		preview: true,
+		opacity: true,
+		hue: true,
+
+		// Input / output Options
+		interaction: {
+			hex: true,
+			rgba: true,
+			input: true,
+			clear: true,
+			save: true
+		}
+	}
+});
+
+pickr.on('change', (color, instance) => {
+	var hexColor = color.toHEXA().toString();
+	console.log(hexColor)
+	window.globalVar = hexColor;
+	window.selectedColor=hexColor.toString()
+
+})
+pickr.on('save',(color,instance)=>{
+	pickr.addSwatch(color.toHEXA().toString());
+})
+
 window.onload = function() {
-	//
-	// // Simple example, see optional options for more configuration.
-	// const pickr = Pickr.create({
-	//     el: '.color-picker',
-	//     theme: 'classic', // or 'monolith', or 'nano'
-	//     default: '#ff0000',
-	//     swatches: [
-	//         'rgba(255, 0, 0, 1)',
-	//         'rgba(255, 127, 0, 1)',
-	//         'rgba(255, 255, 0, 1)',
-	//         'rgba(0, 255, 0, 1)',
-	//         'rgba(0, 0, 255, 1)',
-	//         'rgba(46, 43, 95, 1)',
-	//         'rgba(139, 0, 255, 1)',
-	//     ],
-	//
-	//     components: {
-	//
-	//         // Main components
-	//         preview: true,
-	//         opacity: true,
-	//         hue: true,
-	//
-	//         // Input / output Options
-	//         interaction: {
-	//             hex: true,
-	//             rgba: true,
-	//             input: true,
-	//             clear: true,
-	//             save: true
-	//         }
-	//     }
-	// });
-	//
-	// pickr.on('change', (color, instance) => {
-	//     var hexColor = color.toHEXA().toString();
-	//     console.log(hexColor)
-	//     window.globalVar = hexColor;
-	//     window.selectedColor=hexColor.toString()
-	//
-	// })
-	// pickr.on('save',(color,instance)=>{
-	//     pickr.addSwatch(color.toHEXA().toString());
-	// })
-	//
-	//
+
+
 
 
 
@@ -206,7 +207,7 @@ window.onload = function() {
 			    position: [event.downPoint.x, event.downPoint.y],
 			    radius: Math.round(event.downPoint.subtract(event.point).length),
 			    dashArray: [2, 2],
-		        strokeColor: attributes.selectedColor,
+		        strokeColor: window.selectedColor,
 				selectedColor: 'red'
 			}
 			socket.emit('requestTrackingCircle', circleAttr);
@@ -216,7 +217,7 @@ window.onload = function() {
 				from: [event.downPoint.x, event.downPoint.y],
 				to: [event.point.x, event.point.y],
 				dashArray: [2, 2],
-				strokeColor: attributes.selectedColor,
+				strokeColor: window.selectedColor,
 				isEllipse: drawingTools.ellipse
 			}
 			socket.emit('requestTrackingRect', rectAttr);
@@ -229,7 +230,7 @@ window.onload = function() {
 					[event.downPoint.x, event.point.y]
 				],
 				dashArray: [2, 2],
-				strokeColor: attributes.selectedColor,
+				strokeColor: window.selectedColor,
 				closed: true
 			}
 			socket.emit('requestTrackingTriangle', triangleAttr);
@@ -440,7 +441,7 @@ window.onload = function() {
 			console.log(strokeColor);
 		}
 		else {
-			strokeColor = attributes.selectedColor;
+			strokeColor = window.selectedColor;
 		}
 
 		let attr = {
@@ -572,10 +573,10 @@ window.onload = function() {
 	        btn.className += " active";
 
 	        //set color to button color
-	        attributes.selectedColor = btn.attributes["data-color"].value;
-			if(attributes.selectedColor == '#c46f0f') { attributes.multicolor = true; }
+	        window.selectedColor = btn.attributes["data-color"].value;
+			if(window.selectedColor == '#c46f0f') { attributes.multicolor = true; }
 			else { attributes.multicolor = false; }
-	        console.log(attributes.selectedColor);
+	        console.log(window.selectedColor);
 	    };
 	});
 
