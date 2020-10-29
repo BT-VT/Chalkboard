@@ -10,8 +10,6 @@ app.use(express.static(__dirname + "/node_modules/paper/dist"));
 let sessions = new Map();
 let webRoom = "default";
 
-
-
 console.log("server running on port: " + portNum);
 
 // set up socket.io on express server
@@ -265,6 +263,14 @@ io.on('connection', (socket) => {
     socket.on("getUsernameFromAuth", (username) => {
         socket.emit("giveUsername", username);
     });
+
+    // ================ ROOM HANDLING ====================
+
+ //delays moving to the room initially to give time to update the username first
+    setTimeout( () => {
+        socket.emit("updateRoom", webRoom);
+        webRoom = "default";
+    }, 500)
 
     socket.on("joinSession", (user, prevSession) =>  {
             if (prevSession != null)

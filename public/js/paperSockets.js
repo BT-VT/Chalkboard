@@ -1,6 +1,7 @@
 window.globalVar = ""
 window.selectedColor = ""
 
+
 export let socket = io();
 
 // Simple example, see optional options for more configuration.
@@ -165,7 +166,7 @@ window.onload = function() {
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
 				let pathAttr = getPathAttributes(attributes.multicolor);
-				socket.emit('requestNewDrawing', pathAttr);
+				socket.emit('requestNewDrawing', pathAttr, user);
 			}
 			else if(drawingTools.circle) {
 				socket.emit('requestLock');

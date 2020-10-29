@@ -4,24 +4,9 @@ class User {
         this.sessionID = sessionID;
     }
 
-     getName() {
-        return this.name;
-    }
-
-     setName(value) {
-        this.name = value;
-    }
-     getSessionID() {
-        return this.sessionID;
-    }
-   
-     setSessionID(value) {
-        this.sessionID = value;
-    }
-
 }
 
-export let socket = io();
+import {socket} from "./paperSockets.js"
 export let user = new User( "Guest" +  Math.floor( Math.random() * 10000), "default");
 let sessionForm = document.querySelector("#session-form");
 let sessionId;
