@@ -43,6 +43,10 @@ body {
     filter: invert(1);
     margin: auto;
 }
+.video{
+    height: 300px;
+    width: 300px;
+}
 .toolbox .group .item.active,
 .toolbox .group .item:hover {
     background-color: #4b6161;
