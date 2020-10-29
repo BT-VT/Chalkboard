@@ -579,6 +579,86 @@ window.onload = function() {
 	    };
 	});
 
+/*     ===================================================================
+							   DOWNLOAD & UPLOAD BUTTON
+	   =================================================================== */
+	var commandBtn = document.querySelector(".download");
+	if (commandBtn){
+		commandBtn.onclick = function() {
+			console.log("testing download");
+			var canvas = document.getElementById("canvas");
+			var image = canvas
+				.toDataURL("image/png", 1.0)
+				.replace("image/png", "image/octet-stream");
+			var link = document.createElement("a");
+			link.download = "my-image.png";
+			link.href = image;
+			link.click();
+		}
+	}
+
+	//Random Name generator for the images that are uploaded to storage
+	function generateURL(){
+		return Math.random().toString(36).substring(2,10);
+	}
+
+
+	var uploadBtn = document.querySelector(".upload");
+	var selectedFile; 
+	if (uploadBtn){
+		uploadBtn.addEventListener('click', (e) => {
+			console.log("test uploadbtn with events");
+			//selectedFile = e.target.files[0];
+			//let i = 0;
+
+			var canvas = document.getElementById("canvas");
+			var image = canvas
+				.toDataURL("image/png", 1.0);
+				//.replace("image/png", "image/octet-stream");
+			console.log(typeof(image));
+			console.log(image);
+			let imageTitle = generateURL()
+			
+
+	
+			// create storage ref to empty storage object
+			// https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+			let storageRef = firebase.storage().ref('chalkboards/' + imageTitle);
+
+			// upload file to storage ref location
+			image = image.split(',');
+			
+			let task = storageRef.putString(image[1],"base64", {contentType:'image/png'});
+			// update progress bar and save download URL
+			// https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
+			task.on('state_changed',
+				// called when upload fails
+				function error(err) {
+					console.log(err);
+				},
+				// called when upload finishes, get URL and display corresponding image
+				async function complete() {
+					try {
+						let url = await storageRef.getDownloadURL();
+						let displayResponse = await displayImg(url);
+						console.log(displayResponse);
+					} catch (err) {
+						console.log(err);
+					}
+				}
+			);
+	});
+}
+
+
+
+/*   =======================================================================*/
+
+
+
+
+
+
 	var undoBtn = document.querySelector(".undo");
 	if(undoBtn) {
 		undoBtn.onclick = function() {
