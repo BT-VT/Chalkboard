@@ -69,7 +69,6 @@ window.onload = function() {
 	let curPath = new paper.Path();
 
 	let attributes = {
-		selectedColor: '#000000',
 		multicolor: false,
 		strokeWidth: 5,
 		strokeCap: 'round',
