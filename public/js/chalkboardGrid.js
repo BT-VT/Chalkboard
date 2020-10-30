@@ -24,6 +24,7 @@ function chalkboardGrid() {
                 document.getElementById("grid").appendChild(row);
                 var col = document.createElement("div");
                 col.classList.add("col50");
+                col.classList.add("card-panel");
                 col.appendChild(img);
                 row.appendChild(col);
                 numChalkboards += 1;

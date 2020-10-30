@@ -6,8 +6,7 @@
     /*border: 1px solid gray;/**/
     padding: 8px;
     margin: 4px;
-    background-color: #fff;
-    box-shadow: 2px 3px darkgray;
+    background-color: rgb(243, 243, 243);
 }
 
 .row {
@@ -22,6 +21,7 @@
 .row img {
     aspect-ratio: 1/1;
     height: 80%;
+    background-color: #fff;
     border: 2px solid gray;/**/
 }
 
