@@ -1,7 +1,9 @@
 window.globalVar = ""
 window.selectedColor = ""
 
+import User from "./user.js"
 
+export let user = new User( "Guest" +  Math.floor( Math.random() * 10000), "default");
 export let socket = io();
 
 // Simple example, see optional options for more configuration.
@@ -106,7 +108,7 @@ window.onload = function() {
 	socket.on('movePath', movePath);
 
 	// notify server to send existing session paths
-	socket.emit('hello');
+	socket.emit('hello', user);
 
 
 	// called by every non-drawing client when one client begins drawing.
@@ -163,22 +165,23 @@ window.onload = function() {
 
 	// notify users to create a new path. Repetitive for debugging purposes
 	tool.onMouseDown = function(event) {
+		LOCKED = false;
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
 				let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestNewDrawing', pathAttr, user);
 			}
 			else if(drawingTools.circle) {
-				socket.emit('requestLock');
+				socket.emit('requestLock', user);
 			}
 			else if(drawingTools.rect || drawingTools.ellipse) {
-				socket.emit('requestLock');
+				socket.emit('requestLock', user);
 			}
 			else if(drawingTools.triangle) {
-				socket.emit('requestLock');
+				socket.emit('requestLock', user);
 			}
 			else if(drawingTools.eraser) {
-				socket.emit('requestLock');
+				socket.emit('requestLock', user);
 			}
 			return;
 	    }
@@ -200,7 +203,7 @@ window.onload = function() {
 		if(LOCKED != socket.id) { return; }
 		if(drawingTools.marker) {
 			let loc = { x: event.point.x, y: event.point.y }
-		    socket.emit('requestSegment', loc);
+		    socket.emit('requestSegment', loc, user);
 		}
 		else if(drawingTools.circle) {
 			let circleAttr = {
@@ -210,7 +213,7 @@ window.onload = function() {
 		        strokeColor: window.selectedColor,
 				selectedColor: 'red'
 			}
-			socket.emit('requestTrackingCircle', circleAttr);
+			socket.emit('requestTrackingCircle', circleAttr, user);
 		}
 		else if(drawingTools.rect || drawingTools.ellipse) {
 			let rectAttr = {
@@ -220,7 +223,7 @@ window.onload = function() {
 				strokeColor: window.selectedColor,
 				isEllipse: drawingTools.ellipse
 			}
-			socket.emit('requestTrackingRect', rectAttr);
+			socket.emit('requestTrackingRect', rectAttr, user);
 		}
 		else if(drawingTools.triangle) {
 			let triangleAttr = {
@@ -233,7 +236,7 @@ window.onload = function() {
 				strokeColor: window.selectedColor,
 				closed: true
 			}
-			socket.emit('requestTrackingTriangle', triangleAttr);
+			socket.emit('requestTrackingTriangle', triangleAttr, user);
 		}
 		// paths = [ {pathName: "pathN", path: Path} ]
 		else if(drawingTools.eraser && event.item) {
@@ -304,30 +307,31 @@ window.onload = function() {
 	tool.onMouseUp = function(event) {
 		if(LOCKED != socket.id) { return; }
 		if(drawingTools.marker) {
-		    socket.emit('requestFinishDrawing');
+		    socket.emit('requestFinishDrawing', user);
 			return;
 		}
 		else if(drawingTools.circle) {
-			socket.emit('requestFinishCircle');
+			socket.emit('requestFinishCircle', user);
 			return;
 		}
 		else if(drawingTools.rect || drawingTools.ellipse) {
-			socket.emit('requestFinishRect', drawingTools.ellipse);
+			socket.emit('requestFinishRect', drawingTools.ellipse, user);
 			return;
 		}
 		else if(drawingTools.triangle) {
-			socket.emit('requestFinishTriangle');
+			socket.emit('requestFinishTriangle', user);
 			return;
 		}
 		else if(drawingTools.eraser) {
-			socket.emit('requestFinishErasing');
+			socket.emit('requestFinishErasing', user);
 			return;
 		}
 	}
 
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
-	function finishDrawing(pathID) {
+	function finishDrawing(pathID, user) {
+		initialPathsReceived = true;
 		if(initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
@@ -344,7 +348,7 @@ window.onload = function() {
 		console.log(paths);
 		console.log(pathsItem.path);
 		if(LOCKED == socket.id) {
-			socket.emit('confirmDrawingDone', pathsItem);
+			socket.emit('confirmDrawingDone', pathsItem, user);
 		}
 	}
 
@@ -362,7 +366,7 @@ window.onload = function() {
 		curPath = new paper.Path.Circle();
 
 		if(LOCKED == socket.id) {
-			socket.emit('confirmCircleDone', pathsItem);
+			socket.emit('confirmCircleDone', pathsItem, user);
 		}
 	}
 
@@ -381,7 +385,7 @@ window.onload = function() {
 		curPath = new paper.Path.Rectangle();
 
 		if(LOCKED == socket.id) {
-			socket.emit('confirmRectDone', pathsItem);
+			socket.emit('confirmRectDone', pathsItem, user);
 		}
 	}
 
@@ -398,7 +402,7 @@ window.onload = function() {
 		curPath = new paper.Path();
 
 		if(LOCKED == socket.id) {
-			socket.emit('confirmTriangleDone', pathsItem);
+			socket.emit('confirmTriangleDone', pathsItem, user);
 		}
 	}
 
@@ -494,7 +498,7 @@ window.onload = function() {
 			let x = event.point.x;
 			let y = event.point.y;
 			// send notification to update location of path at specified index
-			socket.emit('requestPathMove', [x, y], pathInd);
+			socket.emit('requestPathMove', [x, y], pathInd, user);
 		}
 		// called when path is 'released' from drag
 		path.onMouseUp = function(event) {
@@ -504,7 +508,7 @@ window.onload = function() {
 			// unnecessary updates of path locations while path is still moving.
 			let x = paths[pathInd].path.position.x;
 			let y = paths[pathInd].path.position.y;
-			socket.emit('confirmPathMoved', [x, y], pathInd);
+			socket.emit('confirmPathMoved', [x, y], pathInd, user);
 		}
 	}
 
@@ -663,7 +667,7 @@ window.onload = function() {
 		undoBtn.onclick = function() {
 			if(!LOCKED) {
 				console.log('undo clicked!');
-				socket.emit('undo');
+				socket.emit('undo', user);
 			}
 		}
 	}

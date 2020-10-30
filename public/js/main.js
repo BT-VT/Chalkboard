@@ -1,13 +1,6 @@
-class User {
-    constructor(name, sessionID) {
-        this.name = name;
-        this.sessionID = sessionID;
-    }
 
-}
+import {socket, user} from "./paperSockets.js"
 
-import {socket} from "./paperSockets.js"
-export let user = new User( "Guest" +  Math.floor( Math.random() * 10000), "default");
 let sessionForm = document.querySelector("#session-form");
 let sessionId;
 
