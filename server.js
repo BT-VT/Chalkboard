@@ -51,8 +51,11 @@ function checkForNewUsers(socket) {
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
-    socket.emit("updateRoom", webRoom);
+    setTimeout(() => {
+         socket.emit("updateRoom", webRoom);
     webRoom = "default";
+    }, 500);
+   
   
     // ================ CANVAS HANDLING =========================
 
