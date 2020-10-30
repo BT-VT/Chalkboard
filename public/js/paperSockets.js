@@ -242,7 +242,7 @@ window.onload = function() {
 		else if(drawingTools.eraser && event.item) {
 			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
 			if(pathsItemArr.length == 1) {
-				socket.emit('requestErase', pathsItemArr[0].pathName);
+				socket.emit('requestErase', pathsItemArr[0].pathName, name);
 			}
 		}
 		return;
@@ -485,7 +485,7 @@ window.onload = function() {
 					pathInd = i;
 					// set drawingTool to selector
 					setDrawingTool('selector');
-					socket.emit('requestLock');
+					socket.emit('requestLock', user);
 					break;
 				}
 			}
