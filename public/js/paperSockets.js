@@ -134,6 +134,7 @@ window.onload = function() {
 	// to begin to receive canvas updates when other users are drawing.
 	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	function addPaths(newPaths) {
+		if (!initialPathsReceived) {
 		LOCKED = false;
 		initialPathsReceived = true;
 		console.log('adding new paths ...... ');
@@ -162,10 +163,10 @@ window.onload = function() {
 			paths.push(pathsItem);
 		}
 	}
+}
 
 	// notify users to create a new path. Repetitive for debugging purposes
 	tool.onMouseDown = function(event) {
-		LOCKED = false;
 		if(!LOCKED || LOCKED == socket.id) {
 			if(drawingTools.marker) {
 				let pathAttr = getPathAttributes(attributes.multicolor);
@@ -331,7 +332,6 @@ window.onload = function() {
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishDrawing(pathID, user) {
-		initialPathsReceived = true;
 		if(initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
