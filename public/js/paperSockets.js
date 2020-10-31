@@ -63,6 +63,17 @@ export function paperSockets() {
 		return LOCKED;
 	}
 
+	//Random Name generator for the images that are uploaded to storage
+	function generateURL(){
+        let result = "";
+        for (var i = 0; i<8;i++)
+        {
+            result+= Math.floor(Math.random() * 100).toString(36);
+
+        }
+        return result;
+    }
+
 	// called when socket receives an 'addPaths' message from server. Adds all
 	// previously existing session paths to new client's canvas and allows client
 	// to begin to receive canvas updates when other users are drawing.
@@ -384,17 +395,18 @@ export function paperSockets() {
 			//.replace("image/png", "image/octet-stream");
 			console.log(typeof (image));
 			//console.log(image);
+			let imageId = generateURL();
 
 
 
 			// create storage ref to empty storage object
 			// https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
-			let storageRef = firebase.storage().ref('chalkboards/');
+			let storageRef = storage.ref().child('chalkboards/');
 
 			// upload file to storage ref location
 			image = image.split(',');
-
 			let task = storageRef.putString(image[1], "base64", { contentType: 'image/png' });
+/*
 			// update progress bar and save download URL
 			// https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
 			task.on('state_changed',
@@ -414,17 +426,14 @@ export function paperSockets() {
 						alert(err);
 					}
 				}
-			);
+			);*/
 			// Add a new chalkboard with a generated id.
 			let today = new Date();
-			let url = await storageRef.getDownloadURL();
-			console.log("ready to save chalkboard to database");
+			let url = await task.snapshot.ref.getDownloadURL();
+			console.log('image url is ' + url);
 			db.collection("chalkboards").add({
 				owner: auth.currentUser.email,
-				guests: null,
 				img: url,
-				edits: null,
-				title: null,
 				date_saved: today
 			})
 				.then(function (docRef) {

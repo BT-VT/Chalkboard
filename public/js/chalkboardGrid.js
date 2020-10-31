@@ -51,16 +51,17 @@ function chalkboardGrid() {
     function displayChalkboard(data) {
         return new Promise((resolve, reject) => {
             let img = document.createElement("img");
-            img.src = data.img;
+            //img.src = data.img;
+            img.setAttribute("src", data.img);
             //document.getElementById("grid").appendChild(img);
-            resolve('image displayed');
+            //resolve('image displayed');
             //create a new row if there are an even number of chalkboards
             if (numChalkboards % 2 == 0) {
                 console.log("# of chalkboards: " + numChalkboards);
                 var row = document.createElement("div");
                 row.classList.add("row");
                 //row.setAttribute("id", "first");
-                img.src = data.img;
+                //img.src = data.img;
                 document.getElementById("grid").appendChild(row);
                 var col = document.createElement("div");
                 col.classList.add("col50");
@@ -83,7 +84,7 @@ function chalkboardGrid() {
                 col.classList.add("col50");
                 row.appendChild(col);
                 //row.getElementById("first");
-                img.src = data.img;
+                //img.src = data.img;
                 col.appendChild(img);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
@@ -113,46 +114,46 @@ function chalkboardGrid() {
     console.log("HELLOOO");
     getChalkboards();
 
-    let fileUrls = {};
-    // listen for file selection
-    fileButton.addEventListener('change', (e) => {
-        let i = 0;
+    // let fileUrls = {};
+    // // listen for file selection
+    // fileButton.addEventListener('change', (e) => {
+    //     let i = 0;
 
-        // for each file selected
-        for (i; i < e.target.files.length; i++) {
-            // get file
-            let file = e.target.files[i];
-            // create storage ref to empty storage object
-            // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
-            let storageRef = firebase.storage().ref('chalkboards/' + file.name);
+    //     // for each file selected
+    //     for (i; i < e.target.files.length; i++) {
+    //         // get file
+    //         let file = e.target.files[i];
+    //         // create storage ref to empty storage object
+    //         // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+    //         let storageRef = firebase.storage().ref('chalkboards/' + file.name);
 
-            // upload file to storage ref location
-            let task = storageRef.put(file);
-            // update progress bar and save download URL
-            // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
-            task.on('state_changed',
-                // called when upload state of upload changes
-                function progress(snapshot) {
-                    // update status bar
-                    let percentage = snapshot.bytesTransferred /
-                        snapshot.totalBytes * 100;
-                    uploader.value = percentage;
-                },
-                // called when upload fails
-                function error(err) {
-                    console.log(err);
-                },
-                // called when upload finishes, get URL and display corresponding image
-                async function complete() {
-                    try {
-                        let url = await storageRef.getDownloadURL();
-                        let displayResponse = await displayImg(url);
-                        console.log(displayResponse);
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-            );
-        };
-    });
+    //         // upload file to storage ref location
+    //         let task = storageRef.put(file);
+    //         // update progress bar and save download URL
+    //         // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
+    //         task.on('state_changed',
+    //             // called when upload state of upload changes
+    //             function progress(snapshot) {
+    //                 // update status bar
+    //                 let percentage = snapshot.bytesTransferred /
+    //                     snapshot.totalBytes * 100;
+    //                 uploader.value = percentage;
+    //             },
+    //             // called when upload fails
+    //             function error(err) {
+    //                 console.log(err);
+    //             },
+    //             // called when upload finishes, get URL and display corresponding image
+    //             async function complete() {
+    //                 try {
+    //                     let url = await storageRef.getDownloadURL();
+    //                     let displayResponse = await displayImg(url);
+    //                     console.log(displayResponse);
+    //                 } catch (err) {
+    //                     console.log(err);
+    //                 }
+    //             }
+    //         );
+    //    };
+    //});
 }
