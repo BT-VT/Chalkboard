@@ -243,7 +243,7 @@ window.onload = function() {
 		else if(drawingTools.eraser && event.item) {
 			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
 			if(pathsItemArr.length == 1) {
-				socket.emit('requestErase', pathsItemArr[0].pathName, name);
+				socket.emit('requestErase', pathsItemArr[0].pathName, user);
 			}
 		}
 		return;
@@ -287,9 +287,10 @@ window.onload = function() {
 	}
 
 	function erasePath(pathName) {
+		console.log("inital: " + initialPathsReceived);
 		if(!initialPathsReceived) { return; }
 		let pathRemoved = null;
-		for(let i = 0; i < paths.length; i++) {
+				for(let i = 0; i < paths.length; i++) {
 			// if path is found try to remove it from canvas
 			if(paths[i].pathName == pathName && paths[i].path.remove()) {
 					console.log('erased ' + pathName);
@@ -297,7 +298,7 @@ window.onload = function() {
 					paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
 					if(LOCKED == socket.id) {
 						// have lock owner confirm removal with server
-						socket.emit('confirmErasePath', pathName);
+						socket.emit('confirmErasePath', pathName, user);
 					}
 					break;
 			}
