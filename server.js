@@ -103,7 +103,7 @@ io.on('connection', (socket) => {
     socket.on('confirmErasePath', async (pathName, user) => {
         console.log('confirm erase ' + pathName);
         // remove path from paths item array
-        sessions.get(user.sessionID) = sessions.get(user.sessionID).filter(pathsItem => pathsItem[0] != pathName);
+        sessions.set(user.sessionID, sessions.get(user.sessionID).filter(pathsItem => pathsItem[0] != pathName));
     });
 
     // called when mouseup event is detected by client. creates pathID and
