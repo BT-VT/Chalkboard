@@ -10,6 +10,12 @@ body {
     height: 10vh;
 }
 
+#navProgress {
+    color: gray;
+    font-size: large;
+    padding-left: 25%;
+}
+
 #header {
     position: fixed;
     width: 100%;

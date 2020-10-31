@@ -64,15 +64,14 @@ export function paperSockets() {
 	}
 
 	//Random Name generator for the images that are uploaded to storage
-	function generateURL(){
-        let result = "";
-        for (var i = 0; i<8;i++)
-        {
-            result+= Math.floor(Math.random() * 100).toString(36);
+	function generateURL() {
+		let result = "";
+		for (var i = 0; i < 8; i++) {
+			result += Math.floor(Math.random() * 100).toString(36);
 
-        }
-        return result;
-    }
+		}
+		return result;
+	}
 
 	// called when socket receives an 'addPaths' message from server. Adds all
 	// previously existing session paths to new client's canvas and allows client
@@ -401,48 +400,73 @@ export function paperSockets() {
 
 			// create storage ref to empty storage object
 			// https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
-			let storageRef = storage.ref().child('chalkboards/');
+			let storageRef = storage.ref();
 
 			// upload file to storage ref location
 			image = image.split(',');
-			let task = storageRef.putString(image[1], "base64", { contentType: 'image/png' });
-/*
-			// update progress bar and save download URL
-			// https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
-			task.on('state_changed',
-				// called when upload fails
-				function error(err) {
-					console.log(err);
-				},
-				// called when upload finishes, get URL and display corresponding image
-				async function complete() {
-					try {
-						let url = await storageRef.getDownloadURL();
-						//let displayResponse = await displayImg(url);
-						//console.log(displayResponse);
+			let uploadTask = storageRef.child('chalkboards/' + imageId).putString(image[1], "base64", { contentType: 'image/png' });
+			
+			uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+			function(snapshot) {
+			  // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+			  var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+			  var message = document.getElementById('navProgress');
+			  console.log('Upload is ' + progress + '% done');
+			  message.innerHTML = 'Uploading: ' + progress + '% ';
+			  switch (snapshot.state) {
+				case firebase.storage.TaskState.PAUSED: // or 'paused'
+				  console.log('Upload is paused');
+				  message.innerHTML = 'Upload is paused';
+				  break;
+				case firebase.storage.TaskState.RUNNING: // or 'running'
+				  console.log('Upload is running');
+				  break;
+			  }
+			}, function(error) {
+		  
+			// A full list of error codes is available at
+			// https://firebase.google.com/docs/storage/web/handle-errors
+			switch (error.code) {
+			  case 'storage/unauthorized':
+				// User doesn't have permission to access the object
+				alert('Permission denied.' + error)
+				break;
+		  
+			  case 'storage/canceled':
+				// User canceled the upload
+				alert('Cancelled upload' + error);
+				break;
 
-					} catch (err) {
-						console.log(err);
-						alert(err);
-					}
-				}
-			);*/
-			// Add a new chalkboard with a generated id.
+			  case 'storage/unknown':
+				// Unknown error occurred, inspect error.serverResponse
+				alert('Unknown error: ' + error)
+				break;
+			}
+		  }, 
+		  function() {
 			let today = new Date();
-			let url = await task.snapshot.ref.getDownloadURL();
-			console.log('image url is ' + url);
-			db.collection("chalkboards").add({
-				owner: auth.currentUser.email,
-				img: url,
-				date_saved: today
-			})
-				.then(function (docRef) {
-					console.log("SUCCESS: Document written with ID: ", docRef.id);
-				})
-				.catch(function (error) {
-					console.error("Error adding document: ", error);
-					alert("Error adding document: ", error);
-				});
+			let message = document.getElementById("navProgress");
+			message.innerHTML = "Upload complete.";
+			uploadTask.snapshot.ref.getDownloadURL()
+				.then(
+					// Add a new chalkboard with a generated id.
+					function (url) {
+						db.collection("chalkboards").add({
+							owner: auth.currentUser.email,
+							img: url,
+							date_saved: today
+						})
+							.then(function (docRef) {
+								console.log("SUCCESS: Document written with ID: ", docRef.id);
+							})
+							.catch(function (error) {
+								console.error("Error adding document: ", error);
+								alert("Error adding document: ", error);
+							});
+					}
+				);
+				message.innerHTML = "";
+		  });			
 		});
 	}
 

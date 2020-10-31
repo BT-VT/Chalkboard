@@ -34,7 +34,6 @@ function chalkboardGrid() {
             else {
                 console.log("# of chalkboards: " + numChalkboards);
                 var arr = document.getElementById("grid").getElementsByClassName("row");
-                console.log(arr);
                 var row = arr[arr.length - 1];
                 var col = document.createElement("div");
                 col.classList.add("col50");
@@ -68,7 +67,7 @@ function chalkboardGrid() {
                 col.appendChild(img);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
-                date.innerHTML = dateSaved;
+                date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
                 col.appendChild(date);
                 row.appendChild(col);
                 numChalkboards += 1;
@@ -78,7 +77,6 @@ function chalkboardGrid() {
             else {
                 console.log("# of chalkboards: " + numChalkboards);
                 var arr = document.getElementById("grid").getElementsByClassName("row");
-                console.log(arr);
                 var row = arr[arr.length - 1];
                 var col = document.createElement("div");
                 col.classList.add("col50");
@@ -88,7 +86,7 @@ function chalkboardGrid() {
                 col.appendChild(img);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
-                date.innerHTML = dateSaved;
+                date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
                 col.appendChild(date);
                 numChalkboards += 1;
                 resolve('image displayed');
@@ -97,7 +95,7 @@ function chalkboardGrid() {
     }
 
     async function getChalkboards() {
-        db.collection("chalkboards").where("owner", "==", auth.currentUser.email)
+        db.collection("chalkboards").orderBy("date_saved", "desc").where("owner", "==", auth.currentUser.email)
             .get()
             .then(function (querySnapshot) {
                 querySnapshot.forEach(function (doc) {
@@ -111,7 +109,6 @@ function chalkboardGrid() {
             });
 
     };
-    console.log("HELLOOO");
     getChalkboards();
 
     // let fileUrls = {};
