@@ -296,11 +296,11 @@
 
         <!-- Chat functions -->
 
-        <div id="message-container">
+        <div id="message-container" style="z-index: 15;">
             <div id="whoIsTyping"></div>
         </div>
 
-        <form id="send-container">
+        <form id="send-container"  style="z-index: 15;">
             <input type="text" id="message-input" placeholder="Type a message">
             <button type="submit" id="send-button" name="action" class="btn waves-effect waves-light">Send
                 <i class="material-icons right">send</i>
@@ -308,7 +308,7 @@
         </form>
 
 
-        <button type="button" id="hide-display" class="btn-floating pink waves-effect">
+        <button type="button" id="hide-display" class="btn-floating pink waves-effect"  style="z-index: 15;">
             <i class="material-icons">chat</i></button>
 
         <script src="js/chat.js" type="module"></script>
