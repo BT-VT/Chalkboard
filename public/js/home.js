@@ -17,14 +17,14 @@ function home () {
                         <div class="color-picker"></div>
                 </div>
                 <div class="group tools">
-                    <div class="item" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
-                    <div class="item active" id="rect" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png"></div>
-                    <div class="item" id="ellipse"  title="Ellipse Tool"><img src="images/ellipse-icon.png"></div>
+                    <div class="item" id = "line" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
+                    <div class="item" id="rect" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png"></div>
+                    <div class="item" id="ellipse" data-tool="ellipse"  title="Ellipse Tool"><img src="images/ellipse-icon.png"></div>
                     <div class="item" id="circle" data-tool="circle" title="Circle Tool"><img src="images/circle-icon.png"></div>
                     <div class="item" id="triangle" data-tool="triangle" title="Triangle Tool"><img src="images/tri-icon.png"></div>
                 </div>
                 <div class="group tools">
-                    <div class="item" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
+                    <div class="item active" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
                     <div class="item" id="eraser" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
                     </div>
                 </div>

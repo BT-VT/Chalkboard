@@ -6,6 +6,8 @@ import User from "./user.js"
 export let user = new User("Guest" + Math.floor(Math.random() * 10000), "default");
 export let socket = io();
 export function paperSockets() {
+
+	let toolType = null;
 	//window.onload = function() {
 
 	function requestPaths() {
@@ -711,6 +713,8 @@ export function paperSockets() {
 	if (undoBtn) {
 		undoBtn.onclick = function () {
 			if (!LOCKED) {
+				//document.querySelector("[data-tool].active").classList.toggle("active");
+				//undoBtn.classList.toggle("active");
 				console.log('undo clicked!');
 				socket.emit('undo', user);
 			}
@@ -722,6 +726,8 @@ export function paperSockets() {
 	if (markerBtn) {
 		markerBtn.onclick = function () {
 			if (setDrawingTool('marker')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				markerBtn.classList.toggle("active");
 				console.log('marker selected');
 			}
 			else { console.log('failed to select marker'); }
@@ -733,6 +739,8 @@ export function paperSockets() {
 	if (circleBtn) {
 		circleBtn.onclick = function () {
 			if (setDrawingTool('circle')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				circleBtn.classList.toggle("active");
 				console.log('circle selected!');
 			}
 			else { console.log('failed to select circle'); }
@@ -744,6 +752,8 @@ export function paperSockets() {
 	if (ellipseBtn) {
 		ellipseBtn.onclick = function () {
 			if (setDrawingTool('ellipse')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				ellipseBtn.classList.toggle("active");
 				console.log('ellipse selected!');
 			}
 			else { console.log('failed to select ellipse'); }
@@ -755,6 +765,10 @@ export function paperSockets() {
 	if (rectBtn) {
 		rectBtn.onclick = function () {
 			if (setDrawingTool('rect')) {
+				
+				
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				rectBtn.classList.toggle("active");
 				console.log('rectangle selected!');
 			}
 			else { console.log('failed to select rectange'); }
@@ -766,6 +780,8 @@ export function paperSockets() {
 	if (triangleBtn) {
 		triangleBtn.onclick = function () {
 			if (setDrawingTool('triangle')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				triangleBtn.classList.toggle("active");
 				console.log('triangle selected!');
 			}
 			else { console.log('failed to select triangle'); }
@@ -777,6 +793,8 @@ export function paperSockets() {
 	if (eraserBtn) {
 		eraserBtn.onclick = function () {
 			if (setDrawingTool("eraser")) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				eraserBtn.classList.toggle("active");
 				console.log('eraser selected');
 			}
 			else { console.log('failed to select eraser'); }
