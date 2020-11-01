@@ -39,7 +39,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var items = document.querySelectorAll('.collapsible');
     M.Collapsible.init(items);
 
-    var dropdowns = document.querySelectorAll('.dropdown');
-    M.Dropdown.init(dropdowns);
+    var dropdown1 = document.querySelector('.dropdown-trigger');
+    var dropdownOptions = {
+        'closeOnClick': false,
+        'hover': false
+    }
+    M.Dropdown.init(dropdown1, dropdownOptions);
+
+    var elems = document.querySelectorAll('.sidenav');
+    var instances = M.Sidenav.init(elems, {});
 
 });

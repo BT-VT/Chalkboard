@@ -30,16 +30,9 @@ body {
 }
 
 .brand-logo {
-    opacity: 0;
-    z-index: -5;
+    position: fixed
 }
 
-@media only screen and (min-width: 900px) {
-    .nav-extended .brand-logo {
-        opacity: 1;
-        z-index: 1;
-    }
-}
 
 #canvas-container {
     display: flex;

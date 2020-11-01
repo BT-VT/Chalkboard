@@ -13,6 +13,8 @@ function home () {
                     <div class="item upload" data-command="upload" title="Upload">
                         <img src="images/upload-icon.png" />
                     </div>
+                    <div class="item"  title="Color Picker">
+                        <div class="color-picker"></div>
                 </div>
                 <div class="group tools">
                     <div class="item" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
@@ -24,13 +26,11 @@ function home () {
                 <div class="group tools">
                     <div class="item" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
                     <div class="item" id="eraser" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
-                    <div class="item"  title="Color Picker">
-                        <div class="color-picker"></div>
                     </div>
                 </div>
             </div>
             <!-- Paint sheet where we draw-->
-            <canvas id="canvas" width="1000" height="500"></canvas>
+            <canvas id="canvas" width="1200" height="500" style=""></canvas>
             <!-- right toolbox with colors-->
             <div class="toolbox right">
                 <div class="group colors">
