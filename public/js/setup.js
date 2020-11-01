@@ -5,9 +5,15 @@ window.addEventListener("hashchange", function () {
         chalkboardGrid();
     } else {
         paperSockets();
+
     }
 });
 
 window.addEventListener("load", function() {
     paperSockets();
 });
+
+$(document).ready(function(){
+    $('.modal').modal();
+    $('.dropdown-trigger').dropdown();
+ });
