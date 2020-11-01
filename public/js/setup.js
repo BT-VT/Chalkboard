@@ -12,8 +12,3 @@ window.addEventListener("hashchange", function () {
 window.addEventListener("load", function() {
     paperSockets();
 });
-
-$(document).ready(function(){
-    $('.modal').modal();
-    $('.dropdown-trigger').dropdown();
- });
