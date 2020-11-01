@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     M.Dropdown.init(dropdown1, dropdownOptions);
 
-    var elems = document.querySelectorAll('.sidenav');
-    var instances = M.Sidenav.init(elems, {});
+    var sidenav = document.querySelectorAll('.sidenav');
+    var instances = M.Sidenav.init(sidenav, {});
 
 });

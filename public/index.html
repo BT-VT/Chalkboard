@@ -163,16 +163,19 @@
                 <a href="#/home" class="brand-logo">
                     <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
                 </a>
-                <a data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons" style='color:gray'>menu</i></a>
+                <a data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons"
+                        style='color:gray'>menu</i></a>
                 <span id="navProgress"></span>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown-button"
-                            data-target="dropdown1" data-activates="dropdown1">Session<i class="material-icons right">arrow_drop_down</i></a></li>
+                            data-target="dropdown1" data-activates="dropdown1">Session<i
+                                class="material-icons right">arrow_drop_down</i></a></li>
                     <li class="logged-in" style="display: none;">
                         <a href="#/my-chalkboards" class="grey-text modal-trigger">My chalkboards</a>
                     </li>
                     <li>
-                        <a href="#" class="grey-text modal-trigger" data-target="modal-session">Join/Create a Session</a>
+                        <a href="#" class="grey-text modal-trigger" data-target="modal-session">Join/Create a
+                            Session</a>
                     </li>
                     <li class="logged-in" style="display: none;">
                         <a href="#modal" class="modal-trigger" id="navEmail" data-target="modal-account"
@@ -192,10 +195,31 @@
 
         <!--Sidenav for mobile-->
         <ul id="mobile-demo" class="sidenav">
-            <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown"
-                    data-target="dropdown1" data-activates="dropdown1">Session<i class="material-icons right">arrow_drop_down</i></a></li>
-            <li class="logged-in" style="display: none;">
-                <a href="#/my-chalkboards" class="grey-text modal-trigger">My chalkboards</a>
+            <li class="no-padding">
+                <ul class="collapsible collapsible-accordion">
+                    <li>
+                        <a class="collapsible-header grey-text">Session<i class="material-icons">arrow_drop_down</i></a>
+                        <div class="collapsible-body">
+                            <ul>
+                                <li class="logged-in" style="display: none;">
+                                    <input id="peerID" placeholder="Peer ID" class="grey-text">
+                                </li>
+                                <li class="logged-in" style="display: none;">
+                                    <a id="call-peer" class="grey-text">Call Peer</a>
+                                </li>
+                                <li class="logged-in" style="display: none;">
+                                    <a id="screenShare" class="grey-text">Screen share</a>
+                                </li>
+                                <li>
+                                    <div class="gray-text" id="show-peer"></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#/my-chalkboards" class="grey-text">My chalkboards</a>
             </li>
             <li>
                 <a href="#" class="grey-text modal-trigger" data-target="modal-session">Join/Create a Session</a>
@@ -328,7 +352,7 @@
             <div id="whoIsTyping"></div>
         </div>
 
-        <form id="send-container"  style="z-index: 15; margin-left: 3.5%">
+        <form id="send-container" style="z-index: 15; margin-left: 3.5%">
             <input type="text" id="message-input" placeholder="Type a message">
             <button type="submit" id="send-button" name="action" class="btn waves-effect waves-light">Send
                 <i class="material-icons right">send</i>
@@ -336,7 +360,8 @@
         </form>
 
 
-        <button type="button" id="hide-display" class="btn-floating pink waves-effect"  style="z-index: 15; margin-left: 3.5%;">
+        <button type="button" id="hide-display" class="btn-floating pink waves-effect"
+            style="z-index: 15; margin-left: 3.5%;">
             <i class="material-icons">chat</i></button>
 
         <script src="js/chat.js" type="module"></script>
