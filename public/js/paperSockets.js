@@ -127,6 +127,9 @@ export function paperSockets() {
 	function lockCanvas(owner) {
 		LOCKED = owner;
 		console.log('canvas LOCKED by socket ' + owner);
+		let msg = document.getElementById("navProgress");
+		msg.setAttribute('style', 'font-size: 16px');
+		msg.innerHTML = auth.currentUser.email + " is drawing...";
 		return LOCKED;
 	}
 
@@ -137,6 +140,8 @@ export function paperSockets() {
 			LOCKED = false;
 			console.log('canvas is UNLOCKED');
 		}
+		let msg = document.getElementById('navProgress');
+		msg.innerHTML = "";
 		return LOCKED;
 	}
 
