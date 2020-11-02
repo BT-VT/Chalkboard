@@ -129,7 +129,7 @@ export function paperSockets() {
 		console.log('canvas LOCKED by socket ' + owner);
 		let msg = document.getElementById("navProgress");
 		msg.setAttribute('style', 'font-size: 16px');
-		msg.innerHTML = auth.currentUser.email + " is drawing...";
+		msg.innerHTML = "Someone is drawing...";
 		return LOCKED;
 	}
 
@@ -848,6 +848,8 @@ export function paperSockets() {
 	if(lineBtn) {
 		lineBtn.onclick = function() {
 			if(setDrawingTool('line')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				lineBtn.classList.toggle("active");
 				console.log('line selected!');
 			}
 			else { console.log('failed to select line'); }
