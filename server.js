@@ -288,13 +288,13 @@ io.on('connection', (socket) => {
           if (sessions.has(user.sessionID)) {
          //   sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
-            io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+          //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
             //  console.log(sessions.get(user.sessionID))
         } else {
             sessions.set(user.sessionID, []);
             socket.join(user.sessionID);
-            io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+          //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
             //  console.log(sessions.get(user.sessionID))
         }
