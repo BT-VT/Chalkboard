@@ -90,6 +90,7 @@ export function paperSockets() {
 		rect: false,
 		ellipse: false,
 		triangle: false,
+		line: false,
 		selector: false,
 		eraser: false
 	}
@@ -102,11 +103,13 @@ export function paperSockets() {
 	socket.on('drawTrackingCircle', drawTrackingCircle);
 	socket.on('drawTrackingRect', drawTrackingRect);
 	socket.on('drawTrackingTriangle', drawTrackingTriangle);
+	socket.on('drawTrackingLine', drawTrackingLine);
 	socket.on('erasePath', erasePath);
 	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
 	socket.on('finishRect', finishRect);
 	socket.on('finishTriangle', finishTriangle);
+	socket.on('finishLine', finishLine);
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
@@ -160,7 +163,6 @@ export function paperSockets() {
 				console.log('adding path ' + pathsItem.pathName);
 				if (pathName.search('path') > -1) {
 					pathsItem.path = new paper.Path(pathObj);
-					pathsItem.path.simplify();
 				}
 				else if (pathName.search('circle') > -1) {
 					pathsItem.path = new paper.Path.Circle(pathObj);
@@ -173,6 +175,9 @@ export function paperSockets() {
 				}
 				else if (pathName.search('triangle') > -1) {
 					pathsItem.path = new paper.Path(pathObj);
+				}
+				else if (pathName.search('line') > -1) {
+					pathsItem.path = new paper.Path.Line(pathObj);
 				}
 				setPathFunctions(pathsItem, attributes.scale);
 				paths.push(pathsItem);
@@ -194,6 +199,9 @@ export function paperSockets() {
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.triangle) {
+				socket.emit('requestLock', user);
+			}
+			else if (drawingTools.line) {
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.eraser) {
@@ -254,6 +262,15 @@ export function paperSockets() {
 			}
 			socket.emit('requestTrackingTriangle', triangleAttr, user);
 		}
+		else if (drawingTools.line) {
+			let lineAttr = {
+				from: [event.downPoint.x, event.downPoint.y],
+				to: [event.point.x, event.point.y],
+				dashArray: [2, 2],
+				strokeColor: window.selectedColor
+			}
+			socket.emit('requestTrackingLine', lineAttr, user);
+		}
 		// paths = [ {pathName: "pathN", path: Path} ]
 		else if (drawingTools.eraser && event.item) {
 			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
@@ -301,6 +318,15 @@ export function paperSockets() {
 		}
 	}
 
+	function drawTrackingLine(lineAttr) {
+		if (!initialPathsReceived) { return; }
+		curPath.remove();
+		curPath = new paper.Path.Line(lineAttr);
+		curPath.onFrame = function (event) {
+			this.dashOffset += attributes.dashOffset;
+		}
+	}
+
 	function erasePath(pathName) {
 		console.log("inital: " + initialPathsReceived);
 		if (!initialPathsReceived) { return; }
@@ -337,6 +363,10 @@ export function paperSockets() {
 		}
 		else if (drawingTools.triangle) {
 			socket.emit('requestFinishTriangle', user);
+			return;
+		}
+		else if (drawingTools.line) {
+			socket.emit('requestFinishLine', user);
 			return;
 		}
 		else if (drawingTools.eraser) {
@@ -419,6 +449,23 @@ export function paperSockets() {
 
 		if (LOCKED == socket.id) {
 			socket.emit('confirmTriangleDone', pathsItem, user);
+		}
+	}
+
+	function finishLine(pathID) {
+		if (!initialPathsReceived) { return; }
+		curPath.dashArray = null;
+		let pathsItem = {
+			pathName: 'line-' + pathID,
+			path: curPath
+		}
+		setPathFunctions(pathsItem, attributes.scale);
+		paths.push(pathsItem);
+		console.log(paths);
+		curPath = new paper.Path.Line();
+
+		if (LOCKED == socket.id) {
+			socket.emit('confirmLineDone', pathsItem, user);
 		}
 	}
 
@@ -765,8 +812,8 @@ export function paperSockets() {
 	if (rectBtn) {
 		rectBtn.onclick = function () {
 			if (setDrawingTool('rect')) {
-				
-				
+
+
 				document.querySelector("[data-tool].active").classList.toggle("active");
 				rectBtn.classList.toggle("active");
 				console.log('rectangle selected!');
@@ -788,6 +835,17 @@ export function paperSockets() {
 		}
 	}
 	else { console.log('triangle button not found'); }
+
+	let lineBtn = document.querySelector("#line");
+	if(lineBtn) {
+		lineBtn.onclick = function() {
+			if(setDrawingTool('line')) {
+				console.log('line selected!');
+			}
+			else { console.log('failed to select line'); }
+		}
+	}
+	else { console.log('line button not found'); }
 
 	let eraserBtn = document.querySelector("#eraser");
 	if (eraserBtn) {

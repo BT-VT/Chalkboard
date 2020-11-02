@@ -17,7 +17,7 @@ function home () {
                         <div class="color-picker"></div>
                 </div>
                 <div class="group tools">
-                    <div class="item" id = "line" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
+                    <div class="item" id="line" data-tool="line" title="Line Tool"><img src="images/line-icon.png"></div>
                     <div class="item" id="rect" data-tool="rectangle" title="Rectangle Tool"><img src="images/rect-icon.png"></div>
                     <div class="item" id="ellipse" data-tool="ellipse"  title="Ellipse Tool"><img src="images/ellipse-icon.png"></div>
                     <div class="item" id="circle" data-tool="circle" title="Circle Tool"><img src="images/circle-icon.png"></div>
@@ -41,11 +41,10 @@ function home () {
                 </div>
             </div>
         `;
-        
+
         var ele = document.createElement("div");
         ele.setAttribute("id", "canvas-container");
         ele.setAttribute("style", "z-index: 10");
         ele.innerHTML = content;
         return ele;
     }
-    

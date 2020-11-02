@@ -19,11 +19,9 @@ var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
 var newUsers = []; // new socket connections waiting to add existing paths
 let LOCKED = false;
 
-console.log("server running on port: " + portNum);
-
 app.get('/', (req,res) => {
     res.send('Welcome to Chalkboard');
-    
+
 });
 
 app.get("/:room", (req, res) => {
@@ -55,8 +53,8 @@ io.on('connection', (socket) => {
          socket.emit("updateRoom", webRoom);
     webRoom = "default";
     }, 500);
-   
-  
+
+
     // ================ CANVAS HANDLING =========================
 
     // initial message from client to request session path
@@ -96,6 +94,10 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('drawTrackingTriangle', triangleAttr);
     });
 
+    socket.on('requestTrackingLine', (lineAttr, user) => {
+        io.to(user.sessionID).emit('drawTrackingLine', lineAttr);
+    });
+
     socket.on('requestErase', (pathName, user) => {
         console.log('request erase ' + pathName);
         io.to(user.sessionID).emit('erasePath', pathName);
@@ -126,7 +128,12 @@ io.on('connection', (socket) => {
     socket.on('requestFinishTriangle', (user) => {
         let pathID = uuidv4();
         io.to(user.sessionID).emit('finishTriangle', pathID);
-    })
+    });
+
+    socket.on('requestFinishLine', (user) => {
+        let pathID = uuidv4();
+        io.to(user.sessionID).emit('finishLine', pathID);
+    });
 
     socket.on('requestFinishErasing', async (user) => {
         await checkForNewUsers(socket);
@@ -182,6 +189,20 @@ io.on('connection', (socket) => {
 
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmTriangleDone', async (pathData, user) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path[1];
+        pathObj.dashArray = null;
+        sessions.get(user.sessionID).push([pathName, pathObj]);
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.to(user.sessionID).emit('unlockCanvas', socket.id);
+    });
+
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
+    socket.on('confirmLineDone', async (pathData, user) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;
@@ -257,8 +278,8 @@ io.on('connection', (socket) => {
     // ================ ROOM HANDLING ====================
 
  //delays moving to the room initially to give time to update the username first
-    
-  
+
+
 
     socket.on("joinSession", (user, prevSession) =>  {
             if (prevSession != null)
