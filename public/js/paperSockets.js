@@ -848,6 +848,8 @@ export function paperSockets() {
 	if(lineBtn) {
 		lineBtn.onclick = function() {
 			if(setDrawingTool('line')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				lineBtn.classList.toggle("active");
 				console.log('line selected!');
 			}
 			else { console.log('failed to select line'); }
