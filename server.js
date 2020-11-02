@@ -147,7 +147,6 @@ io.on('connection', (socket) => {
 
     // pathData = { pathName: path-pathID, path: ['Path', pathObj] }
     socket.on('confirmDrawingDone', async (pathData, user) => {
-        console.log(pathData.path[1].catdog);
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         sessions.get(user.sessionID).push([pathName, pathObj]);
