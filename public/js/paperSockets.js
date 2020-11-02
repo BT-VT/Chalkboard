@@ -129,7 +129,7 @@ export function paperSockets() {
 		console.log('canvas LOCKED by socket ' + owner);
 		let msg = document.getElementById("navProgress");
 		msg.setAttribute('style', 'font-size: 16px');
-		msg.innerHTML = auth.currentUser.email + " is drawing...";
+		msg.innerHTML = "Someone is drawing...";
 		return LOCKED;
 	}
 
