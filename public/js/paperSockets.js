@@ -13,7 +13,7 @@ export function paperSockets() {
 	function requestPaths() {
 		var path = location.hash;
 			if (path === "#/home") {
-				location.reload();
+				//location.reload();
 		}
 	};
 

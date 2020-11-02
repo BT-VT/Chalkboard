@@ -49,9 +49,9 @@ function checkForNewUsers(socket) {
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
-    setTimeout(() => {
+    setTimeout( () => {
          socket.emit("updateRoom", webRoom);
-    webRoom = "default";
+         webRoom = "default";
     }, 500);
 
 
