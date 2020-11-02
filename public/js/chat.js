@@ -6,7 +6,7 @@ let messageContainer = document.getElementById("message-container");
 
 let hideBTn = document.getElementById("hide-display");
 let typingMsg = document.getElementById("whoIsTyping");
-let showHideNum = 0;
+let showHideNum = 1;
 let isTyping = 0;
 
 

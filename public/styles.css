@@ -113,34 +113,33 @@ body {
     border: 1px solid black;
     overflow-y: auto;
     bottom: 15.5%;
-    left: 2%;
+    right: 2%;
     position:fixed;
+    display: none;
   }
 
   #send-container {
       position: fixed;
       bottom:10%;
-      width: 250px;
-      left: 2%;
+      width: 355px;
+      right: 2%;
+      display: none;
   }
 
   #hide-display {
       position: fixed;
       bottom: 6%;
-      left: 2%;
+      right: 2%;
   }
 
   #whoIsTyping {
       position: fixed;
       color: white;
       bottom: 13.5%;
-      left: 2%;
+      right: 2%;
+      display: none;
   }
 
-  #send-button {
-      position: fixed;
-
-  }
 
   #message-input {
       color: white;
