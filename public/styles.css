@@ -9,11 +9,35 @@ body {
 #navbar {
     height: 10vh;
 }
+
+#navProgress {
+    color: gray;
+    font-size: large;
+    padding-left: 25%;
+}
+
+#header {
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+    /*border: 2px solid #ff4500;/* */
+}
+
+#title {
+    padding: 8px;
+    margin-top: 0px;
+    white-space: nowrap;
+}
+
+.brand-logo {
+    position: fixed
+}
+
+
 #canvas-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-
 }
 .toolbox {
     display: flex;
@@ -42,6 +66,10 @@ body {
     height: 18px;
     filter: invert(1);
     margin: auto;
+}
+.video{
+    height: 300px;
+    width: 300px;
 }
 .toolbox .group .item.active,
 .toolbox .group .item:hover {
@@ -85,35 +113,34 @@ body {
     border: 1px solid black;
     overflow-y: auto;
     bottom: 15.5%;
-    left: 2%;
+    right: 2%;
     position:fixed;
+    display: none;
   }
-  
+
   #send-container {
       position: fixed;
       bottom:10%;
-      width: 250px;
-      left: 2%;
+      width: 355px;
+      right: 2%;
+      display: none;
   }
-  
+
   #hide-display {
       position: fixed;
       bottom: 6%;
-      left: 2%;
+      right: 2%;
   }
-  
+
   #whoIsTyping {
       position: fixed;
       color: white;
       bottom: 13.5%;
-      left: 2%;
-  }
-  
-  #send-button {
-      position: fixed;
-      
+      right: 2%;
+      display: none;
   }
 
+
   #message-input {
-      color:white;
+      color: white;
   }

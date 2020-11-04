@@ -2,8 +2,8 @@ import Paint from "./paint.class.js";
 import Tool from "./tool.class.js";
 //import io from 'socket.io-client';
 //var client = app.listen(portNum);
-var socket;
-io.connect('http://localhost:5000/');
+//io.connect('http://localhost:5000/');
+let socket = io();
 console.log("Csadsa");
 console.log(socket);
 
@@ -38,7 +38,7 @@ let paint = new Paint("canvas");
 
 // select all elements on page with tata attribute as tool and add a event listener to all of them
 document.querySelectorAll("[data-tool]").forEach((e) => {
-  
+
   // add event listener of click to elements and declare a arrow fuction to be invoked upon event
   e.addEventListener("click", (t) => {
     //remove active class from previous tool (changes background color)

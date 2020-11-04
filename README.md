@@ -8,15 +8,17 @@ How to run the project
 
 3. Download and install node.js
 
-4. Upon downloading both, open the Windows Powershell as administrator and type in the command
+4. Run the command "npm install" from the directory with package.json in it
 
-Set-ExecutionPolicy RemoteSigned
+5. run command "node server.js" from the directory with server.js file
 
-Confirm yes to confirm the execution policy
+6. The port number where the web app is beign hosted will be listed in the terminal,
+- default is: port 5000
+- example: go to https://localhost:5000 in a browswer (Firefox or Chrome are recommended)
 
-5. In VS code, open the terminal and type in: npm install -g live-server
-This allows live reload capability
+### Extremely Basic Troubleshooting:
 
-6. Next open the folder for the paint application by selecting File-> Open Folder
+If code is not running properly, press ctrl+shift+i on windows or option+command+i on mac and click "console"
+to view dev tools and error messages.
 
-7. In the terminal, type in live-server to deploy the site in your browser 
+Try turning off add blockers for the webpage
