@@ -94,7 +94,7 @@ export function paperSockets() {
 		ellipse: false,
 		triangle: false,
 		line: false,
-		selector: false,
+		grab: false,
 		eraser: false
 	}
 
@@ -527,7 +527,8 @@ export function paperSockets() {
 		return attr;
 	}
 
-	// sets path state other than attributes
+	// sets path state other than attributes, such as functions for making paths
+	// 'pop' when hovered over (enter/leave), and functions for grabbing/moving
 	function setPathFunctions(pathsItem, scale) {
 		let path = pathsItem.path;
 		let pathName = pathsItem.pathName;
@@ -547,15 +548,13 @@ export function paperSockets() {
 		}
 		// called when path is clicked on
 		path.onMouseDown = function (event) {
-			// if you arent the lock owner, gtfo
-			if (LOCKED && LOCKED != socket.id) { return; }
+			// if canvas is locked and you're not the owner, or grab button isnt selected, gtfo
+			if ((LOCKED && LOCKED != socket.id) || drawingTools.grab != true) { return; }
 			// search paths array for path selected
 			for (let i = 0; i < paths.length; i++) {
 				if (paths[i].path == path) {
 					// save index of path in paths array
 					pathInd = i;
-					// set drawingTool to selector
-					setDrawingTool('selector');
 					socket.emit('requestLock', user);
 					break;
 				}
@@ -563,8 +562,8 @@ export function paperSockets() {
 		}
 		// called when path is clicked on and dragged
 		path.onMouseDrag = function (event) {
-			//console.log(event.downPoint);
-			if (LOCKED != socket.id) { return; }
+			// if you don't own the lock or the drawing tool wasnt selected, dont move item
+			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
 			// get new position of path based on new position of mouse
 			let x = event.point.x;
 			let y = event.point.y;
@@ -573,9 +572,9 @@ export function paperSockets() {
 		}
 		// called when path is 'released' from drag
 		path.onMouseUp = function (event) {
-			if (LOCKED != socket.id) { return; }
+			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
 			// get final coords of path location and send to server so server
-			// can update its records. Sending now prevents server from doing
+			// can update its records. Sending "now" prevents server from doing
 			// unnecessary updates of path locations while path is still moving.
 			let x = paths[pathInd].path.position.x;
 			let y = paths[pathInd].path.position.y;
@@ -856,6 +855,19 @@ export function paperSockets() {
 		}
 	}
 	else { console.log('line button not found'); }
+
+	let grabBtn = document.querySelector("#grab");
+	if(grabBtn) {
+		grabBtn.onclick = function() {
+			if(setDrawingTool('grab')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				grabBtn.classList.toggle("active");
+				console.log('grab selected!');
+			}
+			else { console.log('failed to select grab'); }
+		}
+	}
+	else { console.log('grab button not found'); }
 
 	let eraserBtn = document.querySelector("#eraser");
 	if (eraserBtn) {
