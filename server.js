@@ -1,5 +1,6 @@
 
 const { v4: uuidv4 } = require('uuid');
+const paper = require('paper');
 // set up firestore connection
 const admin = require('firebase-admin');
 const serviceAccount = require('../chalkboardPrivate/ServiceAccountKey.json');
@@ -23,8 +24,7 @@ console.log("server running on port: " + portNum);
 // set up socket.io on express server
 var io = require("socket.io")(server);
 
-var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
-                   // needs to be paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
+var paths = [];    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
 var newUsers = []; // new socket connections waiting to add existing paths
 let LOCKED = false;
 
@@ -41,22 +41,34 @@ app.get("/:room", (req, res) => {
 process.on('SIGINT', handleShutdown);
 process.on('SIGTERM', handleShutdown);
 
+let pathsArrayToPathsMap = (paths) => {
+    let pathsMap = new Map();
+    for(let pathsItem of paths) {
+        pathsMap.set(pathsItem.pathName, pathsItem.path);
+    }
+    return pathsMap;
+}
+
 // called when server shuts down. put tasks for graceful shutdown in here.
 async function handleShutdown() {
     console.log('\nclosing server');
     // save paths array to db
-    const pathsRef = db.collection('ChalkboardStates').doc('chalkboard1');
-    try {
-        await pathsRef.set({
-            sessionID: 'chalkboard1',
-            paths: paths
-        });
-        console.log('saved chalkboard state to database');
+    for(let [sessionName, pathsItem] of sessions) {
+        console.log(sessionName);
+        console.log(pathsItem);
+        const pathsRef = db.collection('ChalkboardStates').doc(sessionName);
+        try {
+            await pathsRef.set({
+                sessionID: sessionName,
+                pathsItem: pathsItem
+            });
+            console.log('saved chalkboard session ' + sessionName + ' state to database.');
+        }
+        catch(err) {
+            console.log('error saving chalkboard session ' + sessionName + ' state to database...');
+            console.log(err);
+        };
     }
-    catch(err) {
-        console.log('error saving chalkboard state to databse...');
-        console.log(err);
-    };
 
     process.exit();
 }
