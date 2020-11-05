@@ -25,6 +25,7 @@ function home () {
                 </div>
                 <div class="group tools">
                     <div class="item active" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
+                    <div class="item" id="grab" data-tool="grab" title="Grab Tool"><img src="images/grab-icon.png"></div>
                     <div class="item" id="eraser" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
                     </div>
                 </div>
