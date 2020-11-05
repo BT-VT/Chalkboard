@@ -2,7 +2,7 @@
 const { v4: uuidv4 } = require('uuid');
 // set up firestore connection
 const admin = require('firebase-admin');
-const serviceAccount = require('./private/ServiceAccountKey.json');
+const serviceAccount = require('../chalkboardPrivate/ServiceAccountKey.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
@@ -38,7 +38,7 @@ async function handleShutdown() {
     try {
         await pathsRef.set({
             sessionID: 'chalkboard1',
-            paths: 'ArrayOfPathsObjs'
+            paths: paths
         });
         console.log('saved chalkboard state to database');
     }
