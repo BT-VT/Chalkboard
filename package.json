@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain#readme",
   "dependencies": {
+    "@simonwep/pickr": "^1.7.4",
     "canvas": "^2.6.1",
     "express": "^4.17.1",
     "firebase-admin": "^9.3.0",
