@@ -159,6 +159,7 @@ export function paperSockets() {
 	// previously existing session paths to new client's canvas and allows client
 	// to begin to receive canvas updates when other users are drawing.
 	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
+	// newPaths = [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ]
 	function addPaths(newPaths) {
 		if (!initialPathsReceived) {
 			LOCKED = false;
@@ -166,8 +167,12 @@ export function paperSockets() {
 			console.log('adding new paths ...... ');
 			// add each path from server to client paths array. pathObj is a Path-like
 			// object that must be converted to a Paper.js Path
-			for (let [pathName, pathObj] of newPaths) {
+			for (let newPathsItem of newPaths) {
+				// extract newPathsItem values
+				let pathName = newPathsItem.pathName;
+				let pathObj = newPathsItem.path;
 				let pathsItem = { pathName: pathName }
+
 				console.log('adding path ' + pathsItem.pathName);
 				if (pathName.search('path') > -1) {
 					pathsItem.path = new paper.Path(pathObj);

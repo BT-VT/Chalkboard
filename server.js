@@ -1,4 +1,3 @@
-// set up express server
 
 const { v4: uuidv4 } = require('uuid');
 // set up firestore connection
@@ -25,6 +24,7 @@ console.log("server running on port: " + portNum);
 var io = require("socket.io")(server);
 
 var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
+                   // needs to be paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
 var newUsers = []; // new socket connections waiting to add existing paths
 let LOCKED = false;
 
@@ -136,8 +136,8 @@ io.on('connection', (socket) => {
     });
     socket.on('confirmErasePath', async (pathName, user) => {
         console.log('confirm erase ' + pathName);
-        // remove path from paths item array
-        sessions.set(user.sessionID, sessions.get(user.sessionID).filter(pathsItem => pathsItem[0] != pathName));
+        // remove path from paths array of path item objects (pathsItem = {pathName: pathName, path: pathObj})
+        sessions.set(user.sessionID, sessions.get(user.sessionID).filter(pathsItem => pathsItem.pathName != pathName));
     });
 
     // called when mouseup event is detected by client. creates pathID and
@@ -181,7 +181,7 @@ io.on('connection', (socket) => {
     socket.on('confirmDrawingDone', async (pathData, user) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -195,7 +195,7 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -209,7 +209,7 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -223,7 +223,7 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -237,7 +237,7 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path[1];
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -252,10 +252,10 @@ io.on('connection', (socket) => {
 
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
-    // paths = [[pathName, obj], ... , [pathName, obj]]
+    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
     socket.on('confirmPathMoved', async (newPosition, index, user) => {
 
-        sessions.get(user.sessionID)[index][1].position = newPosition;
+        sessions.get(user.sessionID)[index].path.position = newPosition;
         // always check for new users before letting a client release the lock
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -265,12 +265,12 @@ io.on('connection', (socket) => {
 
     // received by client when 'undo' button is clicked. If there is a path to
     // undo, pop it from the paths array and send message for clients to remove
-    // the path. paths = [[pathName, obj], ... , [pathName, obj]]
+    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
     socket.on('undo', (user) => {
         if(sessions.get(user.sessionID).length > 0) {
-            let pathArray = sessions.get(user.sessionID).pop();
-            console.log('removing ' + pathArray[0]);
-            io.to(user.sessionID).emit('deleteLastPath', pathArray[0]);
+            let pathsItem = sessions.get(user.sessionID).pop();
+            console.log('removing ' + pathsItem.pathName);
+            io.to(user.sessionID).emit('deleteLastPath', pathsItem.pathName);
         }
     });
 
@@ -321,14 +321,14 @@ io.on('connection', (socket) => {
          //   sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
           //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+            console.log('sending paths to client joining session...')
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
-            //  console.log(sessions.get(user.sessionID))
         } else {
             sessions.set(user.sessionID, []);
             socket.join(user.sessionID);
           //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+          console.log('sending paths to client joining new session...')
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
-            //  console.log(sessions.get(user.sessionID))
         }
     });
 
