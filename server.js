@@ -1,6 +1,6 @@
 
 const { v4: uuidv4 } = require('uuid');
-const paper = require('paper');
+
 // set up firestore connection
 const admin = require('firebase-admin');
 const serviceAccount = require('../chalkboardPrivate/ServiceAccountKey.json');
@@ -38,26 +38,19 @@ app.get("/:room", (req, res) => {
     res.sendFile(__dirname + "/public/index.html");
 });
 
+// listeners for (ctrl + c) server termination.
 process.on('SIGINT', handleShutdown);
 process.on('SIGTERM', handleShutdown);
-
-let pathsArrayToPathsMap = (paths) => {
-    let pathsMap = new Map();
-    for(let pathsItem of paths) {
-        pathsMap.set(pathsItem.pathName, pathsItem.path);
-    }
-    return pathsMap;
-}
 
 // called when server shuts down. put tasks for graceful shutdown in here.
 async function handleShutdown() {
     console.log('\nclosing server');
     // save paths array to db
     for(let [sessionName, pathsItem] of sessions) {
-        console.log(sessionName);
-        console.log(pathsItem);
+        // create new DB document with title == sessionName in ChalkboardStates collection
         const pathsRef = db.collection('ChalkboardStates').doc(sessionName);
         try {
+            // add session name and session paths to DB document
             await pathsRef.set({
                 sessionID: sessionName,
                 pathsItem: pathsItem
@@ -192,7 +185,9 @@ io.on('connection', (socket) => {
     // pathData = { pathName: path-pathID, path: ['Path', pathObj] }
     socket.on('confirmDrawingDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
+        // console.log('path obj:');
+        // console.log(pathObj);
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
@@ -205,8 +200,10 @@ io.on('connection', (socket) => {
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmCircleDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
+        console.log('path obj:');
+        console.log(pathObj);
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
@@ -219,7 +216,7 @@ io.on('connection', (socket) => {
     // pathData = { pathName: rect-pathID, path: ['Path', pathObj] }
     socket.on('confirmRectDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
@@ -233,7 +230,7 @@ io.on('connection', (socket) => {
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmTriangleDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
@@ -247,7 +244,7 @@ io.on('connection', (socket) => {
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmLineDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 

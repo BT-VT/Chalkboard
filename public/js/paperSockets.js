@@ -175,22 +175,22 @@ export function paperSockets() {
 
 				console.log('adding path ' + pathsItem.pathName);
 				if (pathName.search('path') > -1) {
-					pathsItem.path = new paper.Path(pathObj);
+					pathsItem.path = new paper.Path().importJSON(pathObj);
 				}
 				else if (pathName.search('circle') > -1) {
-					pathsItem.path = new paper.Path.Circle(pathObj);
+					pathsItem.path = new paper.Path.Circle().importJSON(pathObj);
 				}
 				else if (pathName.search('rect') > -1) {
-					pathsItem.path = new paper.Path.Rectangle(pathObj);
+					pathsItem.path = new paper.Path.Rectangle().importJSON(pathObj);
 				}
 				else if (pathName.search('ellipse') > -1) {
-					pathsItem.path = new paper.Path.Ellipse(pathObj);
+					pathsItem.path = new paper.Path.Ellipse().importJSON(pathObj);
 				}
 				else if (pathName.search('triangle') > -1) {
-					pathsItem.path = new paper.Path(pathObj);
+					pathsItem.path = new paper.Path().importJSON(pathObj);
 				}
 				else if (pathName.search('line') > -1) {
-					pathsItem.path = new paper.Path.Line(pathObj);
+					pathsItem.path = new paper.Path.Line().importJSON(pathObj);
 				}
 				setPathFunctions(pathsItem, attributes.scale);
 				paths.push(pathsItem);
@@ -388,6 +388,17 @@ export function paperSockets() {
 		}
 	}
 
+	// takes a pathsItem, which is stored in a Paths array of the client, and
+	// returns a copy of it where its path variable is serialized as a JSON string.
+	// The serialized version will be sent to the server, and is now in a format
+	// that can be stored in the FireStore DB.
+	let serializedPathsItem = (pathsItem) => {
+		return {
+			pathName: pathsItem.pathName,
+			path: pathsItem.path.exportJSON()
+		}
+	}
+
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishDrawing(pathID, user) {
@@ -401,13 +412,17 @@ export function paperSockets() {
 			pathName: 'path-' + pathID,
 			path: curPath
 		}
+
+		let pathName = 'path-' + pathID;
+
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		curPath = new paper.Path();
 		console.log(paths);
-		console.log(pathsItem.path);
+
 		if (LOCKED == socket.id) {
-			socket.emit('confirmDrawingDone', pathsItem, user);
+			// serialize path before sending to server
+			socket.emit('confirmDrawingDone', serializedPathsItem(pathsItem), user);
 		}
 	}
 
@@ -425,7 +440,7 @@ export function paperSockets() {
 		curPath = new paper.Path.Circle();
 
 		if (LOCKED == socket.id) {
-			socket.emit('confirmCircleDone', pathsItem, user);
+			socket.emit('confirmCircleDone', serializedPathsItem(pathsItem), user);
 		}
 	}
 
@@ -444,7 +459,7 @@ export function paperSockets() {
 		curPath = new paper.Path.Rectangle();
 
 		if (LOCKED == socket.id) {
-			socket.emit('confirmRectDone', pathsItem, user);
+			socket.emit('confirmRectDone', serializedPathsItem(pathsItem), user);
 		}
 	}
 
@@ -461,7 +476,7 @@ export function paperSockets() {
 		curPath = new paper.Path();
 
 		if (LOCKED == socket.id) {
-			socket.emit('confirmTriangleDone', pathsItem, user);
+			socket.emit('confirmTriangleDone', serializedPathsItem(pathsItem), user);
 		}
 	}
 
@@ -478,7 +493,7 @@ export function paperSockets() {
 		curPath = new paper.Path.Line();
 
 		if (LOCKED == socket.id) {
-			socket.emit('confirmLineDone', pathsItem, user);
+			socket.emit('confirmLineDone', serializedPathsItem(pathsItem), user);
 		}
 	}
 
