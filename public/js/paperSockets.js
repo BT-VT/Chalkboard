@@ -399,9 +399,21 @@ export function paperSockets() {
 		}
 	}
 
+	// takes a client-side paths array with pathsItems containing paper.js Paths
+	// objects, and returns an equivalent array where the Paths objects are
+	// serialized in JSON string format, which allows the paths array to be
+	// saved to the FireStore DB.
+	let serializedPaths = (paths) => {
+		return paths.map( pathsItem => {
+			return serializedPathsItem(pathsItem);
+		});
+	}
+
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishDrawing(pathID, user) {
+		console.log('serialized Paths:');
+		console.log(serializedPaths(paths));
 		if (initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
