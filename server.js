@@ -186,8 +186,7 @@ io.on('connection', (socket) => {
     socket.on('confirmDrawingDone', async (pathData, user) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
-        // console.log('path obj:');
-        // console.log(pathObj);
+
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
@@ -202,8 +201,7 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
         pathObj.dashArray = null;
-        console.log('path obj:');
-        console.log(pathObj);
+
         sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
@@ -262,9 +260,9 @@ io.on('connection', (socket) => {
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
     // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
-    socket.on('confirmPathMoved', async (newPosition, index, user) => {
+    socket.on('confirmPathMoved', async (updatedPath, index, user) => {
 
-        sessions.get(user.sessionID)[index].path.position = newPosition;
+        sessions.get(user.sessionID)[index].path = updatedPath;
         // always check for new users before letting a client release the lock
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.

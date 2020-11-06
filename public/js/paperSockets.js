@@ -593,12 +593,11 @@ export function paperSockets() {
 		// called when path is 'released' from drag
 		path.onMouseUp = function (event) {
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
-			// get final coords of path location and send to server so server
-			// can update its records. Sending "now" prevents server from doing
-			// unnecessary updates of path locations while path is still moving.
-			let x = paths[pathInd].path.position.x;
-			let y = paths[pathInd].path.position.y;
-			socket.emit('confirmPathMoved', [x, y], pathInd, user);
+			// get the serialized version of the path that was moved, which contains
+			// its new coordinates. Then send it to the server so the server can
+			// update its paths array.
+			let updatedPath = serializedPathsItem(paths[pathInd]).path;
+			socket.emit('confirmPathMoved', updatedPath, pathInd, user);
 		}
 	}
 
