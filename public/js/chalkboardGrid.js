@@ -11,7 +11,9 @@ function chalkboardGrid() {
     function displayImg(url) {
         return new Promise((resolve, reject) => {
             let img = document.createElement("img");
+            let a = document.createElement("a");
             img.src = url;
+            a.appendChild(img);
             //document.getElementById("grid").appendChild(img);
             resolve('image displayed');
             //create a new row if there are an even number of chalkboards
@@ -25,7 +27,7 @@ function chalkboardGrid() {
                 var col = document.createElement("div");
                 col.classList.add("col50");
                 col.classList.add("card-panel");
-                col.appendChild(img);
+                col.appendChild(a);
                 row.appendChild(col);
                 numChalkboards += 1;
                 resolve('image displayed');
@@ -40,7 +42,7 @@ function chalkboardGrid() {
                 row.appendChild(col);
                 //row.getElementById("first");
                 img.src = url;
-                col.appendChild(img);
+                col.appendChild(a);
                 numChalkboards += 1;
                 resolve('image displayed');
             }
@@ -50,8 +52,11 @@ function chalkboardGrid() {
     function displayChalkboard(data) {
         return new Promise((resolve, reject) => {
             let img = document.createElement("img");
+            let a = document.createElement("a");
+            a.appendChild(img);
             //img.src = data.img;
             img.setAttribute("src", data.img);
+            a.setAttribute('href', data.url);
             //document.getElementById("grid").appendChild(img);
             //resolve('image displayed');
             //create a new row if there are an even number of chalkboards
@@ -64,7 +69,7 @@ function chalkboardGrid() {
                 document.getElementById("grid").appendChild(row);
                 var col = document.createElement("div");
                 col.classList.add("col50");
-                col.appendChild(img);
+                col.appendChild(a);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
@@ -83,7 +88,7 @@ function chalkboardGrid() {
                 row.appendChild(col);
                 //row.getElementById("first");
                 //img.src = data.img;
-                col.appendChild(img);
+                col.appendChild(a);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
@@ -100,7 +105,7 @@ function chalkboardGrid() {
             .then(function (querySnapshot) {
                 querySnapshot.forEach(function (doc) {
                     // doc.data() is never undefined for query doc snapshots
-                    console.log(doc.id, " => ", doc.data());
+                    //console.log(doc.id, " => ", doc.data());
                     displayChalkboard(doc.data());
                 });
             })

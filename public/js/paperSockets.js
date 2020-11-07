@@ -794,7 +794,11 @@ export function paperSockets() {
 										message.innerHTML = "Error uploading document: " + error;
 									});
 							}
-						);
+						).catch(function(error) {
+							console.error("Error adding document: ", error);
+							alert("Error adding document: ", error);
+							message.innerHTML = "Error uploading document: " + error;
+						});
 					message.innerHTML = "";
 				});
 		});

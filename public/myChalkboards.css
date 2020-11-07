@@ -18,11 +18,17 @@
     height: 50vh;
 }
 
-.row img {
-    aspect-ratio: 1/1;
+.row a {
     height: 80%;
     background-color: #fff;
     border: 2px solid gray;/**/
+}
+
+.row img {
+    aspect-ratio: 1/1;
+    height: 100%;
+    background-color: #fff;
+    /*border: 2px solid gray;/**/
 }
 
 #grid {
