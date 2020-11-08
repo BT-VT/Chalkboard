@@ -771,6 +771,9 @@ export function paperSockets() {
 					let today = new Date();
 					let message = document.getElementById("navProgress");
 					message.innerHTML = "Upload complete.";
+					// Get chalkboard paths from server in serialized form to save to database
+					let edits = serializedPaths(paths);
+					let href = window.location.href;
 					uploadTask.snapshot.ref.getDownloadURL()
 						.then(
 							// Add a new chalkboard with a generated id.
@@ -778,7 +781,9 @@ export function paperSockets() {
 								db.collection("chalkboards").add({
 									owner: auth.currentUser.email,
 									img: url,
-									date_saved: today
+									date_saved: today,
+									edits: edits,
+									url: href
 								})
 									.then(function (docRef) {
 										console.log("SUCCESS: Document written with ID: ", docRef.id);
@@ -786,9 +791,14 @@ export function paperSockets() {
 									.catch(function (error) {
 										console.error("Error adding document: ", error);
 										alert("Error adding document: ", error);
+										message.innerHTML = "Error uploading document: " + error;
 									});
 							}
-						);
+						).catch(function(error) {
+							console.error("Error adding document: ", error);
+							alert("Error adding document: ", error);
+							message.innerHTML = "Error uploading document: " + error;
+						});
 					message.innerHTML = "";
 				});
 		});

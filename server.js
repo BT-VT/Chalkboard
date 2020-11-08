@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // set up firestore connection
 const admin = require('firebase-admin');
-const serviceAccount = require('../chalkboardPrivate/ServiceAccountKey.json');
+const serviceAccount = require('./chalkboardPrivate/ServiceAccountKey.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
