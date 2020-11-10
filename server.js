@@ -24,6 +24,8 @@ console.log("server running on port: " + portNum);
 // set up socket.io on express server
 var io = require("socket.io")(server);
 
+// the pathObj in the paths array on the server is serialized, and is in a JSON string format. This allows
+// it to be stored in the FireStore database.
 var paths = [];    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
 var newUsers = []; // new socket connections waiting to add existing paths
 let LOCKED = false;
