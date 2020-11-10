@@ -194,7 +194,7 @@ io.on('connection', (socket) => {
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        console.log(socket.id + ' ended drawing, LOCKED set to: ' + LOCKED);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -257,6 +257,10 @@ io.on('connection', (socket) => {
 
     socket.on('requestPathMove', (newPosition, index,user) => {
         io.to(user.sessionID).emit('movePath',newPosition, index);
+    });
+
+    socket.on('requestColorFill', (pathInd, color, user) => {
+        io.to(user.sessionID).emit('colorFill', pathInd, color);
     });
 
     // called when lock owner releases a path that was being moved. notifies

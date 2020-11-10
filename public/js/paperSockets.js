@@ -23,7 +23,7 @@ export function paperSockets() {
 	const pickr = Pickr.create({
 		el: '.color-picker',
 		theme: 'classic', // or 'monolith', or 'nano'
-		default: '#ff0000',
+		default: '#000000',
 		swatches: [
 			'rgba(255, 0, 0, 1)',
 			'rgba(255, 127, 0, 1)',
@@ -94,6 +94,7 @@ export function paperSockets() {
 		ellipse: false,
 		triangle: false,
 		line: false,
+		colorFill: false,
 		grab: false,
 		eraser: false
 	}
@@ -117,6 +118,7 @@ export function paperSockets() {
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
 	socket.on('movePath', movePath);
+	socket.on('colorFill', colorFill);
 
 	// notify server to send existing session paths
 	socket.emit('hello', user);
@@ -412,8 +414,6 @@ export function paperSockets() {
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
 	function finishDrawing(pathID, user) {
-		console.log('serialized Paths:');
-		console.log(serializedPaths(paths));
 		if (initialPathsReceived == false) {
 			console.log('waiting to load paths');
 			return;
@@ -433,6 +433,7 @@ export function paperSockets() {
 		console.log(paths);
 
 		if (LOCKED == socket.id) {
+			console.log(socket.id + ' sending drawingDone confirmation to server');
 			// serialize path before sending to server
 			socket.emit('confirmDrawingDone', serializedPathsItem(pathsItem), user);
 		}
@@ -515,6 +516,11 @@ export function paperSockets() {
 		paths[index].path.position = newPosition;
 	}
 
+	function colorFill(pathInd, color) {
+		if (!initialPathsReceived) { return; }
+		paths[pathInd].path.fillColor = color;
+	}
+
 	// called when socket receives 'deleteLastPath' message from server. sent
 	// when 'undo' button is clicked by user. Pops last drawn path from paths
 	// array and removes path from canvas.
@@ -560,12 +566,14 @@ export function paperSockets() {
 	}
 
 	// sets path state other than attributes, such as functions for making paths
-	// 'pop' when hovered over (enter/leave), and functions for grabbing/moving
+	// 'pop' when hovered over (enter/leave), and functions for grabbing/moving.
+	// This function sets event listeners directly on individual paths
 	function setPathFunctions(pathsItem, scale) {
 		let path = pathsItem.path;
 		let pathName = pathsItem.pathName;
 		let pathInd = null;			// index of path in paths array on client and server
 		let entered = false;		// stops 'leave' event from firing when object is created
+		// mouseEnter and mouseLeave used to make path 'pop' when hovered over
 		path.onMouseEnter = function (event) {
 			if (!entered) {
 				entered = true;
@@ -580,16 +588,17 @@ export function paperSockets() {
 		}
 		// called when path is clicked on
 		path.onMouseDown = function (event) {
-			// if canvas is locked and you're not the owner, or grab button isnt selected, gtfo
-			if ((LOCKED && LOCKED != socket.id) || drawingTools.grab != true) { return; }
-			// search paths array for path selected
-			for (let i = 0; i < paths.length; i++) {
-				if (paths[i].path == path) {
-					// save index of path in paths array
-					pathInd = i;
-					socket.emit('requestLock', user);
-					break;
-				}
+			// if canvas is locked and you're not the owner, gtfo
+			if (LOCKED && LOCKED != socket.id) { return; }
+
+			if(drawingTools.grab) {
+				// search paths array for path selected
+				pathInd = paths.findIndex(pathItem => pathItem.path == path);
+				socket.emit('requestLock', user);
+			}
+			else if(drawingTools.colorFill) {
+				pathInd = paths.findIndex(pathItem => pathItem.path == path);
+				socket.emit('requestColorFill', pathInd, window.selectedColor, user);
 			}
 		}
 		// called when path is clicked on and dragged
@@ -896,6 +905,19 @@ export function paperSockets() {
 		}
 	}
 	else { console.log('line button not found'); }
+
+	let fillBtn = document.querySelector("#fill");
+	if(fillBtn) {
+		fillBtn.onclick = function() {
+			if(setDrawingTool('colorFill')) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+				grabBtn.classList.toggle("active");
+				console.log('color fill selected!');
+			}
+			else { console.log('failed to select color fill'); }
+		}
+	}
+	else { console.log('fill button not found'); }
 
 	let grabBtn = document.querySelector("#grab");
 	if(grabBtn) {
