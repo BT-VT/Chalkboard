@@ -141,6 +141,14 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('setPointText', pointTextAttr);
     });
 
+    socket.on('requestTextBackspace', (lockOwner, user) => {
+        io.to(user.sessionID).emit('textBackspace', lockOwner);
+    });
+
+    socket.on('requestAddTextChar', (lockOwner, char, user) => {
+        io.to(user.sessionID).emit('addTextChar', lockOwner, char);
+    });
+
     socket.on('requestErase', (pathName, user) => {
         console.log('request erase ' + pathName);
         io.to(user.sessionID).emit('erasePath', pathName);

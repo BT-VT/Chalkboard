@@ -27,7 +27,7 @@ function home () {
                     <div class="item active" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
                     <div class="item" id="fill" data-tool="fill" title="Fill Tool"><img src="images/fill-icon.png"></div>
                     <div class="item" id="grab" data-tool="grab" title="Grab Tool"><img src="images/grab-icon.png"></div>
-                    <div class="item" id="text" data-tool="text" title="Text Tool"><img src="images/text.png"></div>
+                    <div class="item" id="text" data-tool="text" title="Text Tool"><img src="images/text-icon.png"></div>
                     <div class="item" id="eraser" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
                     </div>
                 </div>

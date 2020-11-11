@@ -113,6 +113,8 @@ export function paperSockets() {
 	socket.on('drawTrackingTriangle', drawTrackingTriangle);
 	socket.on('drawTrackingLine', drawTrackingLine);
     socket.on('setPointText', setPointText);
+    socket.on('textBackspace', textBackspace);
+    socket.on('addTextChar', addTextChar);
 	socket.on('erasePath', erasePath);
 	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
@@ -202,6 +204,9 @@ export function paperSockets() {
 				else if (pathName.search('line') > -1) {
 					pathsItem.path = new paper.Path.Line().importJSON(pathObj);
 				}
+                else if (pathName.search('text') > -1) {
+                    pathsItem.path = new paper.PointText().importJSON(pathObj);
+                }
 				setPathFunctions(pathsItem, attributes.scale);
 				paths.push(pathsItem);
 			}
@@ -211,34 +216,43 @@ export function paperSockets() {
     // event listener called when a keyboard key is pressed
 	tool.onKeyDown = (event) => {
 		console.log(event.key + ' key was pressed');
-        // if not drawing, ignore the normal actions of certain keys, as they
-        // are used for some chalkboard features
-        if(drawingTools.text == false) {
-            let keys = ['backspace', 'l', 'left', 'right'];
-    		if(keys.includes(event.key)) {
-    			event.preventDefault();
-    		}
+        // a list of keys to ignore default actions for
+        let keys = ['backspace', 'space', 'l', 'left', 'right'];
+		if(keys.includes(event.key)) {
+			event.preventDefault();
         }
         // if the text box is selected and this user owns the lock, aka has
         // clicked on the canvas to create a PointText / claim the lock, Then
         // edit the PointText accordingly
-        else if(LOCKED == socket.id){
+        if(LOCKED == socket.id){
+            console.log('current text: ' + curPath.content);
             // the enter key ends text editing and releases the lock
-            if(event.key = 'enter') {
+            if(event.key == 'enter') {
                 socket.emit('requestFinishText', user);
             }
             // remove the last char in the text box
             else if(event.key == 'backspace') {
-                curPath.content = curPath.content.slice(0, -1);
-                curPath.data.setBounds(curPath);
+                socket.emit('requestTextBackspace', socket.id, user);
             }
             // add the char pressed to the text box, ignoring non-character keys
             else if(event.character != '') {
-                curPath.content += event.character;
-                curPath.data.setBounds(curPath);
+                socket.emit('requestAddTextChar', socket.id, event.character, user);
             }
         }
 	}
+
+    function textBackspace(lockOwner) {
+        if(!initialPathsReceived || LOCKED != lockOwner) { return }
+        curPath.content = curPath.content.slice(0, -1);
+        curPath.data.setBounds(curPath);
+    }
+
+    function addTextChar(lockOwner, char) {
+        console.log('adding char to text');
+        if(!initialPathsReceived || LOCKED != lockOwner) { return }
+        curPath.content += char;
+        curPath.data.setBounds(curPath);
+    }
 
 	// notify users to create a new path. Repetitive for debugging purposes
 	tool.onMouseDown = function (event) {
@@ -387,16 +401,19 @@ export function paperSockets() {
 
     function setPointText(pointTextAttr) {
         if (!initialPathsReceived) { return; }
+        // remove existing path, including boundary rectangle if new PointText
+        // is requested in the middle of another PointText's creation
+        if(curPath.data.bounds) { curPath.data.bounds.remove(); }
+        curPath.remove();
         // create new textPoint, add red dashed bounding rectangle to show
         // text box while text is still being edited
-        curPath.remove();
         curPath = new paper.PointText(pointTextAttr);
         // create a function that will reset the bounding rectangle when called
         curPath.data.setBounds = (txt) => {
             // remove existing bounding rectangle
             if(txt.data.bounds) { txt.data.bounds.remove(); }
             // create new one
-            txt.data.bounds = new Path.Rectangle(txt.bounds);
+            txt.data.bounds = new paper.Path.Rectangle(txt.bounds);
             txt.data.bounds.style = {
                 dashArray: [2, 2],
                 strokeColor: 'red',
@@ -453,7 +470,7 @@ export function paperSockets() {
 		}
         else if (drawingTools.text) {
             let pointTextAttr = {
-				point: event.position,
+				point: [event.point.x, event.point.y],
 				fillColor: window.selectedColor,
 				fontFamily: attributes.fontFamily,
                 fontSize: attributes.fontSize,
@@ -591,7 +608,7 @@ export function paperSockets() {
 
     function finishText(pathID) {
         if (!initialPathsReceived) { return; }
-        curPath.data.bounds = null;
+        curPath.data.bounds.remove();
         let pathsItem = {
             pathName: 'text-' + pathID,
             path: curPath
@@ -599,7 +616,7 @@ export function paperSockets() {
         setPathFunctions(pathsItem, attributes.scale);
         paths.push(pathsItem);
         console.log(paths);
-        curPath = new Path.PointText();
+        curPath = new paper.PointText();
 
         if(LOCKED == socket.id) {
             socket.emit('confirmTextDone', serializedPathsItem(pathsItem), user);
@@ -1041,7 +1058,7 @@ export function paperSockets() {
 		fillBtn.onclick = function() {
 			if(setDrawingTool('colorFill')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				grabBtn.classList.toggle("active");
+				fillBtn.classList.toggle("active");
 				console.log('color fill selected!');
 			}
 			else { console.log('failed to select color fill'); }
@@ -1064,16 +1081,16 @@ export function paperSockets() {
 
     let textBtn = document.querySelector("#text");
 	if(textBtn) {
-		grabBtn.onclick = function() {
+		textBtn.onclick = function() {
 			if(setDrawingTool('text')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				grabBtn.classList.toggle("active");
+				textBtn.classList.toggle("active");
 				console.log('text selected!');
 			}
 			else { console.log('failed to select text'); }
 		}
 	}
-	else { console.log('text button not found'); }
+	else { console.log('fill button not found'); }
 
 	let eraserBtn = document.querySelector("#eraser");
 	if (eraserBtn) {
