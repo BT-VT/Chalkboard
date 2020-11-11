@@ -1,9 +1,12 @@
-window.globalVar = ""
-window.selectedColor = ""
+window.globalVar = "";
+window.selectedColor = "";
 
-import User from "./user.js"
+import User from "./user.js";
 
-export let user = new User("Guest" + Math.floor(Math.random() * 10000), "default");
+export let user = new User(
+  "Guest" + Math.floor(Math.random() * 10000),
+  "default"
+);
 export let socket = io();
 export function paperSockets() {
 
@@ -97,6 +100,7 @@ export function paperSockets() {
 		line: false,
 		colorFill: false,
 		grab: false,
+		textBtn: false,
 		eraser: false
 	}
 
@@ -122,6 +126,7 @@ export function paperSockets() {
 	socket.on('rotatePath', rotatePath);
 	socket.on('newStrokeColor', newStrokeColor);
 	socket.on('colorFill', colorFill);
+	socket.on("keyStroke", textChar);
 
 	// notify server to send existing session paths
 	socket.emit('hello', user);
@@ -743,251 +748,335 @@ export function paperSockets() {
 	/*     ===================================================================
 								   DOWNLOAD & UPLOAD BUTTON
 		   =================================================================== */
-	var commandBtn = document.querySelector(".download");
-	if (commandBtn) {
-		commandBtn.onclick = function () {
-			console.log("testing download");
-			var canvas = document.getElementById("canvas");
-			var image = canvas
-				.toDataURL("image/png", 1.0)
-				.replace("image/png", "image/octet-stream");
-			var link = document.createElement("a");
-			link.download = "my-image.png";
-			link.href = image;
-			link.click();
-		}
-	}
+  var commandBtn = document.querySelector(".download");
+  if (commandBtn) {
+    commandBtn.onclick = function () {
+      console.log("testing download");
+      var canvas = document.getElementById("canvas");
+      var image = canvas
+        .toDataURL("image/png", 1.0)
+        .replace("image/png", "image/octet-stream");
+      var link = document.createElement("a");
+      link.download = "my-image.png";
+      link.href = image;
+      link.click();
+    };
+  }
 
+  var textBtn = document.querySelector("#textTool");
+  if (textBtn) {
+    textBtn.onclick = function () {
+      document.querySelector("[data-tool].active").classList.toggle("active");
+      textBtn.classList.toggle("active");
+      var canvas = document.getElementById("canvas");
+      var context = canvas.getContext("2d");
+      console.log("textTool");
 
-	var uploadBtn = document.querySelector(".upload");
-	var selectedFile;
-	if (uploadBtn) {
-		uploadBtn.addEventListener('click', async (e) => {
-			console.log("test uploadbtn with events");
-			//selectedFile = e.target.files[0];
-			//let i = 0;
+      //store mouse x and y positions
+      var x = 0;
+      var y = 0;
+      var tempX = 0;
+      var content = "";
+      var text;
 
-			var canvas = document.getElementById("canvas");
-			var image = canvas
-				.toDataURL("image/png", 1.0);
-			//.replace("image/png", "image/octet-stream");
-			console.log(typeof (image));
-			//console.log(image);
-			let imageId = generateURL();
+      //clicked position to write text
+      canvas.addEventListener(
+        "click",
+        function (event) {
+          x = event.pageX - canvas.offsetLeft;
+          y = event.pageY - canvas.offsetTop;
+          let startingX = x;
+          content = "";
+          text = new paper.PointText(new paper.Point(x, y));
+          text.justification = "left";
+          text.fillColor = "black";
+          text.fontSize = 15;
+          //text.content = 'The contents of the int text';
+          //context.fillText(event.)
+          return false;
+        },
+        false
+      );
 
+      document.addEventListener(
+        "keydown",
+        function (event) {
+          if (
+            event.key.length == 1 &&
+            event.key.charCodeAt(0) >= 32 &&
+            event.key.charCodeAt(0) <= 126
+          ) {
+            content = content + event.key;
+          } else if (event.key == "Backspace") {
+            content = content.slice(0, content.length - 1);
+          } else if (event.key == "Enter") {
+            content = content + "\n";
+          }
 
+          text.content = content;
+          console.log(content);
+        },
+        false
+      );
+    };
+  }
 
-			// create storage ref to empty storage object
-			// https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
-			let storageRef = storage.ref();
+  function textChar(text, userChar) {}
 
-			// upload file to storage ref location
-			image = image.split(',');
-			let uploadTask = storageRef.child('chalkboards/' + imageId).putString(image[1], "base64", { contentType: 'image/png' });
+  var uploadBtn = document.querySelector(".upload");
+  var selectedFile;
+  if (uploadBtn) {
+    uploadBtn.addEventListener("click", async (e) => {
+      console.log("test uploadbtn with events");
+      //selectedFile = e.target.files[0];
+      //let i = 0;
 
-			uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-				function (snapshot) {
-					// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-					var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-					var message = document.getElementById('navProgress');
-					console.log('Upload is ' + progress + '% done');
-					message.innerHTML = 'Uploading: ' + progress + '% ';
-					switch (snapshot.state) {
-						case firebase.storage.TaskState.PAUSED: // or 'paused'
-							console.log('Upload is paused');
-							message.innerHTML = 'Upload is paused';
-							break;
-						case firebase.storage.TaskState.RUNNING: // or 'running'
-							console.log('Upload is running');
-							break;
-					}
-				}, function (error) {
+      var canvas = document.getElementById("canvas");
+      var image = canvas.toDataURL("image/png", 1.0);
+      //.replace("image/png", "image/octet-stream");
+      console.log(typeof image);
+      //console.log(image);
+      let imageId = generateURL();
 
-					// A full list of error codes is available at
-					// https://firebase.google.com/docs/storage/web/handle-errors
-					switch (error.code) {
-						case 'storage/unauthorized':
-							// User doesn't have permission to access the object
-							alert('Permission denied.' + error)
-							break;
+      // create storage ref to empty storage object
+      // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+      let storageRef = storage.ref();
 
-						case 'storage/canceled':
-							// User canceled the upload
-							alert('Cancelled upload' + error);
-							break;
+      // upload file to storage ref location
+      image = image.split(",");
+      let uploadTask = storageRef
+        .child("chalkboards/" + imageId)
+        .putString(image[1], "base64", { contentType: "image/png" });
 
-						case 'storage/unknown':
-							// Unknown error occurred, inspect error.serverResponse
-							alert('Unknown error: ' + error)
-							break;
-					}
-				},
-				function () {
-					let today = new Date();
-					let message = document.getElementById("navProgress");
-					message.innerHTML = "Upload complete.";
-					// Get chalkboard paths from server in serialized form to save to database
-					let edits = serializedPaths(paths);
-					let href = window.location.href;
-					uploadTask.snapshot.ref.getDownloadURL()
-						.then(
-							// Add a new chalkboard with a generated id.
-							function (url) {
-								db.collection("chalkboards").add({
-									owner: auth.currentUser.email,
-									img: url,
-									date_saved: today,
-									edits: edits,
-									url: href
-								})
-									.then(function (docRef) {
-										console.log("SUCCESS: Document written with ID: ", docRef.id);
-									})
-									.catch(function (error) {
-										console.error("Error adding document: ", error);
-										alert("Error adding document: ", error);
-										message.innerHTML = "Error uploading document: " + error;
-									});
-							}
-						).catch(function(error) {
-							console.error("Error adding document: ", error);
-							alert("Error adding document: ", error);
-							message.innerHTML = "Error uploading document: " + error;
-						});
-					message.innerHTML = "";
-				});
-		});
-	}
+      uploadTask.on(
+        firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+        function (snapshot) {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          var progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          var message = document.getElementById("navProgress");
+          console.log("Upload is " + progress + "% done");
+          message.innerHTML = "Uploading: " + progress + "% ";
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+              console.log("Upload is paused");
+              message.innerHTML = "Upload is paused";
+              break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+              console.log("Upload is running");
+              break;
+          }
+        },
+        function (error) {
+          // A full list of error codes is available at
+          // https://firebase.google.com/docs/storage/web/handle-errors
+          switch (error.code) {
+            case "storage/unauthorized":
+              // User doesn't have permission to access the object
+              alert("Permission denied." + error);
+              break;
 
-	var undoBtn = document.querySelector(".undo");
-	if (undoBtn) {
-		undoBtn.onclick = function () {
-			if (!LOCKED) {
-				//document.querySelector("[data-tool].active").classList.toggle("active");
-				//undoBtn.classList.toggle("active");
-				console.log('undo clicked!');
-				socket.emit('undo', user);
-			}
-		}
-	}
-	else { console.log('undo button not found'); }
+            case "storage/canceled":
+              // User canceled the upload
+              alert("Cancelled upload" + error);
+              break;
 
-	let markerBtn = document.querySelector("#marker");
-	if (markerBtn) {
-		markerBtn.onclick = function () {
-			if (setDrawingTool('marker')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				markerBtn.classList.toggle("active");
-				console.log('marker selected');
-			}
-			else { console.log('failed to select marker'); }
-		}
-	}
-	else { console.log('marker button not found'); }
+            case "storage/unknown":
+              // Unknown error occurred, inspect error.serverResponse
+              alert("Unknown error: " + error);
+              break;
+          }
+        },
+        function () {
+          let today = new Date();
+          let message = document.getElementById("navProgress");
+          message.innerHTML = "Upload complete.";
+          // Get chalkboard paths from server in serialized form to save to database
+          let edits = serializedPaths(paths);
+          let href = window.location.href;
+          uploadTask.snapshot.ref
+            .getDownloadURL()
+            .then(
+              // Add a new chalkboard with a generated id.
+              function (url) {
+                db.collection("chalkboards")
+                  .add({
+                    owner: auth.currentUser.email,
+                    img: url,
+                    date_saved: today,
+                    edits: edits,
+                    url: href,
+                  })
+                  .then(function (docRef) {
+                    console.log(
+                      "SUCCESS: Document written with ID: ",
+                      docRef.id
+                    );
+                  })
+                  .catch(function (error) {
+                    console.error("Error adding document: ", error);
+                    alert("Error adding document: ", error);
+                    message.innerHTML = "Error uploading document: " + error;
+                  });
+              }
+            )
+            .catch(function (error) {
+              console.error("Error adding document: ", error);
+              alert("Error adding document: ", error);
+              message.innerHTML = "Error uploading document: " + error;
+            });
+          message.innerHTML = "";
+        }
+      );
+    });
+  }
 
-	let circleBtn = document.querySelector("#circle");
-	if (circleBtn) {
-		circleBtn.onclick = function () {
-			if (setDrawingTool('circle')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				circleBtn.classList.toggle("active");
-				console.log('circle selected!');
-			}
-			else { console.log('failed to select circle'); }
-		}
-	}
-	else { console.log('circle button not found'); }
+  var undoBtn = document.querySelector(".undo");
+  if (undoBtn) {
+    undoBtn.onclick = function () {
+      if (!LOCKED) {
+        //document.querySelector("[data-tool].active").classList.toggle("active");
+        //undoBtn.classList.toggle("active");
+        console.log("undo clicked!");
+        socket.emit("undo", user);
+      }
+    };
+  } else {
+    console.log("undo button not found");
+  }
 
-	let ellipseBtn = document.querySelector("#ellipse");
-	if (ellipseBtn) {
-		ellipseBtn.onclick = function () {
-			if (setDrawingTool('ellipse')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				ellipseBtn.classList.toggle("active");
-				console.log('ellipse selected!');
-			}
-			else { console.log('failed to select ellipse'); }
-		}
-	}
-	else { console.log('ellipse button not found'); }
+  let markerBtn = document.querySelector("#marker");
+  if (markerBtn) {
+    markerBtn.onclick = function () {
+      if (setDrawingTool("marker")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        markerBtn.classList.toggle("active");
+        console.log("marker selected");
+      } else {
+        console.log("failed to select marker");
+      }
+    };
+  } else {
+    console.log("marker button not found");
+  }
 
-	let rectBtn = document.querySelector("#rect");
-	if (rectBtn) {
-		rectBtn.onclick = function () {
-			if (setDrawingTool('rect')) {
+  let circleBtn = document.querySelector("#circle");
+  if (circleBtn) {
+    circleBtn.onclick = function () {
+      if (setDrawingTool("circle")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        circleBtn.classList.toggle("active");
+        console.log("circle selected!");
+      } else {
+        console.log("failed to select circle");
+      }
+    };
+  } else {
+    console.log("circle button not found");
+  }
 
+  let ellipseBtn = document.querySelector("#ellipse");
+  if (ellipseBtn) {
+    ellipseBtn.onclick = function () {
+      if (setDrawingTool("ellipse")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        ellipseBtn.classList.toggle("active");
+        console.log("ellipse selected!");
+      } else {
+        console.log("failed to select ellipse");
+      }
+    };
+  } else {
+    console.log("ellipse button not found");
+  }
 
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				rectBtn.classList.toggle("active");
-				console.log('rectangle selected!');
-			}
-			else { console.log('failed to select rectange'); }
-		}
-	}
-	else { console.log('rectangle button not found'); }
+  let rectBtn = document.querySelector("#rect");
+  if (rectBtn) {
+    rectBtn.onclick = function () {
+      if (setDrawingTool("rect")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        rectBtn.classList.toggle("active");
+        console.log("rectangle selected!");
+      } else {
+        console.log("failed to select rectange");
+      }
+    };
+  } else {
+    console.log("rectangle button not found");
+  }
 
-	let triangleBtn = document.querySelector("#triangle");
-	if (triangleBtn) {
-		triangleBtn.onclick = function () {
-			if (setDrawingTool('triangle')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				triangleBtn.classList.toggle("active");
-				console.log('triangle selected!');
-			}
-			else { console.log('failed to select triangle'); }
-		}
-	}
-	else { console.log('triangle button not found'); }
+  let triangleBtn = document.querySelector("#triangle");
+  if (triangleBtn) {
+    triangleBtn.onclick = function () {
+      if (setDrawingTool("triangle")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        triangleBtn.classList.toggle("active");
+        console.log("triangle selected!");
+      } else {
+        console.log("failed to select triangle");
+      }
+    };
+  } else {
+    console.log("triangle button not found");
+  }
 
-	let lineBtn = document.querySelector("#line");
-	if(lineBtn) {
-		lineBtn.onclick = function() {
-			if(setDrawingTool('line')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				lineBtn.classList.toggle("active");
-				console.log('line selected!');
-			}
-			else { console.log('failed to select line'); }
-		}
-	}
-	else { console.log('line button not found'); }
+  let lineBtn = document.querySelector("#line");
+  if (lineBtn) {
+    lineBtn.onclick = function () {
+      if (setDrawingTool("line")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        lineBtn.classList.toggle("active");
+        console.log("line selected!");
+      } else {
+        console.log("failed to select line");
+      }
+    };
+  } else {
+    console.log("line button not found");
+  }
 
-	let fillBtn = document.querySelector("#fill");
-	if(fillBtn) {
-		fillBtn.onclick = function() {
-			if(setDrawingTool('colorFill')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				grabBtn.classList.toggle("active");
-				console.log('color fill selected!');
-			}
-			else { console.log('failed to select color fill'); }
-		}
-	}
-	else { console.log('fill button not found'); }
+  let fillBtn = document.querySelector("#fill");
+  if (fillBtn) {
+    fillBtn.onclick = function () {
+      if (setDrawingTool("colorFill")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        grabBtn.classList.toggle("active");
+        console.log("color fill selected!");
+      } else {
+        console.log("failed to select color fill");
+      }
+    };
+  } else {
+    console.log("fill button not found");
+  }
 
-	let grabBtn = document.querySelector("#grab");
-	if(grabBtn) {
-		grabBtn.onclick = function() {
-			if(setDrawingTool('grab')) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				grabBtn.classList.toggle("active");
-				console.log('grab selected!');
-			}
-			else { console.log('failed to select grab'); }
-		}
-	}
-	else { console.log('grab button not found'); }
+  let grabBtn = document.querySelector("#grab");
+  if (grabBtn) {
+    grabBtn.onclick = function () {
+      if (setDrawingTool("grab")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        grabBtn.classList.toggle("active");
+        console.log("grab selected!");
+      } else {
+        console.log("failed to select grab");
+      }
+    };
+  } else {
+    console.log("grab button not found");
+  }
 
-	let eraserBtn = document.querySelector("#eraser");
-	if (eraserBtn) {
-		eraserBtn.onclick = function () {
-			if (setDrawingTool("eraser")) {
-				document.querySelector("[data-tool].active").classList.toggle("active");
-				eraserBtn.classList.toggle("active");
-				console.log('eraser selected');
-			}
-			else { console.log('failed to select eraser'); }
-		}
-	}
-	else { console.log('eraser button not found'); }
+  let eraserBtn = document.querySelector("#eraser");
+  if (eraserBtn) {
+    eraserBtn.onclick = function () {
+      if (setDrawingTool("eraser")) {
+        document.querySelector("[data-tool].active").classList.toggle("active");
+        eraserBtn.classList.toggle("active");
+        console.log("eraser selected");
+      } else {
+        console.log("failed to select eraser");
+      }
+    };
+  } else {
+    console.log("eraser button not found");
+  }
 }
