@@ -120,6 +120,7 @@ export function paperSockets() {
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
 	socket.on('movePath', movePath);
 	socket.on('rotatePath', rotatePath);
+	socket.on('newStrokeColor', newStrokeColor);
 	socket.on('colorFill', colorFill);
 
 	// notify server to send existing session paths
@@ -204,7 +205,7 @@ export function paperSockets() {
 
 	tool.onKeyDown = (event) => {
 		console.log(event.key + ' was pressed');
-		let keys = ['backspace', 'left', 'right'];
+		let keys = ['backspace', 'l', 'left', 'right'];
 		if(keys.includes(event.key)) {
 			event.preventDefault();
 		}
@@ -423,6 +424,8 @@ export function paperSockets() {
 
 	// called when socket receives "finishPath" message. Smooths the path, adds
 	// finished path to paths array, and unlocks the canvas for drawing.
+	// pathID is a uuid created by the server that will uniquely ID the new path
+	// from all other paths that exist or will exist
 	function finishDrawing(pathID, user) {
 		if (initialPathsReceived == false) {
 			console.log('waiting to load paths');
@@ -519,21 +522,28 @@ export function paperSockets() {
 			socket.emit('confirmLineDone', serializedPathsItem(pathsItem), user);
 		}
 	}
-
+	// callback when socket receives message from server to change location of path.
+	// index is the index of the path to make changes to in the paths array.
 	function movePath(newPosition, index) {
 		if (!initialPathsReceived) { return; }
 		console.log('index of path to move: ' + index);
 		paths[index].path.position = newPosition;
 	}
-
+	// callback for rotating a path
 	function rotatePath(degrees, index) {
 		if(!initialPathsReceived) { return; }
 		console.log('rotating path ' + degrees + ' degrees');
 		paths[index].path.rotate(degrees);
 	}
-
+	// callback for changing stroke color of a path
+	function newStrokeColor(color, index) {
+		if(!initialPathsReceived) { return; }
+		paths[index].path.strokeColor = color;
+	}
+	// callback for changing fill color of a path
 	function colorFill(color, index) {
 		if (!initialPathsReceived) { return; }
+		console.log('index of path to fill: ' + index);
 		paths[index].path.fillColor = color;
 	}
 
@@ -614,11 +624,18 @@ export function paperSockets() {
 			}
 			else if(drawingTools.colorFill) {
 				pathInd = paths.findIndex(pathItem => pathItem.path == path);
+				// if delete/backspace key is held down when line is clicked on
 				if(paper.Key.isDown('backspace')) {
-					socket.emit('requestColorFill', pathInd, null, user);
+					// tell server to notify clients to set path fill color no empty
+					socket.emit('requestColorFill', null, pathInd, user);
+				}
+				// if the 'l' key is held down when line is clicked on
+				else if(paper.Key.isDown('l')) {
+					// change stroke color of path instead of fill color of path
+					socket.emit('requestNewStrokeColor', window.selectedColor, pathInd, user);
 				}
 				else {
-					socket.emit('requestColorFill', pathInd, window.selectedColor, user);
+					socket.emit('requestColorFill', window.selectedColor, pathInd, user);
 				}
 			}
 		}

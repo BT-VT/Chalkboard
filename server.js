@@ -263,6 +263,10 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('rotatePath', degrees, index);
     });
 
+    socket.on('requestNewStrokeColor', (color, index, user) => {
+        io.to(user.sessionID).emit('newStrokeColor', color, index);
+    });
+
     socket.on('requestColorFill', (color, index, user) => {
         io.to(user.sessionID).emit('colorFill', color, index);
     });
