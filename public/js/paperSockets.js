@@ -200,6 +200,13 @@ export function paperSockets() {
 		}
 	}
 
+	tool.onKeyDown = (event) => {
+		console.log(event.key + ' was pressed');
+		if(event.key === 'backspace') {
+			event.preventDefault();
+		}
+	}
+
 	// notify users to create a new path. Repetitive for debugging purposes
 	tool.onMouseDown = function (event) {
 		if (!LOCKED || LOCKED == socket.id) {
@@ -598,7 +605,12 @@ export function paperSockets() {
 			}
 			else if(drawingTools.colorFill) {
 				pathInd = paths.findIndex(pathItem => pathItem.path == path);
-				socket.emit('requestColorFill', pathInd, window.selectedColor, user);
+				if(paper.Key.isDown('backspace')) {
+					socket.emit('requestColorFill', pathInd, null, user);
+				}
+				else {
+					socket.emit('requestColorFill', pathInd, window.selectedColor, user);
+				}
 			}
 		}
 		// called when path is clicked on and dragged
