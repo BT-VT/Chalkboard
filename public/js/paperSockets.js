@@ -307,7 +307,7 @@ export function paperSockets() {
 				radius: Math.round(event.downPoint.subtract(event.point).length),
 				dashArray: [2, 2],
 				strokeColor: window.selectedColor,
-				selectedColor: 'red'
+                strokeWidth: attributes.strokeWidth
 			}
 			socket.emit('requestTrackingCircle', circleAttr, user);
 		}
