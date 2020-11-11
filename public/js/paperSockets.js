@@ -896,13 +896,14 @@ export function paperSockets() {
 		  let href = window.location.href;
 		  let title_span = document.getElementById("chalkboard_title");
 		  let chalkboard_title = title_span.value || "";
+		  let session_id = user.sessionID;
           uploadTask.snapshot.ref
             .getDownloadURL()
             .then(
               // Add a new chalkboard with a generated id.
               function (url) {
-                db.collection("chalkboards")
-                  .add({
+                db.collection("chalkboards").doc(session_id)
+                  .set({
                     owner: auth.currentUser.email,
                     img: url,
                     date_saved: today,
@@ -912,8 +913,10 @@ export function paperSockets() {
                   })
                   .then(function (docRef) {
                     console.log(
-                      "SUCCESS: Document written with ID: ",
-                      docRef.id
+						//	This throws an error when adding a document with a custom ID
+                      //"SUCCESS: Document written with ID: ",
+					  //docRef.id
+					  "SUCCESS: Document was written to database."
                     );
                   })
                   .catch(function (error) {
