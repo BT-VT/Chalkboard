@@ -144,3 +144,14 @@ body {
   #message-input {
       color: white;
   }
+
+  #chalkboard_title {
+      width: 15%;
+      padding-left: 16px;
+      font-size: large;
+  }
+
+  .grid-title {
+      font-size: 20px;
+      font-weight: bold;
+  }

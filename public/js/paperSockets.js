@@ -893,7 +893,9 @@ export function paperSockets() {
           message.innerHTML = "Upload complete.";
           // Get chalkboard paths from server in serialized form to save to database
           let edits = serializedPaths(paths);
-          let href = window.location.href;
+		  let href = window.location.href;
+		  let title_span = document.getElementById("chalkboard_title");
+		  let chalkboard_title = title_span.value || "";
           uploadTask.snapshot.ref
             .getDownloadURL()
             .then(
@@ -905,7 +907,8 @@ export function paperSockets() {
                     img: url,
                     date_saved: today,
                     edits: edits,
-                    url: href,
+					url: href,
+					title: chalkboard_title
                   })
                   .then(function (docRef) {
                     console.log(
