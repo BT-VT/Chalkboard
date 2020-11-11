@@ -119,6 +119,7 @@ export function paperSockets() {
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
 	socket.on('movePath', movePath);
 	socket.on('colorFill', colorFill);
+	socket.on('keyStroke', textChar);
 
 	// notify server to send existing session paths
 	socket.emit('hello', user);
@@ -527,6 +528,7 @@ export function paperSockets() {
 		if (!initialPathsReceived) { return; }
 		paths[pathInd].path.fillColor = color;
 	}
+	
 
 	// called when socket receives 'deleteLastPath' message from server. sent
 	// when 'undo' button is clicked by user. Pops last drawn path from paths
@@ -722,6 +724,66 @@ export function paperSockets() {
 			link.href = image;
 			link.click();
 		}
+	}
+
+	var textBtn = document.querySelector("#textTool");
+	if (textBtn) {
+		textBtn.onclick = function () {
+			document.querySelector("[data-tool].active").classList.toggle("active");
+			textBtn.classList.toggle("active");
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			console.log("textTool");
+
+			//store mouse x and y positions
+			var x = 0;
+			var y = 0;
+			var tempX = 0;
+			var content = "";
+			var text;
+
+
+			//clicked position to write text
+			canvas.addEventListener("click", function(event)
+			{
+				x = event.pageX - canvas.offsetLeft;
+				y = event.pageY - canvas.offsetTop;
+				let startingX = x;
+				content = "";
+				text = new paper.PointText(new paper.Point(x, y));
+				text.justification = 'left';
+				text.fillColor = 'black';
+				text.fontSize = 15;
+				//text.content = 'The contents of the int text';
+				//context.fillText(event.)
+				return false;
+			}, false);
+
+			document.addEventListener("keydown", function(event)
+			{
+				if (event.key.length==1 && event.key.charCodeAt(0)>= 32 && event.key.charCodeAt(0) <= 126)  
+				{
+
+					content = content + event.key;
+				}
+
+				else if (event.key == 'Backspace'){
+					content = content.slice(0, content.length-1);
+				}
+				else if (event.key == 'Enter')
+				{
+					content = content + '\n';
+				}
+				
+				text.content = content;
+				console.log(content);
+			}, false);
+		}
+	}
+
+	function textChar(text, userChar)
+	{
+		
 	}
 
 
