@@ -84,7 +84,8 @@ export function paperSockets() {
 		strokeWidth: 5,
 		strokeCap: 'round',
 		dashOffset: 1,
-		scale: 2
+		scale: 2,
+		rotation: 1
 	}
 
 	let drawingTools = {
@@ -118,6 +119,7 @@ export function paperSockets() {
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
 	socket.on('movePath', movePath);
+	socket.on('rotatePath', rotatePath);
 	socket.on('colorFill', colorFill);
 
 	// notify server to send existing session paths
@@ -202,7 +204,8 @@ export function paperSockets() {
 
 	tool.onKeyDown = (event) => {
 		console.log(event.key + ' was pressed');
-		if(event.key === 'backspace') {
+		let keys = ['backspace', 'left', 'right'];
+		if(keys.includes(event.key)) {
 			event.preventDefault();
 		}
 	}
@@ -523,9 +526,15 @@ export function paperSockets() {
 		paths[index].path.position = newPosition;
 	}
 
-	function colorFill(pathInd, color) {
+	function rotatePath(degrees, index) {
+		if(!initialPathsReceived) { return; }
+		console.log('rotating path ' + degrees + ' degrees');
+		paths[index].path.rotate(degrees);
+	}
+
+	function colorFill(color, index) {
 		if (!initialPathsReceived) { return; }
-		paths[pathInd].path.fillColor = color;
+		paths[index].path.fillColor = color;
 	}
 
 	// called when socket receives 'deleteLastPath' message from server. sent
@@ -617,11 +626,19 @@ export function paperSockets() {
 		path.onMouseDrag = function (event) {
 			// if you don't own the lock or the drawing tool wasnt selected, dont move item
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
-			// get new position of path based on new position of mouse
-			let x = event.point.x;
-			let y = event.point.y;
-			// send notification to update location of path at specified index
-			socket.emit('requestPathMove', [x, y], pathInd, user);
+			if(paper.Key.isDown('left')) {
+				socket.emit('requestPathRotate', (-1)*attributes.rotation, pathInd, user);
+			}
+			else if (paper.Key.isDown('right')) {
+				socket.emit('requestPathRotate', attributes.rotation, pathInd, user);
+			}
+			else {
+				// get new position of path based on new position of mouse
+				let x = event.point.x;
+				let y = event.point.y;
+				// send notification to update location of path at specified index
+				socket.emit('requestPathMove', [x, y], pathInd, user);
+			}
 		}
 		// called when path is 'released' from drag
 		path.onMouseUp = function (event) {

@@ -255,12 +255,16 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
-    socket.on('requestPathMove', (newPosition, index,user) => {
+    socket.on('requestPathMove', (newPosition, index, user) => {
         io.to(user.sessionID).emit('movePath',newPosition, index);
     });
 
-    socket.on('requestColorFill', (pathInd, color, user) => {
-        io.to(user.sessionID).emit('colorFill', pathInd, color);
+    socket.on('requestPathRotate', (degrees, index, user) => {
+        io.to(user.sessionID).emit('rotatePath', degrees, index);
+    });
+
+    socket.on('requestColorFill', (color, index, user) => {
+        io.to(user.sessionID).emit('colorFill', color, index);
     });
 
     // called when lock owner releases a path that was being moved. notifies
