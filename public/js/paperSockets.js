@@ -327,6 +327,7 @@ export function paperSockets() {
 				to: [event.point.x, event.point.y],
 				dashArray: [2, 2],
 				strokeColor: window.selectedColor,
+				strokeWidth: attributes.strokeWidth,
 				isEllipse: drawingTools.ellipse
 			}
 			socket.emit('requestTrackingRect', rectAttr, user);
@@ -340,6 +341,7 @@ export function paperSockets() {
 				],
 				dashArray: [2, 2],
 				strokeColor: window.selectedColor,
+				strokeWidth: attributes.strokeWidth,
 				closed: true
 			}
 			socket.emit('requestTrackingTriangle', triangleAttr, user);
@@ -349,7 +351,8 @@ export function paperSockets() {
 				from: [event.downPoint.x, event.downPoint.y],
 				to: [event.point.x, event.point.y],
 				dashArray: [2, 2],
-				strokeColor: window.selectedColor
+				strokeColor: window.selectedColor,
+				strokeWidth: attributes.strokeWidth
 			}
 			socket.emit('requestTrackingLine', lineAttr, user);
 		}
