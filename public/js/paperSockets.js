@@ -1,6 +1,5 @@
 window.globalVar = "";
 window.selectedColor = "";
-window.fontSizeGlobal = "";
 
 import User from "./user.js";
 
@@ -81,7 +80,6 @@ export function paperSockets() {
   var slider = document.getElementById("slider");
   slider.addEventListener("input", sliderChange);
   var sliderSize;
-  window.globalSlideSize = "";
   function sliderChange() {
     sliderSize = this.value;
     attributes.fontSize = sliderSize;
@@ -1171,6 +1169,7 @@ export function paperSockets() {
       if (setDrawingTool("text")) {
         document.querySelector("[data-tool].active").classList.toggle("active");
         textBtn.classList.toggle("active");
+        textBtn.classList.toggle("extendList");
         console.log("text selected!");
       } else {
         console.log("failed to select text");

@@ -27,6 +27,10 @@ function home() {
                     <div class="item" id="fill" data-tool="fill" title="Fill Tool"><img src="images/fill-icon.png"></div>
                     <div class="item" id="grab" data-tool="grab" title="Grab Tool"><img src="images/grab-icon.png"></div>
                     <div class="item" id="text" data-tool="text" title="Text Tool"><img src="images/text-icon.png"></div>
+
+
+
+
                     <div class="item" id="eraser" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
                     </div>
                 </div>
@@ -43,6 +47,23 @@ function home() {
                 </div>
             </div>
         `;
+
+  /* vertical bar
+<div class="item" id="text" data-tool="text" title="Text Tool"><img src="images/text-icon.png">
+    <li>
+        <input
+          id="slider"
+          type="range"
+          min="1"
+          max="100"
+          value="50"
+          step="2"
+          style="-webkit-transform: rotate(90deg)"
+          orient="vertical"
+        />
+      </li>
+    </div>
+    */
 
   var ele = document.createElement("div");
   ele.setAttribute("id", "canvas-container");
