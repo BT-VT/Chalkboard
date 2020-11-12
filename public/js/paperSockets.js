@@ -1,9 +1,12 @@
-window.globalVar = ""
-window.selectedColor = ""
+window.globalVar = "";
+window.selectedColor = "";
 
-import User from "./user.js"
+import User from "./user.js";
 
-export let user = new User("Guest" + Math.floor(Math.random() * 10000), "default");
+export let user = new User(
+  "Guest" + Math.floor(Math.random() * 10000),
+  "default"
+);
 export let socket = io();
 export function paperSockets() {
 
@@ -129,6 +132,7 @@ export function paperSockets() {
 	socket.on('rotatePath', rotatePath);
 	socket.on('newStrokeColor', newStrokeColor);
 	socket.on('colorFill', colorFill);
+	socket.on("keyStroke", textChar);
 
 	// notify server to send existing session paths
 	socket.emit('hello', user);

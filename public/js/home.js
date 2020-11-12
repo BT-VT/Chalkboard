@@ -1,6 +1,5 @@
-function home () {
-
-    var content = `
+function home() {
+  var content = `
     <!-- tool box on left panel -->
             <div class="toolbox left">
                 <div class="group commands">
@@ -45,9 +44,9 @@ function home () {
             </div>
         `;
 
-        var ele = document.createElement("div");
-        ele.setAttribute("id", "canvas-container");
-        ele.setAttribute("style", "z-index: 10");
-        ele.innerHTML = content;
-        return ele;
-    }
+  var ele = document.createElement("div");
+  ele.setAttribute("id", "canvas-container");
+  ele.setAttribute("style", "z-index: 10");
+  ele.innerHTML = content;
+  return ele;
+}
