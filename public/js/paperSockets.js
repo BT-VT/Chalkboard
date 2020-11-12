@@ -132,7 +132,6 @@ export function paperSockets() {
 	socket.on('rotatePath', rotatePath);
 	socket.on('newStrokeColor', newStrokeColor);
 	socket.on('colorFill', colorFill);
-	socket.on("keyStroke", textChar);
 
 	// notify server to send existing session paths
 	socket.emit('hello', user);
