@@ -889,77 +889,93 @@ export function paperSockets() {
 			image = image.split(',');
 			let uploadTask = storageRef.child('chalkboards/' + imageId).putString(image[1], "base64", { contentType: 'image/png' });
 
-			uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+			
+			uploadTask.on(
+				firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
 				function (snapshot) {
-					// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-					var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-					var message = document.getElementById('navProgress');
-					console.log('Upload is ' + progress + '% done');
-					message.innerHTML = 'Uploading: ' + progress + '% ';
-					switch (snapshot.state) {
-						case firebase.storage.TaskState.PAUSED: // or 'paused'
-							console.log('Upload is paused');
-							message.innerHTML = 'Upload is paused';
-							break;
-						case firebase.storage.TaskState.RUNNING: // or 'running'
-							console.log('Upload is running');
-							break;
-					}
-				}, function (error) {
-
-					// A full list of error codes is available at
-					// https://firebase.google.com/docs/storage/web/handle-errors
-					switch (error.code) {
-						case 'storage/unauthorized':
-							// User doesn't have permission to access the object
-							alert('Permission denied.' + error)
-							break;
-
-						case 'storage/canceled':
-							// User canceled the upload
-							alert('Cancelled upload' + error);
-							break;
-
-						case 'storage/unknown':
-							// Unknown error occurred, inspect error.serverResponse
-							alert('Unknown error: ' + error)
-							break;
-					}
+				  // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+				  var progress =
+					(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+				  var message = document.getElementById("navProgress");
+				  console.log("Upload is " + progress + "% done");
+				  message.innerHTML = "Uploading: " + progress + "% ";
+				  switch (snapshot.state) {
+					case firebase.storage.TaskState.PAUSED: // or 'paused'
+					  console.log("Upload is paused");
+					  message.innerHTML = "Upload is paused";
+					  break;
+					case firebase.storage.TaskState.RUNNING: // or 'running'
+					  console.log("Upload is running");
+					  break;
+				  }
+				},
+				function (error) {
+				  // A full list of error codes is available at
+				  // https://firebase.google.com/docs/storage/web/handle-errors
+				  switch (error.code) {
+					case "storage/unauthorized":
+					  // User doesn't have permission to access the object
+					  alert("Permission denied." + error);
+					  break;
+		
+					case "storage/canceled":
+					  // User canceled the upload
+					  alert("Cancelled upload" + error);
+					  break;
+		
+					case "storage/unknown":
+					  // Unknown error occurred, inspect error.serverResponse
+					  alert("Unknown error: " + error);
+					  break;
+				  }
 				},
 				function () {
-					let today = new Date();
-					let message = document.getElementById("navProgress");
-					message.innerHTML = "Upload complete.";
-					// Get chalkboard paths from server in serialized form to save to database
-					let edits = serializedPaths(paths);
-					let href = window.location.href;
-					uploadTask.snapshot.ref.getDownloadURL()
-						.then(
-							// Add a new chalkboard with a generated id.
-							function (url) {
-								db.collection("chalkboards").add({
-									owner: auth.currentUser.email,
-									img: url,
-									date_saved: today,
-									edits: edits,
-									url: href
-								})
-									.then(function (docRef) {
-										console.log("SUCCESS: Document written with ID: ", docRef.id);
-									})
-									.catch(function (error) {
-										console.error("Error adding document: ", error);
-										alert("Error adding document: ", error);
-										message.innerHTML = "Error uploading document: " + error;
-									});
-							}
-						).catch(function(error) {
+				  let today = new Date();
+				  let message = document.getElementById("navProgress");
+				  message.innerHTML = "Upload complete.";
+				  // Get chalkboard paths from server in serialized form to save to database
+				  let edits = serializedPaths(paths);
+				  let href = window.location.href;
+				  let title_span = document.getElementById("chalkboard_title");
+				  let chalkboard_title = title_span.value || "";
+				  let session_id = user.sessionID;
+				  uploadTask.snapshot.ref
+					.getDownloadURL()
+					.then(
+					  // Add a new chalkboard with a generated id.
+					  function (url) {
+						db.collection("chalkboards").doc(session_id)
+						  .set({
+							owner: auth.currentUser.email,
+							img: url,
+							date_saved: today,
+							edits: edits,
+							url: href,
+							title: chalkboard_title
+						  })
+						  .then(function (docRef) {
+							console.log(
+								//	This throws an error when adding a document with a custom ID
+							  //"SUCCESS: Document written with ID: ",
+							  //docRef.id
+							  "SUCCESS: Document was written to database."
+							);
+						  })
+						  .catch(function (error) {
 							console.error("Error adding document: ", error);
 							alert("Error adding document: ", error);
 							message.innerHTML = "Error uploading document: " + error;
-						});
-					message.innerHTML = "";
-				});
+						  });
+					  }
+					)
+					.catch(function (error) {
+					  console.error("Error adding document: ", error);
+					  alert("Error adding document: ", error);
+					  message.innerHTML = "Error uploading document: " + error;
+					});
+				  message.innerHTML = "";
+				}
+			  );
 		});
 	}
 
