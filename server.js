@@ -50,13 +50,13 @@ async function handleShutdown() {
     // save paths array to db
     for(let [sessionName, pathsItem] of sessions) {
         // create new DB document with title == sessionName in ChalkboardStates collection
-        const pathsRef = db.collection('ChalkboardStates').doc(sessionName);
+        const pathsRef = db.collection('chalkboards').doc(sessionName);
         try {
             // add session name and session paths to DB document
             await pathsRef.set({
                 sessionID: sessionName,
-                pathsItem: pathsItem
-            });
+                edits: pathsItem
+            }, { merge: true });
             console.log('saved chalkboard session ' + sessionName + ' state to database.');
         }
         catch(err) {
@@ -137,6 +137,18 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('drawTrackingLine', lineAttr);
     });
 
+    socket.on('requestPointText', (pointTextAttr, user) => {
+        io.to(user.sessionID).emit('setPointText', pointTextAttr);
+    });
+
+    socket.on('requestTextBackspace', (lockOwner, user) => {
+        io.to(user.sessionID).emit('textBackspace', lockOwner);
+    });
+
+    socket.on('requestAddTextChar', (lockOwner, char, user) => {
+        io.to(user.sessionID).emit('addTextChar', lockOwner, char);
+    });
+
     socket.on('requestErase', (pathName, user) => {
         console.log('request erase ' + pathName);
         io.to(user.sessionID).emit('erasePath', pathName);
@@ -172,6 +184,11 @@ io.on('connection', (socket) => {
     socket.on('requestFinishLine', (user) => {
         let pathID = uuidv4();
         io.to(user.sessionID).emit('finishLine', pathID);
+    });
+
+    socket.on('requestFinishText', (user) => {
+        let pathID = uuidv4();
+        io.to(user.sessionID).emit('finishText', pathID);
     });
 
     socket.on('requestFinishErasing', async (user) => {
@@ -252,6 +269,19 @@ io.on('connection', (socket) => {
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
+        io.to(user.sessionID).emit('unlockCanvas', socket.id);
+    });
+
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
+    socket.on('confirmTextDone', async (pathData, user) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path;
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end text, LOCKED set to: ' + LOCKED);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
