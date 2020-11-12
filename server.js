@@ -49,6 +49,7 @@ async function handleShutdown() {
     console.log('\nclosing server');
     // save paths array to db
     for(let [sessionName, pathsItem] of sessions) {
+        if(sessionName == 'default') { continue; }
         // create new DB document with title == sessionName in ChalkboardStates collection
         const pathsRef = db.collection('chalkboards').doc(sessionName);
         try {
