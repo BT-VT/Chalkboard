@@ -86,9 +86,18 @@ export function paperSockets() {
     console.log(sliderSize);
   }
 
+  var slider1 = document.getElementById("slider1");
+  slider1.addEventListener("input", slider1Change);
+  var sliderSize1;
+  function slider1Change() {
+    sliderSize1 = this.value;
+    attributes.strokeWidth = sliderSize1;
+    console.log(sliderSize1);
+  }
+
   let attributes = {
     multicolor: selectedColor,
-    strokeWidth: 5,
+    //strokeWidth: 5,
     strokeCap: "round",
     fontFamily: "Courier New",
     //fontSize: sliderChange(),
@@ -307,6 +316,7 @@ export function paperSockets() {
         radius: Math.round(event.downPoint.subtract(event.point).length),
         dashArray: [2, 2],
         strokeColor: window.selectedColor,
+        strokeWidth: attributes.strokeWidth,
         selectedColor: "red",
       };
       socket.emit("requestTrackingCircle", circleAttr, user);
@@ -316,6 +326,7 @@ export function paperSockets() {
         to: [event.point.x, event.point.y],
         dashArray: [2, 2],
         strokeColor: window.selectedColor,
+        strokeWidth: attributes.strokeWidth,
         isEllipse: drawingTools.ellipse,
       };
       socket.emit("requestTrackingRect", rectAttr, user);
@@ -328,6 +339,7 @@ export function paperSockets() {
         ],
         dashArray: [2, 2],
         strokeColor: window.selectedColor,
+        strokeWidth: attributes.strokeWidth,
         closed: true,
       };
       socket.emit("requestTrackingTriangle", triangleAttr, user);
@@ -337,6 +349,7 @@ export function paperSockets() {
         to: [event.point.x, event.point.y],
         dashArray: [2, 2],
         strokeColor: window.selectedColor,
+        strokeWidth: attributes.strokeWidth,
       };
       socket.emit("requestTrackingLine", lineAttr, user);
     }
