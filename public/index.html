@@ -166,9 +166,6 @@
                 <a data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons"
                         style='color:gray'>menu</i></a>
                 <span id="navProgress"></span>
-                <span class="input-field s6">
-                    <input placeholder="Title" id="chalkboard_title" type="text">
-                </span>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown-button"
                             data-target="dropdown1" data-activates="dropdown1">Audio/Video<i
@@ -201,7 +198,8 @@
             <li class="no-padding">
                 <ul class="collapsible collapsible-accordion">
                     <li>
-                        <a class="collapsible-header grey-text">Audio/Video<i class="material-icons">arrow_drop_down</i></a>
+                        <a class="collapsible-header grey-text">Audio/Video<i
+                                class="material-icons">arrow_drop_down</i></a>
                         <div class="collapsible-body">
                             <ul>
                                 <li class="logged-in" style="display: none;">
@@ -298,6 +296,21 @@
                         <label for="session-id">Session ID</label>
                     </div>
                     <button class="btn cyan darken-2 z-depth-0">Enter</button>
+                </form>
+            </div>
+        </div>
+        
+        <!--SAVE/UPLOAD MODAL-->
+        <div id="modal-save" class="modal">
+            <div class="modal-content">
+                <h4>Save chalkboard</h4><br />
+                <form id="save-form">
+                    <div class="input-field">
+                        <input type="text" id="chalkboard-title" />
+                        <label for="chalkboard-title">Add a title...</label>
+                    </div>
+                    <button class="upload btn cyan darken-2 z-depth-0" data-command="upload">Save</button>
+                    <p class="error red-text center-align"></p>
                 </form>
             </div>
         </div>

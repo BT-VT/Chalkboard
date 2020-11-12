@@ -936,7 +936,7 @@ export function paperSockets() {
 				  // Get chalkboard paths from server in serialized form to save to database
 				  let edits = serializedPaths(paths);
 				  let href = window.location.href;
-				  let title_span = document.getElementById("chalkboard_title");
+				  let title_span = document.getElementById("chalkboard-title");
 				  let chalkboard_title = title_span.value || "";
 				  let session_id = user.sessionID;
 				  uploadTask.snapshot.ref
