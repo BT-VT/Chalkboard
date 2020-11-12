@@ -499,6 +499,12 @@ export function paperSockets() {
 	// The serialized version will be sent to the server, and is now in a format
 	// that can be stored in the FireStore DB.
 	let serializedPathsItem = (pathsItem) => {
+        // if path is scaled up from being hovered over with mouse, scale it down
+        // before serialization
+        if(pathsItem.path.data.scaled) {
+            pathsItem.path.strokeWidth = pathsItem.path.strokeWidth - attributes.scale;
+            pathsItem.path.data.scaled = false;
+        }
 		return {
 			pathName: pathsItem.pathName,
 			path: pathsItem.path.exportJSON()
@@ -525,6 +531,7 @@ export function paperSockets() {
 			return;
 		}
 		curPath.simplify();
+        curPath.data.scaled = false;
         curPath.data.type = 'path';
         curPath.data.id = pathID;
 		// add new path to paths array as path Item
@@ -551,6 +558,7 @@ export function paperSockets() {
 		if (!initialPathsReceived) { return; }
 		curPath.dashArray = null;
 		curPath.onFrame = null;
+        curPath.data.scaled = false;
         curPath.data.type = 'circle';
         curPath.data.id = pathID;
         // add new path to paths array as pathItem
@@ -571,8 +579,9 @@ export function paperSockets() {
 	function finishRect(pathID, isEllipse) {
 		if (!initialPathsReceived) { return; }
 		let type = isEllipse ? 'ellipse' : 'rect';
-
         curPath.dashArray = null;
+        curPath.onFrame = null;
+        curPath.data.scaled = false;
         curPath.data.type = type;
         curPath.data.id = pathID;
         // add new path to paths array as pathItem
@@ -593,6 +602,8 @@ export function paperSockets() {
 	function finishTriangle(pathID) {
 		if (!initialPathsReceived) { return; }
 		curPath.dashArray = null;
+        curPath.onFrame = null;
+        curPath.data.scaled = false;
         curPath.data.type = 'triangle';
         curPath.data.id = pathID;
 		let pathsItem = {
@@ -612,8 +623,11 @@ export function paperSockets() {
 	function finishLine(pathID) {
 		if (!initialPathsReceived) { return; }
 		curPath.dashArray = null;
+        curPath.onFrame = null;
+        curPath.data.scaled = false;
         curPath.data.type = 'line';
         curPath.data.id = pathID;
+
 		let pathsItem = {
 			pathName: 'line-' + pathID,
 			path: curPath
@@ -631,6 +645,7 @@ export function paperSockets() {
     function finishText(pathID) {
         if (!initialPathsReceived) { return; }
         curPath.data.bounds.remove();
+        curPath.data.scaled = false;
         curPath.data.type = 'text';
         curPath.data.id = pathID;
         let pathsItem = {
@@ -660,7 +675,8 @@ export function paperSockets() {
 		console.log('rotating path ' + degrees + ' degrees');
 		paths[index].path.rotate(degrees);
 	}
-	// callback for changing stroke color of a path
+	// callback for changing stroke color of a path.
+    // check colorFill() for details
 	function newStrokeColor(color, index) {
 		if(!initialPathsReceived) { return; }
         if(paths[index].path.data.type != 'text') {
@@ -672,10 +688,14 @@ export function paperSockets() {
 	// callback for changing fill color of a path
 	function colorFill(color, index) {
 		if (!initialPathsReceived) { return; }
+        // dont set text colorFill to null, this is equivalent to setting a
+        // shapes strokeColor to null.
         if (color || paths[index].path.data.type != 'text') {
     		console.log('index of path to fill: ' + index);
             console.log('color: ' + color);
+            // change the color of the path
     		paths[index].path.fillColor = color;
+            // serialize updated path and send to server to be saved on sererside
             let updatedPath = serializedPathsItem(paths[index]).path;
             socket.emit('confirmPathUpdated', updatedPath, index, user);
         }
@@ -732,18 +752,17 @@ export function paperSockets() {
 		let path = pathsItem.path;
 		let pathName = pathsItem.pathName;
 		let pathInd = null;			// index of path in paths array on client and server
-		let entered = false;		// stops 'leave' event from firing when object is created
 		// mouseEnter and mouseLeave used to make path 'pop' when hovered over
 		path.onMouseEnter = function (event) {
-			if (!entered) {
-				entered = true;
+			if (!path.data.scaled) {
 				path.strokeWidth = path.strokeWidth + attributes.scale;
+                path.data.scaled = true;
 			}
 		}
 		path.onMouseLeave = function (event) {
-			if (entered) {
-				entered = false;
+			if (path.data.scaled) {
 				path.strokeWidth = path.strokeWidth - attributes.scale;
+                path.data.scaled = false;
 			}
 		}
 		// called when path is clicked on
