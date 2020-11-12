@@ -54,6 +54,7 @@ async function handleShutdown() {
         try {
             // add session name and session paths to DB document
             await pathsRef.set({
+                date_saved: new Date(),
                 sessionID: sessionName,
                 edits: pathsItem
             }, { merge: true });
