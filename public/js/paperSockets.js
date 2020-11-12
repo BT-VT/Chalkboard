@@ -219,11 +219,18 @@ export function paperSockets() {
     // event listener called when a keyboard key is pressed
 	tool.onKeyDown = (event) => {
 		console.log(event.key + ' key was pressed');
+        console.log(getDrawingTool());
         // a list of keys to ignore default actions for
         let keys = ['backspace', 'space', 'l', 'left', 'right'];
-		if(keys.includes(event.key)) {
-			event.preventDefault();
+        // a list of attributes that use keyboard keys, if one is being used,
+        // the keys in the keys array should have their default actions prevented
+        let attrs = [drawingTools.colorFill, drawingTools.grab, drawingTools.text];
+        const hasTrueVal = (acc, curVal) => acc || curVal;
+
+        if(keys.includes(event.key) && attrs.reduce(hasTrueVal)) {
+            event.preventDefault();
         }
+
         // if the text box is selected and this user owns the lock, aka has
         // clicked on the canvas to create a PointText / claim the lock, Then
         // edit the PointText accordingly
