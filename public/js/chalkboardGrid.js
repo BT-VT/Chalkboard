@@ -94,6 +94,11 @@ function chalkboardGrid() {
                 //row.getElementById("first");
                 //img.src = data.img;
                 col.appendChild(a);
+                let chalkboard_title = data.title;
+                let title_ele = document.createElement("div");
+                title_ele.classList.add("grid-title");
+                title_ele.innerHTML = data.title;
+                col.appendChild(title_ele);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
