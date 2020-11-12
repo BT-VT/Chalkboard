@@ -1,5 +1,5 @@
 window.globalVar = "";
-window.selectedColor = "";
+window.selectedColor = '#000000';
 
 import User from "./user.js";
 
@@ -525,7 +525,9 @@ export function paperSockets() {
 			return;
 		}
 		curPath.simplify();
-		// add new path to paths array
+        curPath.data.type = 'path';
+        curPath.data.id = pathID;
+		// add new path to paths array as path Item
 		let pathsItem = {
 			pathName: 'path-' + pathID,
 			path: curPath
@@ -549,6 +551,9 @@ export function paperSockets() {
 		if (!initialPathsReceived) { return; }
 		curPath.dashArray = null;
 		curPath.onFrame = null;
+        curPath.data.type = 'circle';
+        curPath.data.id = pathID;
+        // add new path to paths array as pathItem
 		let pathsItem = {
 			pathName: 'circle-' + pathID,
 			path: curPath
@@ -565,11 +570,14 @@ export function paperSockets() {
 
 	function finishRect(pathID, isEllipse) {
 		if (!initialPathsReceived) { return; }
-		curPath.dashArray = null;
-		let type = isEllipse ? 'ellipse-' : 'rect-';
+		let type = isEllipse ? 'ellipse' : 'rect';
 
+        curPath.dashArray = null;
+        curPath.data.type = type;
+        curPath.data.id = pathID;
+        // add new path to paths array as pathItem
 		let pathsItem = {
-			pathName: type + pathID,
+			pathName: type + '-' + pathID,
 			path: curPath
 		}
 		setPathFunctions(pathsItem, attributes.scale);
@@ -585,6 +593,8 @@ export function paperSockets() {
 	function finishTriangle(pathID) {
 		if (!initialPathsReceived) { return; }
 		curPath.dashArray = null;
+        curPath.data.type = 'triangle';
+        curPath.data.id = pathID;
 		let pathsItem = {
 			pathName: 'triangle-' + pathID,
 			path: curPath
@@ -602,6 +612,8 @@ export function paperSockets() {
 	function finishLine(pathID) {
 		if (!initialPathsReceived) { return; }
 		curPath.dashArray = null;
+        curPath.data.type = 'line';
+        curPath.data.id = pathID;
 		let pathsItem = {
 			pathName: 'line-' + pathID,
 			path: curPath
@@ -619,6 +631,8 @@ export function paperSockets() {
     function finishText(pathID) {
         if (!initialPathsReceived) { return; }
         curPath.data.bounds.remove();
+        curPath.data.type = 'text';
+        curPath.data.id = pathID;
         let pathsItem = {
             pathName: 'text-' + pathID,
             path: curPath
@@ -649,13 +663,22 @@ export function paperSockets() {
 	// callback for changing stroke color of a path
 	function newStrokeColor(color, index) {
 		if(!initialPathsReceived) { return; }
-		paths[index].path.strokeColor = color;
+        if(paths[index].path.data.type != 'text') {
+            paths[index].path.strokeColor = color;
+            let updatedPath = serializedPathsItem(paths[index]).path;
+            socket.emit('confirmPathUpdated', updatedPath, index, user);
+        }
 	}
 	// callback for changing fill color of a path
 	function colorFill(color, index) {
 		if (!initialPathsReceived) { return; }
-		console.log('index of path to fill: ' + index);
-		paths[index].path.fillColor = color;
+        if (color || paths[index].path.data.type != 'text') {
+    		console.log('index of path to fill: ' + index);
+            console.log('color: ' + color);
+    		paths[index].path.fillColor = color;
+            let updatedPath = serializedPathsItem(paths[index]).path;
+            socket.emit('confirmPathUpdated', updatedPath, index, user);
+        }
 	}
 
 	// called when socket receives 'deleteLastPath' message from server. sent
@@ -775,7 +798,7 @@ export function paperSockets() {
 			// its new coordinates. Then send it to the server so the server can
 			// update its paths array.
 			let updatedPath = serializedPathsItem(paths[pathInd]).path;
-			socket.emit('confirmPathMoved', updatedPath, pathInd, user);
+			socket.emit('confirmPathUpdated', updatedPath, pathInd, user);
 		}
 	}
 

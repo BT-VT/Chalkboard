@@ -306,7 +306,7 @@ io.on('connection', (socket) => {
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
     // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
-    socket.on('confirmPathMoved', async (updatedPath, index, user) => {
+    socket.on('confirmPathUpdated', async (updatedPath, index, user) => {
 
         sessions.get(user.sessionID)[index].path = updatedPath;
         // always check for new users before letting a client release the lock
