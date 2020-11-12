@@ -50,13 +50,13 @@ async function handleShutdown() {
     // save paths array to db
     for(let [sessionName, pathsItem] of sessions) {
         // create new DB document with title == sessionName in ChalkboardStates collection
-        const pathsRef = db.collection('ChalkboardStates').doc(sessionName);
+        const pathsRef = db.collection('chalkboards').doc(sessionName);
         try {
             // add session name and session paths to DB document
             await pathsRef.set({
                 sessionID: sessionName,
-                pathsItem: pathsItem
-            });
+                edits: pathsItem
+            }, { merge: true });
             console.log('saved chalkboard session ' + sessionName + ' state to database.');
         }
         catch(err) {
