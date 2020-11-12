@@ -867,6 +867,10 @@ export function paperSockets() {
 	var selectedFile;
 	if (uploadBtn) {
 		uploadBtn.addEventListener('click', async (e) => {
+            if(user.sessionID == 'default') {
+                console.log('cannot save default page');
+                return;
+            }
 			console.log("test uploadbtn with events");
 			//selectedFile = e.target.files[0];
 			//let i = 0;
@@ -889,7 +893,7 @@ export function paperSockets() {
 			image = image.split(',');
 			let uploadTask = storageRef.child('chalkboards/' + imageId).putString(image[1], "base64", { contentType: 'image/png' });
 
-			
+
 			uploadTask.on(
 				firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
 				function (snapshot) {
@@ -917,12 +921,12 @@ export function paperSockets() {
 					  // User doesn't have permission to access the object
 					  alert("Permission denied." + error);
 					  break;
-		
+
 					case "storage/canceled":
 					  // User canceled the upload
 					  alert("Cancelled upload" + error);
 					  break;
-		
+
 					case "storage/unknown":
 					  // Unknown error occurred, inspect error.serverResponse
 					  alert("Unknown error: " + error);
