@@ -1,6 +1,14 @@
-// set up express server
 
 const { v4: uuidv4 } = require('uuid');
+
+// set up firestore connection
+const admin = require('firebase-admin');
+const serviceAccount = require('./chalkboardPrivate/ServiceAccountKey.json');
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+const db = admin.firestore();
+// set up express server
 var express = require("express");
 var app = express();
 var portNum = process.env.PORT || '5000';
@@ -15,7 +23,10 @@ console.log("server running on port: " + portNum);
 
 // set up socket.io on express server
 var io = require("socket.io")(server);
-var paths = [];    // paths = [[pathName, obj], ... , [pathName, obj]]
+
+// the pathObj in the paths array on the server is serialized, and is in a JSON string format. This allows
+// it to be stored in the FireStore database.
+var paths = [];    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
 var newUsers = []; // new socket connections waiting to add existing paths
 let LOCKED = false;
 
@@ -28,6 +39,34 @@ app.get("/:room", (req, res) => {
     webRoom = req.params.room;
     res.sendFile(__dirname + "/public/index.html");
 });
+
+// listeners for (ctrl + c) server termination.
+process.on('SIGINT', handleShutdown);
+process.on('SIGTERM', handleShutdown);
+
+// called when server shuts down. put tasks for graceful shutdown in here.
+async function handleShutdown() {
+    console.log('\nclosing server');
+    // save paths array to db
+    for(let [sessionName, pathsItem] of sessions) {
+        // create new DB document with title == sessionName in ChalkboardStates collection
+        const pathsRef = db.collection('ChalkboardStates').doc(sessionName);
+        try {
+            // add session name and session paths to DB document
+            await pathsRef.set({
+                sessionID: sessionName,
+                pathsItem: pathsItem
+            });
+            console.log('saved chalkboard session ' + sessionName + ' state to database.');
+        }
+        catch(err) {
+            console.log('error saving chalkboard session ' + sessionName + ' state to database...');
+            console.log(err);
+        };
+    }
+
+    process.exit();
+}
 
 // called when new client socket connection first established
 
@@ -49,10 +88,10 @@ function checkForNewUsers(socket) {
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
-   
+
          socket.emit("updateRoom", webRoom);
          webRoom = "default";
-    
+
 
 
     // ================ CANVAS HANDLING =========================
@@ -98,14 +137,26 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('drawTrackingLine', lineAttr);
     });
 
+    socket.on('requestPointText', (pointTextAttr, user) => {
+        io.to(user.sessionID).emit('setPointText', pointTextAttr);
+    });
+
+    socket.on('requestTextBackspace', (lockOwner, user) => {
+        io.to(user.sessionID).emit('textBackspace', lockOwner);
+    });
+
+    socket.on('requestAddTextChar', (lockOwner, char, user) => {
+        io.to(user.sessionID).emit('addTextChar', lockOwner, char);
+    });
+
     socket.on('requestErase', (pathName, user) => {
         console.log('request erase ' + pathName);
         io.to(user.sessionID).emit('erasePath', pathName);
     });
     socket.on('confirmErasePath', async (pathName, user) => {
         console.log('confirm erase ' + pathName);
-        // remove path from paths item array
-        sessions.set(user.sessionID, sessions.get(user.sessionID).filter(pathsItem => pathsItem[0] != pathName));
+        // remove path from paths array of path item objects (pathsItem = {pathName: pathName, path: pathObj})
+        sessions.set(user.sessionID, sessions.get(user.sessionID).filter(pathsItem => pathsItem.pathName != pathName));
     });
 
     // called when mouseup event is detected by client. creates pathID and
@@ -135,6 +186,11 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('finishLine', pathID);
     });
 
+    socket.on('requestFinishText', (user) => {
+        let pathID = uuidv4();
+        io.to(user.sessionID).emit('finishText', pathID);
+    });
+
     socket.on('requestFinishErasing', async (user) => {
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -148,22 +204,24 @@ io.on('connection', (socket) => {
     // pathData = { pathName: path-pathID, path: ['Path', pathObj] }
     socket.on('confirmDrawingDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        let pathObj = pathData.path;
+
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        console.log(socket.id + ' ended drawing, LOCKED set to: ' + LOCKED);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmCircleDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -175,9 +233,9 @@ io.on('connection', (socket) => {
     // pathData = { pathName: rect-pathID, path: ['Path', pathObj] }
     socket.on('confirmRectDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -189,9 +247,9 @@ io.on('connection', (socket) => {
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmTriangleDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -203,9 +261,9 @@ io.on('connection', (socket) => {
     // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
     socket.on('confirmLineDone', async (pathData, user) => {
         let pathName = pathData.pathName;
-        let pathObj = pathData.path[1];
+        let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).push([pathName, pathObj]);
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
 
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -214,16 +272,41 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
-    socket.on('requestPathMove', (newPosition, index,user) => {
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
+    socket.on('confirmTextDone', async (pathData, user) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path;
+        sessions.get(user.sessionID).push({pathName: pathName, path: pathObj});
+
+        await checkForNewUsers(socket);
+        // if no new users are waiting, unlock all users canvas's.
+        LOCKED = false;
+        console.log('end text, LOCKED set to: ' + LOCKED);
+        io.to(user.sessionID).emit('unlockCanvas', socket.id);
+    });
+
+    socket.on('requestPathMove', (newPosition, index, user) => {
         io.to(user.sessionID).emit('movePath',newPosition, index);
+    });
+
+    socket.on('requestPathRotate', (degrees, index, user) => {
+        io.to(user.sessionID).emit('rotatePath', degrees, index);
+    });
+
+    socket.on('requestNewStrokeColor', (color, index, user) => {
+        io.to(user.sessionID).emit('newStrokeColor', color, index);
+    });
+
+    socket.on('requestColorFill', (color, index, user) => {
+        io.to(user.sessionID).emit('colorFill', color, index);
     });
 
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
-    // paths = [[pathName, obj], ... , [pathName, obj]]
-    socket.on('confirmPathMoved', async (newPosition, index, user) => {
+    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
+    socket.on('confirmPathMoved', async (updatedPath, index, user) => {
 
-        sessions.get(user.sessionID)[index][1].position = newPosition;
+        sessions.get(user.sessionID)[index].path = updatedPath;
         // always check for new users before letting a client release the lock
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -233,12 +316,12 @@ io.on('connection', (socket) => {
 
     // received by client when 'undo' button is clicked. If there is a path to
     // undo, pop it from the paths array and send message for clients to remove
-    // the path. paths = [[pathName, obj], ... , [pathName, obj]]
+    // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
     socket.on('undo', (user) => {
         if(sessions.get(user.sessionID).length > 0) {
-            let pathArray = sessions.get(user.sessionID).pop();
-            console.log('removing ' + pathArray[0]);
-            io.to(user.sessionID).emit('deleteLastPath', pathArray[0]);
+            let pathsItem = sessions.get(user.sessionID).pop();
+            console.log('removing ' + pathsItem.pathName);
+            io.to(user.sessionID).emit('deleteLastPath', pathsItem.pathName);
         }
     });
 
@@ -289,14 +372,14 @@ io.on('connection', (socket) => {
          //   sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
           //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+            console.log('sending paths to client joining session...')
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
-            //  console.log(sessions.get(user.sessionID))
         } else {
             sessions.set(user.sessionID, []);
             socket.join(user.sessionID);
           //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+          console.log('sending paths to client joining new session...')
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
-            //  console.log(sessions.get(user.sessionID))
         }
     });
 

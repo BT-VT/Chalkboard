@@ -30,6 +30,7 @@
     "@simonwep/pickr": "^1.7.4",
     "canvas": "^2.6.1",
     "express": "^4.17.1",
+    "firebase-admin": "^9.3.0",
     "jest": "^26.5.3",
     "materialize-css": "^1.0.0-rc.2",
     "paper": "^0.12.11",
