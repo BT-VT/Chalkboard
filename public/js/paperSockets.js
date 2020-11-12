@@ -1,5 +1,6 @@
 window.globalVar = "";
 window.selectedColor = "";
+window.fontSizeGlobal = "";
 
 import User from "./user.js";
 
@@ -77,13 +78,22 @@ export function paperSockets() {
   // paths array on server
   let paths = []; // paths = [ {pathName: "pathN", path: Path} ]
   let curPath = new paper.Path();
+  var slider = document.getElementById("slider");
+  slider.addEventListener("input", sliderChange);
+  var sliderSize;
+  window.globalSlideSize = "";
+  function sliderChange() {
+    sliderSize = this.value;
+    attributes.fontSize = sliderSize;
+    console.log(sliderSize);
+  }
 
   let attributes = {
     multicolor: selectedColor,
     strokeWidth: 5,
     strokeCap: "round",
     fontFamily: "Courier New",
-    fontSize: 14,
+    //fontSize: sliderChange(),
     dashOffset: 1,
     scale: 2,
     rotation: 1,
