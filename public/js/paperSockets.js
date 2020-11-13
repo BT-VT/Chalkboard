@@ -80,14 +80,23 @@ export function paperSockets() {
 	// global array of objects containing info about each path drawn. similar to
 	// paths array on server
 	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
-	let curPath = new paper.Path();
+  let curPath = new paper.Path();
+  var slider = document.getElementById("slider");
+  slider.addEventListener("input", sliderChange);
+  var sliderSize;
+  function sliderChange() {
+    sliderSize = this.value;
+    attributes.fontSize = sliderSize;
+    attributes.strokeWidth = sliderSize;
+    console.log(sliderSize);
+  }
 
 	let attributes = {
 		multicolor: false,
-		strokeWidth: 5,
+		//strokeWidth: 5,
 		strokeCap: 'round',
         fontFamily: 'Courier New',
-        fontSize: 14,
+        //fontSize: 14,
 		dashOffset: 1,
 		scale: 2,
 		rotation: 1
@@ -273,19 +282,24 @@ export function paperSockets() {
 				socket.emit('requestNewDrawing', pathAttr, user);
 			}
 			else if (drawingTools.circle) {
+        let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.rect || drawingTools.ellipse) {
+        let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.triangle) {
+        let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.line) {
+        let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
             else if (drawingTools.text) {
-                socket.emit('requestLock', user);
+              let pathAttr = getPathAttributes(attributes.multicolor);
+              socket.emit('requestLock', user);
             }
 			else if (drawingTools.eraser) {
 				socket.emit('requestLock', user);
@@ -318,7 +332,7 @@ export function paperSockets() {
 				radius: Math.round(event.downPoint.subtract(event.point).length),
 				dashArray: [2, 2],
 				strokeColor: window.selectedColor,
-                strokeWidth: attributes.strokeWidth
+        strokeWidth: attributes.strokeWidth
 			}
 			socket.emit('requestTrackingCircle', circleAttr, user);
 		}
@@ -435,7 +449,7 @@ export function paperSockets() {
             txt.data.bounds.style = {
                 dashArray: [2, 2],
                 strokeColor: 'red',
-                strokeWidth: 2
+                strokeWidth: attributes.strokeWidth
             }
             // make dashes animated
             txt.data.bounds.onFrame = function (event) {
@@ -770,13 +784,13 @@ export function paperSockets() {
 		// mouseEnter and mouseLeave used to make path 'pop' when hovered over
 		path.onMouseEnter = function (event) {
 			if (!path.data.scaled) {
-				path.strokeWidth = path.strokeWidth + attributes.scale;
+				path.strokeWidth = Number(path.strokeWidth) + attributes.scale;
                 path.data.scaled = true;
 			}
 		}
 		path.onMouseLeave = function (event) {
 			if (path.data.scaled) {
-				path.strokeWidth = path.strokeWidth - attributes.scale;
+				path.strokeWidth = Number(path.strokeWidth) - attributes.scale;
                 path.data.scaled = false;
 			}
 		}
