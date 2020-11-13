@@ -11,4 +11,4 @@ Grab Hand:
 - rotate object right: hold down 'right arrow', click down on object and drag mouse
 
 Text:
-- add text: click mouse on chalkboard to choose a starting location. Begin typing and hit enter when complete
+- add text: click mouse on chalkboard to choose a starting location. Begin typing and hit "shift + enter" when complete

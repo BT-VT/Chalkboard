@@ -221,7 +221,7 @@ export function paperSockets() {
 		console.log(event.key + ' key was pressed');
         console.log(getDrawingTool());
         // a list of keys to ignore default actions for
-        let keys = ['backspace', 'space', 'l', 'left', 'right'];
+        let keys = ['backspace', 'space', 'l', 'left', 'right', "'", 'enter'];
         // a list of attributes that use keyboard keys, if one is being used,
         // the keys in the keys array should have their default actions prevented
         let attrs = [drawingTools.colorFill, drawingTools.grab, drawingTools.text];
@@ -237,7 +237,7 @@ export function paperSockets() {
         if(LOCKED == socket.id){
             console.log('current text: ' + curPath.content);
             // the enter key ends text editing and releases the lock
-            if(event.key == 'enter') {
+            if(paper.Key.isDown('shift') && paper.Key.isDown('enter')) {
                 socket.emit('requestFinishText', user);
             }
             // remove the last char in the text box
