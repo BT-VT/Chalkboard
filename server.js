@@ -296,11 +296,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('requestNewStrokeColor', (color, index, user) => {
-        io.to(user.sessionID).emit('newStrokeColor', color, index);
+        io.to(user.sessionID).emit('newStrokeColor', color, index, socket.id);
     });
 
     socket.on('requestColorFill', (color, index, user) => {
-        io.to(user.sessionID).emit('colorFill', color, index);
+        io.to(user.sessionID).emit('colorFill', color, index, socket.id);
     });
 
     // called when lock owner releases a path that was being moved. notifies

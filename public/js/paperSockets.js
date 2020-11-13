@@ -261,6 +261,7 @@ export function paperSockets() {
         console.log('adding char to text');
         if(!initialPathsReceived || LOCKED != lockOwner) { return }
         curPath.content += char;
+        // adjust the boundary box using custom func attached to path
         curPath.data.setBounds(curPath);
     }
 
@@ -412,6 +413,9 @@ export function paperSockets() {
 		}
 	}
 
+    // called when setPointText is received from server.
+    // creates a new paper.js text object at a location specified by the user.
+    // the location and all attributes are stored in pointTextAttr..
     function setPointText(pointTextAttr) {
         if (!initialPathsReceived) { return; }
         // remove existing path, including boundary rectangle if new PointText
@@ -421,11 +425,12 @@ export function paperSockets() {
         // create new textPoint, add red dashed bounding rectangle to show
         // text box while text is still being edited
         curPath = new paper.PointText(pointTextAttr);
-        // create a function that will reset the bounding rectangle when called
+        // create a function that will reset the bounding rectangle of text
+        // when called
         curPath.data.setBounds = (txt) => {
-            // remove existing bounding rectangle
+            // remove existing bounding rectangle if one exists
             if(txt.data.bounds) { txt.data.bounds.remove(); }
-            // create new one
+            // create new one based on bounds of text (provided by paper.js)
             txt.data.bounds = new paper.Path.Rectangle(txt.bounds);
             txt.data.bounds.style = {
                 dashArray: [2, 2],
@@ -680,27 +685,34 @@ export function paperSockets() {
 	}
 	// callback for changing stroke color of a path.
     // check colorFill() for details
-	function newStrokeColor(color, index) {
+	function newStrokeColor(color, index, owner) {
 		if(!initialPathsReceived) { return; }
+        // change stroke color of path
         if(paths[index].path.data.type != 'text') {
             paths[index].path.strokeColor = color;
-            let updatedPath = serializedPathsItem(paths[index]).path;
-            socket.emit('confirmPathUpdated', updatedPath, index, user);
+            if(socket.id == owner) {
+                let updatedPath = serializedPathsItem(paths[index]).path;
+                socket.emit('confirmPathUpdated', updatedPath, index, user);
+            }
         }
 	}
-	// callback for changing fill color of a path
-	function colorFill(color, index) {
+	// callback for changing fill color of a path, or text color. Also removes
+    // fill color or text bounds box
+	function colorFill(color, index, owner) {
 		if (!initialPathsReceived) { return; }
+        console.log('change path color to: ' + color);
         // dont set text colorFill to null, this is equivalent to setting a
         // shapes strokeColor to null.
         if (color || paths[index].path.data.type != 'text') {
-    		console.log('index of path to fill: ' + index);
-            console.log('color: ' + color);
             // change the color of the path
     		paths[index].path.fillColor = color;
-            // serialize updated path and send to server to be saved on sererside
-            let updatedPath = serializedPathsItem(paths[index]).path;
-            socket.emit('confirmPathUpdated', updatedPath, index, user);
+            // if this is the client who requested the color change, notify server
+            if(socket.id == owner) {
+                console.log('sending updated path to server');
+                // serialize updated path and send to server to be saved on sererside
+                let updatedPath = serializedPathsItem(paths[index]).path;
+                socket.emit('confirmPathUpdated', updatedPath, index, user);
+            }
         }
 	}
 
@@ -816,6 +828,7 @@ export function paperSockets() {
 		// called when path is 'released' from drag
 		path.onMouseUp = function (event) {
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
+            console.log('up event on specific path, should only be called when tool = grab');
 			// get the serialized version of the path that was moved, which contains
 			// its new coordinates. Then send it to the server so the server can
 			// update its paths array.
