@@ -1,147 +1,157 @@
 body {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  min-width: 100%;
-  background-color: #283333;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    min-width: 100%;
+    background-color: #283333;
 }
 #navbar {
-  height: 10vh;
+    height: 10vh;
 }
 
 #navProgress {
-  color: gray;
-  font-size: large;
-  padding-left: 25%;
+    color: gray;
+    font-size: large;
+    padding-left: 25%;
 }
 
 #header {
-  position: fixed;
-  width: 100%;
-  z-index: 10;
-  /*border: 2px solid #ff4500;/* */
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+    /*border: 2px solid #ff4500;/* */
 }
 
 #title {
-  padding: 8px;
-  margin-top: 0px;
-  white-space: nowrap;
+    padding: 8px;
+    margin-top: 0px;
+    white-space: nowrap;
 }
 
 .brand-logo {
-  position: fixed;
+    position: fixed
 }
 
+
 #canvas-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 .toolbox {
-  display: flex;
-  flex-direction: column;
-  justify-content: top;
-  height: 90vh;
-  background-color: #a0a0a0;
-  overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    height: 90vh;
+    background-color: #a0a0a0;
+    overflow-y: auto;
 }
 .toolbox .group {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: #a0a0a0;
-  border-bottom: thin solid gray;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #a0a0a0;
+    border-bottom: thin solid gray;
 }
 .toolbox .group .item {
-  display: flex;
-  width: 42px;
-  height: 48px;
-  padding: 4px;
-  cursor: pointer;
+    display: flex;
+    width: 42px;
+    height: 48px;
+    padding: 4px;
+    cursor: pointer;
 }
 .toolbox .group .item img {
-  width: 18px;
-  height: 18px;
-  filter: invert(1);
-  margin: auto;
+    width: 18px;
+    height: 18px;
+    filter: invert(1);
+    margin: auto;
 }
-.video {
-  height: 300px;
-  width: 300px;
+.video{
+    height: 300px;
+    width: 300px;
 }
 .toolbox .group .item.active,
 .toolbox .group .item:hover {
-  background-color: #4b6161;
+    background-color: #4b6161;
 }
 .toolbox .group.stroks .item {
-  position: relative;
+    position: relative;
 }
 .toolbox .group.stroks .item .stroke {
-  position: absolute;
-  background-color: #fff;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  left: 50%;
+    position: absolute;
+    background-color: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
 }
 .toolbox .group.colors .item .swatch {
-  margin: auto;
-  box-sizing: border-box;
-  width: 100%;
-  height: 18px;
-  border: 1px #fff solid;
+    margin: auto;
+    box-sizing: border-box;
+    width: 100%;
+    height: 18px;
+    border: 1px #fff solid;
 }
 
 #canvas {
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #fff;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
 }
+
 
 #message-container {
-  background: #ccc;
-  padding: 20px;
-  width: 355px;
-  height: 300px;
-  max-height: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  border: 1px solid black;
-  overflow-y: auto;
-  bottom: 15.5%;
-  right: 2%;
-  position: fixed;
-  display: none;
-}
+    background: #ccc;
+    padding: 20px;
+    width: 355px;
+    height: 300px;
+    max-height: 300px;
+    display: flex;
+    flex-direction:column;
+    align-items: flex-start;
+    border: 1px solid black;
+    overflow-y: auto;
+    bottom: 15.5%;
+    right: 2%;
+    position:fixed;
+    display: none;
+  }
 
-#send-container {
-  position: fixed;
-  bottom: 10%;
-  width: 355px;
-  right: 2%;
-  display: none;
-}
+  #send-container {
+      position: fixed;
+      bottom:10%;
+      width: 355px;
+      right: 2%;
+      display: none;
+  }
 
-#hide-display {
-  position: fixed;
-  bottom: 6%;
-  right: 2%;
-}
+  #hide-display {
+      position: fixed;
+      bottom: 6%;
+      right: 2%;
+  }
 
-#whoIsTyping {
-  position: fixed;
-  color: white;
-  bottom: 13.5%;
-  right: 2%;
-  display: none;
-}
+  #whoIsTyping {
+      position: fixed;
+      color: white;
+      bottom: 13.5%;
+      right: 2%;
+      display: none;
+  }
 
-#message-input {
-  color: white;
-}
 
-.extendList {
-  margin-bottom: 500%;
-}
+  #message-input {
+      color: white;
+  }
+
+  #chalkboard-title {
+      width: 15%;
+      padding-left: 16px;
+      font-size: large;
+  }
+
+  .grid-title {
+      font-size: 20px;
+      font-weight: bold;
+  }

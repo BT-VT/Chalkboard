@@ -61,7 +61,7 @@ function chalkboardGrid() {
             //resolve('image displayed');
             //create a new row if there are an even number of chalkboards
             if (numChalkboards % 2 == 0) {
-                console.log("# of chalkboards: " + numChalkboards);
+                //console.log("# of chalkboards: " + numChalkboards);
                 var row = document.createElement("div");
                 row.classList.add("row");
                 //row.setAttribute("id", "first");
@@ -70,6 +70,11 @@ function chalkboardGrid() {
                 var col = document.createElement("div");
                 col.classList.add("col50");
                 col.appendChild(a);
+                let chalkboard_title = data.title;
+                let title_ele = document.createElement("div");
+                title_ele.classList.add("grid-title");
+                title_ele.innerHTML = data.title;
+                col.appendChild(title_ele);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
@@ -80,7 +85,7 @@ function chalkboardGrid() {
             }
             //or append to existing row
             else {
-                console.log("# of chalkboards: " + numChalkboards);
+                //console.log("# of chalkboards: " + numChalkboards);
                 var arr = document.getElementById("grid").getElementsByClassName("row");
                 var row = arr[arr.length - 1];
                 var col = document.createElement("div");
@@ -89,6 +94,11 @@ function chalkboardGrid() {
                 //row.getElementById("first");
                 //img.src = data.img;
                 col.appendChild(a);
+                let chalkboard_title = data.title;
+                let title_ele = document.createElement("div");
+                title_ele.classList.add("grid-title");
+                title_ele.innerHTML = data.title;
+                col.appendChild(title_ele);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();

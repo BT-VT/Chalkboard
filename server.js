@@ -49,14 +49,16 @@ async function handleShutdown() {
     console.log('\nclosing server');
     // save paths array to db
     for(let [sessionName, pathsItem] of sessions) {
+        if(sessionName == 'default') { continue; }
         // create new DB document with title == sessionName in ChalkboardStates collection
-        const pathsRef = db.collection('ChalkboardStates').doc(sessionName);
+        const pathsRef = db.collection('chalkboards').doc(sessionName);
         try {
             // add session name and session paths to DB document
             await pathsRef.set({
+                date_saved: new Date(),
                 sessionID: sessionName,
-                pathsItem: pathsItem
-            });
+                edits: pathsItem
+            }, { merge: true });
             console.log('saved chalkboard session ' + sessionName + ' state to database.');
         }
         catch(err) {
@@ -294,17 +296,17 @@ io.on('connection', (socket) => {
     });
 
     socket.on('requestNewStrokeColor', (color, index, user) => {
-        io.to(user.sessionID).emit('newStrokeColor', color, index);
+        io.to(user.sessionID).emit('newStrokeColor', color, index, socket.id);
     });
 
     socket.on('requestColorFill', (color, index, user) => {
-        io.to(user.sessionID).emit('colorFill', color, index);
+        io.to(user.sessionID).emit('colorFill', color, index, socket.id);
     });
 
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
     // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
-    socket.on('confirmPathMoved', async (updatedPath, index, user) => {
+    socket.on('confirmPathUpdated', async (updatedPath, index, user) => {
 
         sessions.get(user.sessionID)[index].path = updatedPath;
         // always check for new users before letting a client release the lock
@@ -363,23 +365,40 @@ io.on('connection', (socket) => {
 
 
 
-    socket.on("joinSession", (user, prevSession) =>  {
-            if (prevSession != null)
-                socket.leave(prevSession);
+    socket.on("joinSession", async (user, prevSession) =>  {
+        if (prevSession != null)
+            socket.leave(prevSession);
 
-    // checking to see if the session exists, but for now just create one if it doesn't exist
-          if (sessions.has(user.sessionID)) {
-         //   sessions.get(user.sessionID).push(user);
+        // check if session already exists on server
+        if (sessions.has(user.sessionID)) {
+            //   sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
-          //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
-            console.log('sending paths to client joining session...')
+            //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+            console.log('sending paths to client joining session on...')
             io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
         } else {
-            sessions.set(user.sessionID, []);
-            socket.join(user.sessionID);
-          //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
-          console.log('sending paths to client joining new session...')
-            io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
+            try {
+                // check if session exists in dB. If it does, add it to the server and
+                // add the user to the session, else create a new session and add the user.
+                const docRef = db.collection('chalkboards').doc(user.sessionID);
+                const docObj = await docRef.get();
+                if(docObj && docObj.exists) {
+                    const sessObj = docObj.data();
+                    sessions.set(user.sessionID, sessObj.edits);
+                    console.log('sending paths to client joining session from dB: ' + user.sessionID);
+
+                }
+                else {
+                    sessions.set(user.sessionID, []);
+                    console.log('sending paths to client joining new session: ' + user.sessionID);
+                }
+                socket.join(user.sessionID);
+                io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID));
+                //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+            }
+            catch(err) {
+                console.log("error retreiving session from dB: ", err);
+            }
         }
     });
 
