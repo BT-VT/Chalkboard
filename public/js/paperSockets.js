@@ -1193,7 +1193,7 @@ export function paperSockets() {
 			if(setDrawingTool('text')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         textBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "auto";
+        document.querySelector('#canvas').style.cursor = "text";
 				console.log('text selected!');
 			}
 			else { console.log('failed to select text'); }

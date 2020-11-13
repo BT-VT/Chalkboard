@@ -46,9 +46,26 @@ function home() {
             </div>
         `;
 
-  var ele = document.createElement("div");
+/* vertical bar
+<div class="item" id="text" data-tool="text" title="Text Tool"><img src="images/text-icon.png">
+    <li>
+        <input
+          id="slider"
+          type="range"
+          min="1"
+          max="100"
+          value="50"
+          step="2"
+          style="-webkit-transform: rotate(90deg)"
+          orient="vertical"
+        />
+      </li>
+    </div>
+    */
+var ele = document.createElement("div");
   ele.setAttribute("id", "canvas-container");
   ele.setAttribute("style", "z-index: 10");
   ele.innerHTML = content;
   return ele;
 }
+
