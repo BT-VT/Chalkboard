@@ -1080,7 +1080,8 @@ export function paperSockets() {
 		markerBtn.onclick = function () {
 			if (setDrawingTool('marker')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				markerBtn.classList.toggle("active");
+        markerBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "url(images/pencil_2.png), auto";
 				console.log('marker selected');
 			}
 			else { console.log('failed to select marker'); }
@@ -1093,7 +1094,8 @@ export function paperSockets() {
 		circleBtn.onclick = function () {
 			if (setDrawingTool('circle')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				circleBtn.classList.toggle("active");
+        circleBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('circle selected!');
 			}
 			else { console.log('failed to select circle'); }
@@ -1106,7 +1108,8 @@ export function paperSockets() {
 		ellipseBtn.onclick = function () {
 			if (setDrawingTool('ellipse')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				ellipseBtn.classList.toggle("active");
+        ellipseBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('ellipse selected!');
 			}
 			else { console.log('failed to select ellipse'); }
@@ -1118,10 +1121,9 @@ export function paperSockets() {
 	if (rectBtn) {
 		rectBtn.onclick = function () {
 			if (setDrawingTool('rect')) {
-
-
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				rectBtn.classList.toggle("active");
+        rectBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('rectangle selected!');
 			}
 			else { console.log('failed to select rectange'); }
@@ -1134,7 +1136,8 @@ export function paperSockets() {
 		triangleBtn.onclick = function () {
 			if (setDrawingTool('triangle')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				triangleBtn.classList.toggle("active");
+        triangleBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('triangle selected!');
 			}
 			else { console.log('failed to select triangle'); }
@@ -1147,7 +1150,8 @@ export function paperSockets() {
 		lineBtn.onclick = function() {
 			if(setDrawingTool('line')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				lineBtn.classList.toggle("active");
+        lineBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('line selected!');
 			}
 			else { console.log('failed to select line'); }
@@ -1160,7 +1164,8 @@ export function paperSockets() {
 		fillBtn.onclick = function() {
 			if(setDrawingTool('colorFill')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				fillBtn.classList.toggle("active");
+        fillBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('color fill selected!');
 			}
 			else { console.log('failed to select color fill'); }
@@ -1173,7 +1178,8 @@ export function paperSockets() {
 		grabBtn.onclick = function() {
 			if(setDrawingTool('grab')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				grabBtn.classList.toggle("active");
+        grabBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "grab";
 				console.log('grab selected!');
 			}
 			else { console.log('failed to select grab'); }
@@ -1186,7 +1192,8 @@ export function paperSockets() {
 		textBtn.onclick = function() {
 			if(setDrawingTool('text')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				textBtn.classList.toggle("active");
+        textBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('text selected!');
 			}
 			else { console.log('failed to select text'); }
@@ -1199,7 +1206,8 @@ export function paperSockets() {
 		eraserBtn.onclick = function () {
 			if (setDrawingTool("eraser")) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
-				eraserBtn.classList.toggle("active");
+        eraserBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "url(images/eraser_2.png), auto";
 				console.log('eraser selected');
 			}
 			else { console.log('failed to select eraser'); }
