@@ -61,7 +61,7 @@ function chalkboardGrid() {
             //resolve('image displayed');
             //create a new row if there are an even number of chalkboards
             if (numChalkboards % 2 == 0) {
-                console.log("# of chalkboards: " + numChalkboards);
+                //console.log("# of chalkboards: " + numChalkboards);
                 var row = document.createElement("div");
                 row.classList.add("row");
                 //row.setAttribute("id", "first");
@@ -85,7 +85,7 @@ function chalkboardGrid() {
             }
             //or append to existing row
             else {
-                console.log("# of chalkboards: " + numChalkboards);
+                //console.log("# of chalkboards: " + numChalkboards);
                 var arr = document.getElementById("grid").getElementsByClassName("row");
                 var row = arr[arr.length - 1];
                 var col = document.createElement("div");
