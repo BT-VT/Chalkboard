@@ -9,9 +9,11 @@ function home() {
                     <div class="item download" data-command="download" title="Download">
                         <img src="images/download-icon.png" />
                     </div>
-                    <div class="item upload" data-command="upload" title="Upload">
-                        <img src="images/upload-icon.png" />
-                    </div>
+                    <a href="#modal" class="modal-trigger" data-target="modal-save" style="color: #02A6C1">
+                        <div class="item " title="Upload">
+                            <img src="images/upload-icon.png" />
+                        </div>
+                    </a>
                     <div class="item"  title="Color Picker">
                         <div class="color-picker"></div>
                 </div>
