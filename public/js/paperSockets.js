@@ -454,7 +454,7 @@ export function paperSockets() {
             txt.data.bounds.style = {
                 dashArray: [2, 2],
                 strokeColor: 'red',
-                strokeWidth: attributes.strokeWidth
+                strokeWidth: 2
             }
             // make dashes animated
             txt.data.bounds.onFrame = function (event) {
