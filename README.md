@@ -43,9 +43,9 @@ on it which is a perfect job for the path event listeners onMouseDown and onMous
 may click on it without wanting to edit the text, so we should only switch to text-edit mode if the user has selected the grab
 icon and is holding down the shift key (we can change the key that needs to be held down to start editing, I just wanted to use 
 a key that wouldnt also start appending text to the text string being edited if the user hold's it down to long after choosing
-to edit it). in the path.onMouseDown() event listener on ~813, we are already requesting the lock if the grab tool is selected
+to edit it). in the path.onMouseDown() event listener on line ~813, we are already requesting the lock if the grab tool is selected
 and the user clicks down on a path, presuming their trying to move that path. We want to request the lock for editing text as 
-well, when the grab tool is selected and the user clicks down, so we don't have to change anything here. When the lock is 
+well when the grab tool is selected and the user clicks down, so we don't have to change anything here. When the lock is 
 requested by a client, a message is sent to the server which tells it to tell all other clients the lock is now owned by the
 reqesting client, preventing everyone else from interacting with the chalkboard canvas.
 
@@ -55,26 +55,26 @@ enough time to grab the lock for the client trying to edit the text. We know we 
 tool is selected AND the shift key is held down. If both of these statements are true, then we can switch the client into 
 textEdit mode (via setDrawingTools('textEdit') which sets all tools to false except drawingTools.textEdit) and tell the server
 to send a message to all clients to begin editing a specific pre-existing text path in their 'paths' array. this is done with
-socket.emit('requestEditText', pathInd, user), where user helps the server ID the session it needs to forward the message to,
-and pathInd is a variable within the scope of setPathFunctions() that is set to the index of the path that needs to be edited
+socket.emit('requestEditText', pathInd, user), where 'user' helps the server ID the session it needs to forward the message to,
+and 'pathInd' is a variable within the scope of setPathFunctions() that is set to the index of the path that needs to be edited
 in the paths array (on both client and server, as they should mirror eachother) in the onMouseDown() function. We need to be
-able to tell every other client what text path they should edit, so we have the server pass pathInd to all clients in a 
+able to tell every other client what text path they should edit, so we have the server forward pathInd to all clients in a 
 broadcast method. This is done by the server around line 310, where it broadcasts the 'editText' message to each client.
 
 When the client receives the 'editText' message from the server it calls the editText() function (around line 120 on client).
-This function is defined at line ~454, and it used the provided index value from the server to assign the global variable 
+This function is defined at line ~454, and it uses the provided index value from the server to assign the global variable 
 curPath (which points to whatever path is currently being added/edited on the canvas) to the text path that will be edited. the 
-line that says curPath.data.setBounds(curPath) uses a function I wrote and attached to every text path which makes a dashed red 
+line that says curPath.data.setBounds(curPath) uses a function I wrote and attached to every text path, which makes a dashed red 
 rectangle around the textbox when it is being edited, this function is called every time the textbox changes size, so the box 
 around the text will change its size as well. after editText() is called, every client has put the desired text path into 'edit 
 mode'.
 
-Once each client is in edit mode, we can start allowing the editor to edit the text path. This is done by using a keyboard 
+Once each client is in edit mode, we can start allowing the editor (client) to edit the text path. This is done by using a keyboard 
 event listener provided by paper.js, tool.onKeyDown() found around line 223. every time a key is pressed, this event listener
 is fired and it checks the function it points to. If a key is pressed and that client also has drawingTools.textEdit set to
-true (which should only ever be true for one client at a time) then we know this client is trying to edit a text path that
+true (which should only ever be true for one client at a time, the editor) then we know this client is trying to edit a text path that
 has been set to the curPath variable. appending and deleting characters from the text path is the same in edit mode as it is
-in 'text' mode (drawingTools.text = true) which is used when the text path is first created. However, the way we need to handle
+in 'text' mode (when drawingTools.text = true) which is used when the text path is first created. However, the way we need to handle
 ending an edit is different than the way we handle ending a new text path. With a new text path, we need to tell every client
 to add the text path to the paths array. With a text path being edited, we need to tell every client to stop editing, but dont
 add the path that curPath refers to to the paths array because it's already in the paths array. This distinction is made around
