@@ -692,8 +692,8 @@ export function paperSockets() {
         curPath.data.bounds.remove();
         console.log(paths);
         curPath = new paper.PointText();
-        setDrawingTool('grab');
         if(LOCKED == socket.id) {
+            setDrawingTool('grab');
             let updatedPath = serializedPathsItem(paths[index]).path;
             socket.emit('confirmPathUpdated', updatedPath, index, user);
         }
