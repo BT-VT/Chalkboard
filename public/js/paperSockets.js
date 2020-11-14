@@ -103,6 +103,7 @@ export function paperSockets() {
 		colorFill: false,
 		grab: false,
         text: false,
+        textEdit: false,
 		eraser: false
 	}
 
@@ -116,6 +117,7 @@ export function paperSockets() {
 	socket.on('drawTrackingTriangle', drawTrackingTriangle);
 	socket.on('drawTrackingLine', drawTrackingLine);
     socket.on('setPointText', setPointText);
+    socket.on('editText', editText);
     socket.on('textBackspace', textBackspace);
     socket.on('addTextChar', addTextChar);
 	socket.on('erasePath', erasePath);
@@ -125,6 +127,7 @@ export function paperSockets() {
 	socket.on('finishTriangle', finishTriangle);
 	socket.on('finishLine', finishLine);
     socket.on('finishText', finishText);
+    socket.on('finishEditText', finishEditText);
 	socket.on('unlockCanvas', unlockCanvas);			// allows user to draw
 	socket.on('deleteLastPath', deleteLastPath);		// send when "undo" is clicked
 	socket.on('deleteCurPath', deleteCurPath);			// sent if lock owner is disconnected.
@@ -219,12 +222,11 @@ export function paperSockets() {
     // event listener called when a keyboard key is pressed
 	tool.onKeyDown = (event) => {
 		console.log(event.key + ' key was pressed');
-        console.log(getDrawingTool());
         // a list of keys to ignore default actions for
         let keys = ['backspace', 'space', 'l', 'left', 'right', "'", 'enter'];
         // a list of attributes that use keyboard keys, if one is being used,
         // the keys in the keys array should have their default actions prevented
-        let attrs = [drawingTools.colorFill, drawingTools.grab, drawingTools.text];
+        let attrs = [drawingTools.colorFill, drawingTools.grab, drawingTools.text, drawingTools.textEdit];
         const hasTrueVal = (acc, curVal) => acc || curVal;
 
         if(keys.includes(event.key) && attrs.reduce(hasTrueVal)) {
@@ -234,11 +236,14 @@ export function paperSockets() {
         // if the text box is selected and this user owns the lock, aka has
         // clicked on the canvas to create a PointText / claim the lock, Then
         // edit the PointText accordingly
-        if(LOCKED == socket.id){
+        if(LOCKED == socket.id && (drawingTools.text || drawingTools.textEdit)){
             console.log('current text: ' + curPath.content);
-            // the enter key ends text editing and releases the lock
+            // the shift+enter key combo ends text editing and releases the lock
             if(paper.Key.isDown('shift') && paper.Key.isDown('enter')) {
-                socket.emit('requestFinishText', user);
+                // if a user was editing a pre-existing text string, it should be handled
+                // differently than a string that needs to be added to the paths list when complete.
+                if(drawingTools.textEdit) { socket.emit('requestFinishEditText', user); }
+                else { socket.emit('requestFinishText', user); }
             }
             // remove the last char in the text box
             else if(event.key == 'backspace') {
@@ -442,6 +447,15 @@ export function paperSockets() {
     			this.dashOffset += attributes.dashOffset;
     		}
         }
+    }
+
+    // called when editText message is received from server, signifying a user
+    // is trying to edit an existing text box.
+    function editText(index) {
+        if (!initialPathsReceived) { return; }
+        curPath.remove();
+        curPath = paths[index].path;
+        curPath.data.setBounds(curPath);
     }
 
 	function erasePath(pathName) {
@@ -670,6 +684,21 @@ export function paperSockets() {
         }
     }
 
+    function finishEditText() {
+        if (!initialPathsReceived) { return; }
+        // get index of text path being edited
+        let index = paths.findIndex(pathItem => pathItem.path == curPath);
+        // remove the boundary box
+        curPath.data.bounds.remove();
+        console.log(paths);
+        curPath = new paper.PointText();
+        setDrawingTool('grab');
+        if(LOCKED == socket.id) {
+            let updatedPath = serializedPathsItem(paths[index]).path;
+            socket.emit('confirmPathUpdated', updatedPath, index, user);
+        }
+    }
+
 	// callback when socket receives message from server to change location of path.
 	// index is the index of the path to make changes to in the paths array.
 	function movePath(newPosition, index) {
@@ -817,7 +846,7 @@ export function paperSockets() {
 			else if (paper.Key.isDown('right')) {
 				socket.emit('requestPathRotate', attributes.rotation, pathInd, user);
 			}
-			else {
+			else if(!paper.Key.isDown('shift')) {
 				// get new position of path based on new position of mouse
 				let x = event.point.x;
 				let y = event.point.y;
@@ -829,11 +858,18 @@ export function paperSockets() {
 		path.onMouseUp = function (event) {
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
             console.log('up event on specific path, should only be called when tool = grab');
-			// get the serialized version of the path that was moved, which contains
-			// its new coordinates. Then send it to the server so the server can
-			// update its paths array.
-			let updatedPath = serializedPathsItem(paths[pathInd]).path;
-			socket.emit('confirmPathUpdated', updatedPath, pathInd, user);
+
+            if(paper.Key.isDown('shift')) {
+                setDrawingTool('textEdit');
+                socket.emit('requestEditText', pathInd, user);
+            }
+            else {
+                // get the serialized version of the path that was moved, which contains
+    			// its new coordinates. Then send it to the server so the server can
+    			// update its paths array.
+    			let updatedPath = serializedPathsItem(paths[pathInd]).path;
+    			socket.emit('confirmPathUpdated', updatedPath, pathInd, user);
+            }
 		}
 	}
 

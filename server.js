@@ -193,6 +193,10 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('finishText', pathID);
     });
 
+    socket.on('requestFinishEditText', (user) => {
+        io.to(user.sessionID).emit('finishEditText');
+    });
+
     socket.on('requestFinishErasing', async (user) => {
         await checkForNewUsers(socket);
         // if no new users are waiting, unlock all users canvas's.
@@ -288,7 +292,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('requestPathMove', (newPosition, index, user) => {
-        io.to(user.sessionID).emit('movePath',newPosition, index);
+        io.to(user.sessionID).emit('movePath', newPosition, index);
     });
 
     socket.on('requestPathRotate', (degrees, index, user) => {
@@ -303,11 +307,17 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('colorFill', color, index, socket.id);
     });
 
+    socket.on('requestEditText', (index, user) => {
+        io.to(user.sessionID).emit('editText', index);
+    });
+
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
     // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]
     socket.on('confirmPathUpdated', async (updatedPath, index, user) => {
-
+        // get the paths array for the session the user is in, then get the
+        // pathData obj at the specified index in the paths array, then update
+        // the path variable for that pathData obj.
         sessions.get(user.sessionID)[index].path = updatedPath;
         // always check for new users before letting a client release the lock
         await checkForNewUsers(socket);
