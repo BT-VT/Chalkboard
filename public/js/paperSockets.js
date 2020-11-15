@@ -1202,7 +1202,7 @@ export function paperSockets() {
 			if(setDrawingTool('colorFill')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         fillBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "auto";
+        document.querySelector('#canvas').style.cursor = "url(images/paint-bucket-icon_2.png), auto";
 				console.log('color fill selected!');
 			}
 			else { console.log('failed to select color fill'); }
@@ -1236,7 +1236,7 @@ export function paperSockets() {
 			else { console.log('failed to select text'); }
 		}
 	}
-	else { console.log('fill button not found'); }
+	else { console.log('Text button not found'); }
 
 	let eraserBtn = document.querySelector("#eraser");
 	if (eraserBtn) {
