@@ -156,7 +156,7 @@ export function paperSockets() {
 		console.log('canvas LOCKED by socket ' + owner);
 		let msg = document.getElementById("navProgress");
 		msg.setAttribute('style', 'font-size: 16px');
-		msg.innerHTML = "Someone is drawing...";
+		msg.innerHTML = `Someone is drawing...`;
 		return LOCKED;
 	}
 
@@ -1056,6 +1056,7 @@ export function paperSockets() {
 				  let edits = serializedPaths(paths);
 				  let href = window.location.href;
 				  let title_span = document.getElementById("chalkboard-title");
+				  title_span.innerHTML = user.sessionID;
 				  let chalkboard_title = title_span.value || "";
 				  let session_id = user.sessionID;
 				  uploadTask.snapshot.ref
