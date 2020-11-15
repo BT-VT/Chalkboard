@@ -12,3 +12,4 @@ Grab Hand:
 
 Text:
 - add text: click mouse on chalkboard to choose a starting location. Begin typing and hit "shift + enter" when complete
+- edit text: select the grab tool, then hold down the shift key and click on a text string
