@@ -10,7 +10,7 @@ How to run the project
 
 4. Run the command "npm install" from the directory with package.json in it
 
-5. run command "npm start" from the directory with server.js file
+5. run command "npm start"
 
 6. The port number where the web app is beign hosted will be listed in the terminal,
 - default is: port 5000
