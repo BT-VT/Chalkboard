@@ -90,10 +90,10 @@ function checkForNewUsers(socket) {
 io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
-
-         socket.emit("updateRoom", webRoom);
-         webRoom = "default";
-
+    socket.on('hello', () => {
+        socket.emit("updateRoom", webRoom);
+        webRoom = "default";
+    })
 
 
     // ================ CANVAS HANDLING =========================
@@ -113,8 +113,8 @@ io.on('connection', (socket) => {
     socket.on('requestNewDrawing', (pathAttr, user) => {
         LOCKED = socket.id;
         console.log('begin drawing, LOCKED set to: ' + LOCKED);
-        console.log('user:');
-        console.log(user);
+        console.log('sockets connected to sessions:');
+        console.log(io.sockets.adapter.rooms);
         io.to(user.sessionID).emit('lockCanvas', socket.id);       // broadcast to all sockets except sender who triggered event
         io.to(user.sessionID).emit('createNewDrawing', pathAttr);  // broadcast to all sockets, including sender who triggered event
     });
