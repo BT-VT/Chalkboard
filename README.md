@@ -22,6 +22,27 @@ to view dev tools and error messages.*
 
 ## USER GUIDE
 
+#### User Account and NavBar
+- **Sign Up:** a user can choose a unique email and a password to create a Chalkboard account managed through google Auth. Users must
+be signed into an account to access all features.
+- **Log in:** allows a user to log into their existing Chalkboard account. Once a user is logged in, they can sign out or delete their
+account by clicking on their email in the top right corner of the app. When a user is signed in, they will be able to view their
+saved chalkboard sessions on the My chalkboards page, and select teh Audio/Video dropdown menu to call other users.
+- **My chalkboards:** the my chalkboards page is personalized for each user and displays snapshots of chalkboard sessions which the
+user has chosen to save via the **Upload** button on the Tool bar. The snapshots are displayed dynamically in a grid format, along with
+a title chosen by the user and a date/time stamp showing when the snapshot was saved. The images act as references to the sessions and
+can be clicked on if a user would like to join the session the snapshot references. If updates have been made to the session after it
+was saved by a user, they will not be reflected in the snapshot image under the My chalkboards page, however the user will see the
+updates after entering the session. If the same session is saved more than once by a user the new snapshot will overwrite the old
+snapshot of that particular session, i.e. the same session will never be represented simultaneously by two snapshots on the same My
+chalkboards page.
+  -**Default Session:** the default session is the session that is loaded when a user first visits the chalkboard home page. The
+  default session cannot be saved by a user. Eventually, the default session will also not be networked, and will act as an initial
+  demo / playground for the user to be introduced to the application.
+- **Audio/Video:** allows a user to enter another users peer ID (found at the bottom of the dropdown menu, unique for each user) to
+start a video call with them. The end goal is to allow every user in a session to join a session video/audio call.
+
+
 #### Tool Bar
 - **Undo:** removes the last object added to the canvas (shape or text). Does not undo color, angle, or position changes of objects.
 - **Download:** saves a .png image of the chalkboard to local drive. the default name of the image is "my-image.png".
@@ -52,6 +73,12 @@ an object (works by detecting the mouse over a line, if a line is very small it 
 - **Text:** allows a user to add a text box to the canvas. Click on the canvas to determine the starting position of the text box, and
 begin typing. To end typing, press the "enter" key. To break to a new line, press "shift + enter".
   - **Edit Existing Text box:** when the **Grab** icon is selected, hold down shift and select a text box on the canvas.
+
+
+#### Chat Box
+The chatbox can be found in the bottom left corner o the app, and is a pink icon that expands when clicked. The chat feature allows
+users within the same chalkboard session to communicate with eachother through text. When a user sends a chat through the chat box
+their name is displayed next to their message in the message thread.
 
 ### IMPLEMENTING THE text edit FEATURE
 When a new path is finished being created, the client calls the setPathFunctions(pahtsItem, attributes.scale) function and
