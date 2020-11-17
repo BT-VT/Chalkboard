@@ -5,9 +5,13 @@ that canvas through a web browser. Users can create chalkboard "sessions" where 
 other canvas's, allowing multiple groups of collaborators to work simultaneously within their own workspaces hosted by Chalkboard.
 Chalkboard is *definitely not* buggy and if you are having trouble using it it's probably just you, not us... we swear...
 
+#### Resources
 Chalkboard was developed using an Express server built ontop of Node.js. The client side uses a number of libraries, primarily Paper.js
 and Socket.io for the implementation of the networked drawing canvas.
-
+- http://paperjs.org
+- https://socket.io/
+- https://firebase.google.com/docs/auth
+- https://firebase.google.com/docs/firestore
 
 ### Download And Run Chalkboard
 
