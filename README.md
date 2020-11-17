@@ -1,28 +1,57 @@
 # ChalkboardMain
 
-How to run the project
+### How to run the project
 
-1. Download the zip file
+1. Download and install node.js https://nodejs.org/en/download/
 
-2. Download Visual Studio Code or some text editor 
+2. Run the command "npm install" from the directory with package.json in it (should be the root dir). This will install all
+required dependencies for the application.
 
-3. Download and install node.js
+3. run command "npm start" from the same root dir, where the server.js file is found.
 
-4. Run the command "npm install" from the directory with package.json in it
-
-5. run command "npm start"
-
-6. The port number where the web app is beign hosted will be listed in the terminal,
-- default is: port 5000
+4. The port number where the web app is being hosted will be listed in the terminal,
+- default port: 5000
 - example: go to https://localhost:5000 in a browswer (Firefox or Chrome are recommended)
 
-### Extremely Basic Troubleshooting:
+#### Extremely Basic Troubleshooting:
 
-If code is not running properly, press ctrl+shift+i on windows or option+command+i on mac and click "console"
-to view dev tools and error messages.
+*If code is not running properly, press ctrl+shift+i on windows or option+command+i on mac and click "console"
+to view dev tools and error messages.*
 
-Try turning off add blockers for the webpage
+*Try turning off add blockers for the webpage*
 
+## USER GUIDE
+
+#### Tool Bar
+- **Undo:** removes the last object added to the canvas (shape or text). Does not undo color, angle, or position changes of objects.
+- **Download:** saves a .png image of the chalkboard to local drive. the default name of the image is "my-image.png".
+- **Upload:** saves a copy of the chalkboard session to the chalkboard database, and adds the chalkboard session to the users
+"My chalkboards" page. A title will be requested for the Chalkboard session, and the title will be displayed next to a snapshot of
+the chalkboard under the "My chalkboards" page.
+- **Color Picker:** Allows a user to change the color output of objects. When the save button is clicked, the color selected is added
+to a row of pre-selected colors for quick access.
+- **Straight Line:** draws a straight line from the down-point of the mouse to the release-point of the mouse.
+- **Rectangle:** draws a rectangle from the down-point of the mouse to the release-point of the mouse.
+- **Ellipse:** draws an ellipse from the down-point of the mouse to the release-point of the mouse.
+- **Circle:** draws a circle where the down-point of the mouse defines the center and the distance between the release-point and 
+down-point of the mouse defines the radius.
+- **Triangle:** draws a right triangle where the down-point of the mouse defines the location of the angle formed by the hypotenuse
+and adjacent sides, while the release-point of the mouse defines the location of the angle formed by the hypotenuse and the opposite
+sides.
+- **Pencil:** allows a user to free-draw a line that is defined by the path made by a mouse being dragged on the canvas.
+- **Eraser:** perminantly removes objects from the canvas when a user clicks on an object, or holds down the mouse and passes over
+an object (works by detecting the mouse over a line, if a line is very small it works best to move slowly).
+- **Paint Bucket:** Allows a user to change the fill color and edge color of objects on the chalkboard canvas.
+  - **Fill object with color:** select the edge of the object, when the object edge scales up in size, click.
+  - **Remove fill color from object:** hold down the "backspace" key when selecting an object edge with the paint bucket.
+  - **Change color of object edge:** hold down the "l" key when selecting an object edge with the paint bucket.
+- **Grab:** allows users to relocate objects, rotate objects, and edit text on the canvas (see **Text**).
+  - **Relocate object:** select the edge of the object, when the object edge scales up in size, click and drag it to a new location.
+  - **Rotate object left:** hold down the "left arrow" key, select an object and drag the mouse in any direction.
+  - **Rotate object right:** hold down the "right arrow" key, select an object and drag the mouse in any direction.
+- **Text:** allows a user to add a text box to the canvas. Click on the canvas to determine the starting position of the text box, and
+begin typing. To end typing, press the "enter" key. To break to a new line, press "shift + enter".
+  - **Edit Existing Text box:** when the **Grab** icon is selected, hold down shift and select a text box on the canvas.
 
 ### IMPLEMENTING THE text edit FEATURE
 When a new path is finished being created, the client calls the setPathFunctions(pahtsItem, attributes.scale) function and
