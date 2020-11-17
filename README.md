@@ -96,7 +96,7 @@ The chatbox can be found in the bottom left corner o the app, and is a pink icon
 users within the same chalkboard session to communicate with eachother through text. When a user sends a chat through the chat box
 their name is displayed next to their message in the message thread.
 
-### IMPLEMENTING THE text edit FEATURE
+### IMPLEMENTING THE text edit FEATURE (testers can ignore)
 When a new path is finished being created, the client calls the setPathFunctions(pahtsItem, attributes.scale) function and
 passes it a reference to the new path (it is usually called from a finishShape() callback function that is called when a 
 client receives a message from the server stating that the current shape should be finished and added to the clients paths
