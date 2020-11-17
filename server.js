@@ -113,6 +113,8 @@ io.on('connection', (socket) => {
     socket.on('requestNewDrawing', (pathAttr, user) => {
         LOCKED = socket.id;
         console.log('begin drawing, LOCKED set to: ' + LOCKED);
+        console.log('user:');
+        console.log(user);
         io.to(user.sessionID).emit('lockCanvas', socket.id);       // broadcast to all sockets except sender who triggered event
         io.to(user.sessionID).emit('createNewDrawing', pathAttr);  // broadcast to all sockets, including sender who triggered event
     });
