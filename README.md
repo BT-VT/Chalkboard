@@ -1,6 +1,15 @@
-# ChalkboardMain
+# Chalkboard
+Chalkboard is an online interactive canvas that allows users to meet and collaborate remotely. Users can work with different drawing tools
+to add shapes and objects to a Chalkboard canvas. Anything added to a chalkboard canvas will instantly be displayed for all users viewing
+that canvas through a web browser. Users can create chalkboard "sessions" where each session has its own unique canvas independent of all
+other canvas's, allowing multiple groups of collaborators to work simultaneously within their own workspaces hosted by Chalkboard.
+Chalkboard is *definitely not* buggy and if you are having trouble using it it's probably just you, not us... we swear...
 
-### How to run the project
+Chalkboard was developed using an Express server built ontop of Node.js. The client side uses a number of libraries, primarily Paper.js
+and Socket.io for the implementation of the networked drawing canvas.
+
+
+### Download And Run Chalkboard
 
 1. Download and install node.js https://nodejs.org/en/download/
 
@@ -36,6 +45,9 @@ was saved by a user, they will not be reflected in the snapshot image under the 
 updates after entering the session. If the same session is saved more than once by a user the new snapshot will overwrite the old
 snapshot of that particular session, i.e. the same session will never be represented simultaneously by two snapshots on the same My
 chalkboards page.
+- **Join/Create a Session:** allows a user to join an existing chalkboard session or create a new one by entering a session name. Each
+Chalkboard session has its own unique drawing canvas, chat feature and audio/video feature. Users in different sessions should not be
+able to interact with eachother.
   -**Default Session:** the default session is the session that is loaded when a user first visits the chalkboard home page. The
   default session cannot be saved by a user. Eventually, the default session will also not be networked, and will act as an initial
   demo / playground for the user to be introduced to the application.
