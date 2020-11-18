@@ -96,6 +96,36 @@ The chatbox can be found in the bottom left corner o the app, and is a pink icon
 users within the same chalkboard session to communicate with eachother through text. When a user sends a chat through the chat box
 their name is displayed next to their message in the message thread.
 
+
+## Known Bugs
+- **Loading Issue Prevents buttons and other features from working properly**
+  - Behavior: Several tools (shapes) cannot be selected, only the pencil tool can add paths to the canvas. If an object is relocated
+  on the canvas a line will be drawn while it is being moved. Objects added to the canvas by a user will be added more than once,
+  resulting in duplicate objects with the same path name. This affects how they are erased. The eraser will only remove one of the
+  duplicates, and some paths will not be able to be erased. All paths can be "undone" using hte undo button.
+  - Reproduce: It is unknown exactly why this happens, however it will occasionally occur when a client joins a session. If the
+  console log is open through the debugger, a pickr.js error will be thrown every time this error occurs, and certain function output
+  will appear twice on both the client and server side when drawing new lines on the canvas.
+- **Paths not automatically loaded when accessing canvas session from Chalkboard Logo link**
+  - Behavior: When on the My-chalkboards page, if a user clicks the Chalkboard logo to get back to the session they were in, the paths
+  in that session will not display on the canvas until the user manually refreshes the page. This can be avioded by selecting a saved
+  chalkboard image in the my-chalkboards grid to navigate to that session.
+  - Reproduce: while signed in to an account, navigate to the My-Chalkboards page from the session canvas page (using the navbar option,
+  and make sure there is at least one drawing on the canvas). From the my-chalkboards page, select the chalkboard logo on the navbar to
+  be brought back to the session canvas page.
+- **More than two users cannot share a video/audio call**
+  - Behavior: When multiple people try to call the same user, the user receiving the calls can establish an independent video connection
+  with each caller however the callers cannot see or hear eachother.
+  - Reproduce: with three client accessing a session, have two clients call the same client by entering the receiving clients peer ID into
+  the callbox in the dropdown menu.
+- **Attempts to save sessions do not always succeed**
+  - Behavior: When the upload/save button is selected (while logged in) and a user give the session a title, then hits "enter" or clicks 
+  the "save" button, the save modal closes but the chalkboard session does not save to the database and is not accessible through the 
+  my-chalkboards page. This behavior resembles what happens if a guest tries saving a chalkboard without being logged in. When a session 
+  is saved successfully, the save modal does not close automatically and can be closed by clicking outside of its boundary.
+  - Reproduce: This bug is not consistantly reproducable, and will happen randomly when a session is being saved by a user who is signed in.
+
+
 ### IMPLEMENTING THE text edit FEATURE (testers can ignore)
 When a new path is finished being created, the client calls the setPathFunctions(pahtsItem, attributes.scale) function and
 passes it a reference to the new path (it is usually called from a finishShape() callback function that is called when a 
