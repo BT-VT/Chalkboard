@@ -106,6 +106,9 @@ their name is displayed next to their message in the message thread.
   - Reproduce: It is unknown exactly why this happens, however it will occasionally occur when a client joins a session. If the
   console log is open through the debugger, a pickr.js error will be thrown every time this error occurs, and certain function output
   will appear twice on both the client and server side when drawing new lines on the canvas.
+  ![pickr.js error](https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain/blob/main/error_screenshots/pickr_error.png)
+  ![output on server showing functions being called twice](https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain/blob/main/error_screenshots/server_double_output.png)
+  ![shows paths being added twice (bottom of image)](https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain/blob/main/error_screenshots/paperSockets_called_mult_times.png)
 - **Paths not automatically loaded when accessing canvas session from Chalkboard Logo link**
   - Behavior: When on the My-chalkboards page, if a user clicks the Chalkboard logo to get back to the session they were in, the paths
   in that session will not display on the canvas until the user manually refreshes the page. This can be avioded by selecting a saved
