@@ -247,6 +247,9 @@ export function paperSockets() {
             console.log('current text: ' + curPath.content);
             // the shift+enter key combo ends text editing and releases the lock
             if(paper.Key.isDown('shift') && paper.Key.isDown('enter')) {
+                socket.emit('requestAddTextChar', socket.id, '\n', user);
+            }
+            else if(paper.Key.isDown('enter')) {
                 // if a user was editing a pre-existing text string, it should be handled
                 // differently than a string that needs to be added to the paths list when complete.
                 if(drawingTools.textEdit) { socket.emit('requestFinishEditText', user); }
