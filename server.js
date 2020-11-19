@@ -84,7 +84,7 @@ async function handleShutdown() {
 function tryToSendPaths(socket, sessionID) {
     return new Promise((response, reject) => {
         let sessionObj = sessions.get(sessionID);
-        if(!LOCKED) {
+        if(!sessionObj.LOCKED) {
             console.log('sending paths from session: "' + sessionID + '" to socket ' + socket.id);
             socket.emit('addPaths', sessionObj.paths);
             response(socket);
@@ -131,16 +131,16 @@ io.on('connection', (socket) => {
     // called by a user who has caused a mouseDown event to fire. set LOCKED to
     // callers socket ID on server and broadcast notification to lock client canvas's
     socket.on('requestLock', (user) => {
-        LOCKED = socket.id;
-        console.log('lock given to ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = socket.id;
+        console.log('lock given to ' + socket.id + ' in session: ' + user.sessionID);
         io.to(user.sessionID).emit('lockCanvas', socket.id);
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
     // created by getPathAttributes() function on client-side.
     socket.on('requestNewDrawing', (pathAttr, user) => {
-        LOCKED = socket.id;
-        console.log('begin drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = socket.id;
+        console.log('begin drawing, LOCKED set to: ' + socket.id + ' in session: ' + user.sessionID);
         io.to(user.sessionID).emit('lockCanvas', socket.id);       // broadcast to all sockets except sender who triggered event
         io.to(user.sessionID).emit('createNewDrawing', pathAttr);  // broadcast to all sockets, including sender who triggered event
     });
@@ -229,8 +229,8 @@ io.on('connection', (socket) => {
     socket.on('requestFinishErasing', async (user) => {
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('end drawing, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -245,8 +245,8 @@ io.on('connection', (socket) => {
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log(socket.id + ' ended drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended drawing, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -260,8 +260,8 @@ io.on('connection', (socket) => {
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended drawing, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -274,8 +274,8 @@ io.on('connection', (socket) => {
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended drawing, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -288,8 +288,8 @@ io.on('connection', (socket) => {
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended drawing, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -302,8 +302,8 @@ io.on('connection', (socket) => {
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end drawing, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended drawing, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -315,8 +315,8 @@ io.on('connection', (socket) => {
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
-        console.log('end text, LOCKED set to: ' + LOCKED);
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended text, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -351,7 +351,8 @@ io.on('connection', (socket) => {
         // always check for new users before letting a client release the lock
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
-        LOCKED = false;
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('finished updating path, lock set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
@@ -361,7 +362,7 @@ io.on('connection', (socket) => {
     socket.on('undo', (user) => {
         if(sessions.get(user.sessionID).paths.length > 0) {
             let pathsItem = sessions.get(user.sessionID).paths.pop();
-            console.log('removing ' + pathsItem.pathName);
+            console.log('removing ' + pathsItem.pathName + ' in session ' + user.sessionID);
             io.to(user.sessionID).emit('deleteLastPath', pathsItem.pathName);
         }
     });
@@ -369,10 +370,10 @@ io.on('connection', (socket) => {
     socket.on('disconnecting', async () => {
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
         // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
-        if(LOCKED == socket.id && userSessions.lenth > 1) {
+        if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
             await checkForNewUsers(socket, userSessions[1]);
-            LOCKED = false;
-            console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock...');
+            sessions.get(userSesssions[1]).LOCKED = false;
+            console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
             io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
     });
@@ -401,15 +402,6 @@ io.on('connection', (socket) => {
 
     // ================ ROOM HANDLING ====================
 
- /*
- sessions = map : {
-     sessionID: {
-         paths: [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ],
-         LOCKED: false,
-         newUsers: []
-     }
- }
- */
 
     socket.on("joinSession", async (user, prevSession) =>  {
         try {
