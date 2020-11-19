@@ -84,7 +84,7 @@ async function handleShutdown() {
 function tryToSendPaths(socket, sessionID) {
     return new Promise((response, reject) => {
         let sessionObj = sessions.get(sessionID);
-        if(!sessionObj.LOCKED) {
+        if(!LOCKED) {
             console.log('sending paths from session: "' + sessionID + '" to socket ' + socket.id);
             socket.emit('addPaths', sessionObj.paths);
             response(socket);
