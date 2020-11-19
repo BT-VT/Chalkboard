@@ -81,16 +81,34 @@ async function handleShutdown() {
 }
 
 // called when new client socket connection first established
-
+function tryToSendPaths(socket, sessionID) {
+    return new Promise((response, reject) => {
+        let sessionObj = sessions.get(sessionID);
+        if(!sessionObj.LOCKED) {
+            console.log('sending paths from session: "' + sessionID + '" to socket ' + socket.id);
+            socket.emit('addPaths', sessionObj.paths);
+            response(socket);
+        }
+        else {
+            console.log('adding socket ' + socket.id + ' to queue for session ' + sessionID);
+            sessionObj.newUsers.push(socket);
+            reject(socket);
+        }
+    });
+}
 
 // called when user finishes drawing. Attempts to send session paths to new
 // users who are waiting to receive them in the newUsers queue.
-function checkForNewUsers(socket) {
+function checkForNewUsers(socket, sessionID) {
     return new Promise((response, reject) => {
+        // get newUsers array for the session of socket who called function
+        let newUsers = sessions.get(sessionID).newUsers;
+        // send all waiting sockets the session paths
         while(newUsers.length) {
             let newSocket = newUsers.shift();
             console.log('sending paths to socket ' + newSocket.id);
-            socket.broadcast.to(newSocket.id).emit('addPaths', sessions.get(user.sessionID).paths); // send paths to next new user in queue
+            //socket.broadcast.to(newSocket.id).emit('addPaths', sessions.get(user.sessionID).paths); // send paths to next new user in queue
+            socket.to(newSocket.id).emit('addPaths', sessions.get(user.sessionID).paths); // send paths to next new user in queue
         }
         response(newUsers.length);
     });
@@ -209,7 +227,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('requestFinishErasing', async (user) => {
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
@@ -225,7 +243,7 @@ io.on('connection', (socket) => {
 
         sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
 
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log(socket.id + ' ended drawing, LOCKED set to: ' + LOCKED);
@@ -240,7 +258,7 @@ io.on('connection', (socket) => {
 
         sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
 
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
@@ -254,7 +272,7 @@ io.on('connection', (socket) => {
         pathObj.dashArray = null;
         sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
 
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
@@ -268,7 +286,7 @@ io.on('connection', (socket) => {
         pathObj.dashArray = null;
         sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
 
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
@@ -282,7 +300,7 @@ io.on('connection', (socket) => {
         pathObj.dashArray = null;
         sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
 
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end drawing, LOCKED set to: ' + LOCKED);
@@ -295,7 +313,7 @@ io.on('connection', (socket) => {
         let pathObj = pathData.path;
         sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
 
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         console.log('end text, LOCKED set to: ' + LOCKED);
@@ -331,7 +349,7 @@ io.on('connection', (socket) => {
         // the path variable for that pathData obj.
         sessions.get(user.sessionID).paths[index].path = updatedPath;
         // always check for new users before letting a client release the lock
-        await checkForNewUsers(socket);
+        await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
         LOCKED = false;
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
@@ -348,15 +366,16 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('disconnect', async (reson) => {
-        if(LOCKED == socket.id) {
-            await checkForNewUsers(socket);
+    socket.on('disconnecting', async () => {
+        let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
+        // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
+        if(LOCKED == socket.id && userSessions.lenth > 1) {
+            await checkForNewUsers(socket, userSessions[1]);
             LOCKED = false;
             console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock...');
-            io.emit('deleteCurPath', socket.id);
+            io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
-    })
-
+    });
 
 
 
@@ -401,8 +420,9 @@ io.on('connection', (socket) => {
             //   sessions.get(user.sessionID).push(user);
             socket.join(user.sessionID);
             //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
-            console.log('sending paths to client joining existing session: ' + user.sessionID);
-            io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID).paths);
+            console.log('user requested to join existing session: ' + user.sessionID);
+            tryToSendPaths(socket, user.sessionID);
+            //socket.emit('addPaths', sessions.get(user.sessionID).paths);
         } else {
             try {
 
@@ -418,16 +438,16 @@ io.on('connection', (socket) => {
                 if(docObj && docObj.exists) {
                     const sessObj = docObj.data();
                     sessionObj.paths = sessObj.edits;
-                    console.log('sending paths to client joining session from dB: ' + user.sessionID);
+                    console.log('user requested to join session from dB: ' + user.sessionID);
 
                 }
                 else {
-                    console.log('sending paths to client joining new session: ' + user.sessionID);
+                    console.log('user requested to join new session: ' + user.sessionID);
                 }
                 sessions.set(user.sessionID, sessionObj);
                 socket.join(user.sessionID);
-                io.to(user.sessionID).emit('addPaths', sessions.get(user.sessionID).paths);
-                //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+                tryToSendPaths(socket, user.sessionID);
+                // socket.emit('addPaths', sessions.get(user.sessionID).paths);
             }
             catch(err) {
                 console.log("error retreiving session from dB: ", err);
