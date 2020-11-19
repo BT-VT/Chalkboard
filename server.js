@@ -92,7 +92,7 @@ function tryToSendPaths(socket, sessionID) {
         else {
             console.log('adding socket ' + socket.id + ' to queue for session ' + sessionID);
             sessionObj.newUsers.push(socket);
-            reject(socket);
+            response(socket);
         }
     });
 }
@@ -106,9 +106,9 @@ function checkForNewUsers(socket, sessionID) {
         // send all waiting sockets the session paths
         while(newUsers.length) {
             let newSocket = newUsers.shift();
-            console.log('sending paths to socket ' + newSocket.id);
+            console.log('sending paths to socket ' + newSocket.id + 'waiting in newUser queue of session: ' + sessionID);
             //socket.broadcast.to(newSocket.id).emit('addPaths', sessions.get(user.sessionID).paths); // send paths to next new user in queue
-            socket.to(newSocket.id).emit('addPaths', sessions.get(user.sessionID).paths); // send paths to next new user in queue
+            socket.to(newSocket.id).emit('addPaths', sessions.get(sessionID).paths); // send paths to next new user in queue
         }
         response(newUsers.length);
     });
@@ -412,19 +412,19 @@ io.on('connection', (socket) => {
  */
 
     socket.on("joinSession", async (user, prevSession) =>  {
-        if (prevSession != null)
-            socket.leave(prevSession);
+        try {
+            if (prevSession != null)
+                socket.leave(prevSession);
 
-        // check if session already exists on server
-        if (sessions.has(user.sessionID)) {
-            //   sessions.get(user.sessionID).push(user);
-            socket.join(user.sessionID);
-            //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
-            console.log('user requested to join existing session: ' + user.sessionID);
-            tryToSendPaths(socket, user.sessionID);
-            //socket.emit('addPaths', sessions.get(user.sessionID).paths);
-        } else {
-            try {
+            // check if session already exists on server
+            if (sessions.has(user.sessionID)) {
+                //   sessions.get(user.sessionID).push(user);
+                socket.join(user.sessionID);
+                //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
+                console.log('user requested to join existing session: ' + user.sessionID);
+                await tryToSendPaths(socket, user.sessionID);
+                //socket.emit('addPaths', sessions.get(user.sessionID).paths);
+            } else {
 
                 let sessionObj = {
                     paths: [],
@@ -446,12 +446,12 @@ io.on('connection', (socket) => {
                 }
                 sessions.set(user.sessionID, sessionObj);
                 socket.join(user.sessionID);
-                tryToSendPaths(socket, user.sessionID);
+                await tryToSendPaths(socket, user.sessionID);
                 // socket.emit('addPaths', sessions.get(user.sessionID).paths);
             }
-            catch(err) {
-                console.log("error retreiving session from dB: ", err);
-            }
+        }
+        catch(err) {
+            console.log("error retreiving session from dB: ", err);
         }
     });
 
