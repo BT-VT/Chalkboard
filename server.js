@@ -25,6 +25,7 @@ sessions = map : {
     sessionID: {
         paths: [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ],
         LOCKED: false,
+        usersInSession: [user.name],
         newUsers: []
     }
 }
@@ -124,7 +125,7 @@ io.on('connection', (socket) => {
         socket.emit("updateRoom", webRoom);
         webRoom = "default";
         }, 1000)
-        
+
     })
 
     socket.on('confirmSessionJoined', (user) => {
@@ -385,7 +386,7 @@ io.on('connection', (socket) => {
             console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
             io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
-        
+
     });
 
 
@@ -433,7 +434,8 @@ io.on('connection', (socket) => {
                 let sessionObj = {
                     paths: [],
                     LOCKED: false,
-                    usersInSession: [user.name]
+                    usersInSession: [user.name],
+                    newUsers: []
                 }
                 // check if session exists in dB. If it does, add it to the server and
                 // add the user to the session, else create a new session and add the user.
