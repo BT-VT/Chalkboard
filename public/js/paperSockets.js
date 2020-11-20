@@ -164,12 +164,12 @@ export function paperSockets() {
 
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
-	function lockCanvas(owner) {
+	function lockCanvas(owner, user) {
 		LOCKED = owner;
 		console.log('canvas LOCKED by socket ' + owner);
 		let msg = document.getElementById("navProgress");
 		msg.setAttribute('style', 'font-size: 16px');
-		msg.innerHTML = `Someone is drawing...`;
+		msg.innerHTML = user.name + " is drawing...";
 		return LOCKED;
 	}
 
