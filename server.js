@@ -378,11 +378,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnecting', async () => {
+        console.log('user is disconnecting');
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
+        console.log(userSessions);
         // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
         if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
             await checkForNewUsers(socket, userSessions[1]);
-            sessions.get(userSesssions[1]).LOCKED = false;
+            sessions.get(userSessions[1]).LOCKED = false;
             console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
             io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
