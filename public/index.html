@@ -69,14 +69,12 @@
                     <li><span id="navProgress"></span></li>
                     <li style="color: gray">Text/Drawing Size: </li>
                     <li>
-                      <input
-                        id="slider"
-                        type="range"
-                        min="1"
-                        max="100"
-                        value="2"
-                        step="2"
-                      />
+                        <input id="slider" type="range" min="1" max="100" value="2" step="2" />
+                    </li>
+                    <li>
+                        <a class="modal-trigger grey-text" data-target="help-modal">
+                            <i class="material-icons">help</i>
+                        </a>
                     </li>
                     <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown-button"
                             data-target="dropdown1" data-activates="dropdown1">Audio/Video<i
@@ -194,6 +192,49 @@
                     <a href="#" id="logout" style="color: #02A6C1">Log out</a>
                     <a href="#" id="delete-account" style="color: #02A6C1">Delete account</a>
                 </div>
+            </div>
+        </div>
+        <!--HELP MODAL-->
+        <div id="help-modal" class="modal">
+            <div class="modal-content center align">
+                <h4>Tutorial</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Keys</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Move/Grab an object</td>
+                            <td>Select the grabber tool, hover over the border of desired object until it expands, click
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Rotate an object</td>
+                            <td>Select the grabber tool, grab an object, use left/right arrow keys</td>
+                        </tr>
+                        <tr>
+                            <td>Change selected color</td>
+                            <td>Open color picker, select color, press 'Save'</td>
+                        </tr>
+                        <tr>
+                            <td>Enter text</td>
+                            <td>shift+enter</td>
+                        </tr>
+                        <tr>
+                            <td>Edit text</td>
+                            <td>Use grabber tool, shift+click on text</td>
+                        </tr>
+                        <tr>
+                            <td>Fill tool</td>
+                            <td>Mouse over object border until it expands, click</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
