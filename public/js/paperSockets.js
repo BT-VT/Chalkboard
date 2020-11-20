@@ -63,6 +63,12 @@ export function paperSockets() {
 	// Setup directly from canvas id:
 	paper.setup('canvas');
 	var tool = new paper.Tool();
+
+    // video and audio global variables
+    const videoGrid = document.getElementById('video-grid');
+    const myVideo = document.createElement('video');            // video obj for this client
+    myVideo.muted = true;                                       // client mutes own video obj to stop from hearing self
+    let myPeer;
 	// When a client first joins a session, they must wait until it is their turn to
 	// load the existing session paths. Their canvas starts as locked and a special
 	// flag 'initialPathsReceived' prevents them from adding paths that are currently being
@@ -73,16 +79,16 @@ export function paperSockets() {
 	// global array of objects containing info about each path drawn. similar to
 	// paths array on server
 	let paths = [];		// paths = [ {pathName: "pathN", path: Path} ]
-  let curPath = new paper.Path();
-  var slider = document.getElementById("slider");
-  slider.addEventListener("input", sliderChange);
-  var sliderSize;
-  function sliderChange() {
-    sliderSize = this.value;
-    attributes.fontSize = sliderSize;
-    attributes.strokeWidth = sliderSize;
-    console.log(sliderSize);
-  }
+    let curPath = new paper.Path();
+    var slider = document.getElementById("slider");
+    slider.addEventListener("input", sliderChange);
+    var sliderSize;
+    function sliderChange() {
+        sliderSize = this.value;
+        attributes.fontSize = sliderSize;
+        attributes.strokeWidth = sliderSize;
+        console.log(sliderSize);
+    }
 
 	let attributes = {
 		multicolor: false,
@@ -222,29 +228,51 @@ export function paperSockets() {
 	}
 
     function setupVideoRoom() {
-
-        const myPeer = new Peer(socket.id, {
+        myPeer = new Peer(socket.id, {
             host: '/',
             port: '5001'
         });
-        // create new video element for user and have user mute self
-        const myVideo = document.createElement('video');
-        myVideo.muted = true;
 
         navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true
         }).then(stream => {
             addVideoStream(myVideo, stream);
-        })
 
-
-        function addVideoStream(video, stream)  {
-            video.srcObject = stream;
-            video.addEventListener('loadedmetadata', () => {
-                video.play();
+            myPeer.on('call', (call) => {
+                console.log('peer called');
+                call.answer(stream);
             })
-        }
+
+            socket.emit('confirmSessionJoined', user);
+
+            socket.on('userJoinedSession', (userID) => {
+                connectToNewUser(userID, stream);
+            });
+        })
+    }
+
+    // assigns video stream to video object
+    function addVideoStream(video, stream)  {
+        video.srcObject = stream;
+        video.addEventListener('loadedmetadata', () => {
+            video.play();
+        })
+        videoGrid.append(video);
+    }
+
+    // send a user this clients video stream, then when the user responds with their
+    // video stream, add it to this clients list of videos
+    function connectToNewUser(userID, stream) {
+        const call = myPeer.call(userID, stream);
+        const video = document.createElement('video');
+        call.on('stream', (userVideoStream) => {
+            addVideoStream(video, userVideoStream);
+        });
+        // set listener to end video when stream stops
+        call.on('close', () => {
+            video.remove();
+        })
     }
 
     // event listener called when a keyboard key is pressed

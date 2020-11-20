@@ -13,6 +13,7 @@ var express = require("express");
 var app = express();
 var portNum = process.env.PORT || '5000';
 var server = app.listen(portNum);
+app.set('view engine', 'ejs');
 app.use(express.static("public"));
 app.use(express.static(__dirname + "/node_modules/paper/dist"));
 
@@ -122,6 +123,10 @@ io.on('connection', (socket) => {
         socket.emit("updateRoom", webRoom);
         webRoom = "default";
     })
+
+    socket.on('confirmSessionJoined', (user) => {
+        socket.to(user.sessionID).broadcast.emit('userJoinedSession', socket.id);
+    });
 
 
     // ================ CANVAS HANDLING =========================

@@ -36,14 +36,7 @@ function home() {
             <!-- Paint sheet where we draw-->
             <canvas id="canvas" width="1200" height="500" style=""></canvas>
             <!-- right toolbox with colors-->
-            <div class="toolbox right">
-                <div class="group colors">
-                    <div style="display: grid; justify-content: space-around; margin:10px;">
-                        <div style="transform: scale(-1, 1); display:grid; margin-bottom: 5%;" id="ourVideo"></div>
-                        <div style="transform: scale(-1, 1); display: grid;" id="remoteVideo"></div>
-                    </div>
-                </div>
-            </div>
+            <div id="video-grid"></div>
         `;
 
 /* vertical bar
@@ -68,4 +61,3 @@ var ele = document.createElement("div");
   ele.innerHTML = content;
   return ele;
 }
-
