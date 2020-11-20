@@ -243,10 +243,7 @@ export function paperSockets() {
 
     function setupVideoRoom() {
         // connect to the peer server
-        myPeer = new Peer(socket.id, {
-            host: '/',
-            port: '5001'
-        });
+        myPeer = new Peer(socket.id);
         // request to use video/audio from client device
         navigator.mediaDevices.getUserMedia({
             video: true,
