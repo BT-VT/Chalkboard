@@ -415,7 +415,6 @@ io.on('connection', (socket) => {
                 //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
                 console.log('user requested to join existing session: ' + user.sessionID);
                 await tryToSendPaths(socket, user.sessionID);
-                //socket.emit('addPaths', sessions.get(user.sessionID).paths);
             } else {
 
                 let sessionObj = {
@@ -439,7 +438,6 @@ io.on('connection', (socket) => {
                 sessions.set(user.sessionID, sessionObj);
                 socket.join(user.sessionID);
                 await tryToSendPaths(socket, user.sessionID);
-                // socket.emit('addPaths', sessions.get(user.sessionID).paths);
             }
         }
         catch(err) {

@@ -13,15 +13,6 @@ export function paperSockets() {
 	let toolType = null;
 	//window.onload = function() {
 
-	function requestPaths() {
-		var path = location.hash;
-			if (path === "#/home") {
-				//location.reload();
-		}
-	};
-
-	window.addEventListener('hashchange', requestPaths);
-
 	// Simple example, see optional options for more configuration.
 	const pickr = Pickr.create({
 		el: '.color-picker',
@@ -66,6 +57,8 @@ export function paperSockets() {
 		pickr.addSwatch(color.toHEXA().toString());
 	})
 
+
+/* ======================================== Paper.js ============================================ */
 
 	// Setup directly from canvas id:
 	paper.setup('canvas');
@@ -223,8 +216,36 @@ export function paperSockets() {
 				setPathFunctions(pathsItem, attributes.scale);
 				paths.push(pathsItem);
 			}
+
+            setupVideoRoom();
 		}
 	}
+
+    function setupVideoRoom() {
+
+        const myPeer = new Peer(socket.id, {
+            host: '/',
+            port: '5001'
+        });
+        // create new video element for user and have user mute self
+        const myVideo = document.createElement('video');
+        myVideo.muted = true;
+
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        }).then(stream => {
+            addVideoStream(myVideo, stream);
+        })
+
+
+        function addVideoStream(video, stream)  {
+            video.srcObject = stream;
+            video.addEventListener('loadedmetadata', () => {
+                video.play();
+            })
+        }
+    }
 
     // event listener called when a keyboard key is pressed
 	tool.onKeyDown = (event) => {
