@@ -379,7 +379,7 @@ io.on('connection', (socket) => {
             console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
             io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
-        sessions.get(userSessions).usersInSession
+        
     });
 
 
