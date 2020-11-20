@@ -8,7 +8,7 @@ window.addEventListener("hashchange", function () {
 
 window.addEventListener("load", function() {
     if (location.hash != "#/my-chalkboards") {
-        console.log("running paperSockets from hashchange");
+        console.log("running paperSockets from onLoad listener");
         paperSockets();
     }
 });
