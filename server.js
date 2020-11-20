@@ -125,6 +125,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('confirmSessionJoined', (user) => {
+        console.log('confirmSessionJoined received')
         socket.to(user.sessionID).broadcast.emit('userJoinedSession', socket.id);
     });
 
@@ -410,8 +411,9 @@ io.on('connection', (socket) => {
 
     socket.on("joinSession", async (user, prevSession) =>  {
         try {
-            if (prevSession != null)
+            if (prevSession != null) {
                 socket.leave(prevSession);
+            }
 
             // check if session already exists on server
             if (sessions.has(user.sessionID)) {

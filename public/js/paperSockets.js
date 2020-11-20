@@ -68,7 +68,9 @@ export function paperSockets() {
     const videoGrid = document.getElementById('video-grid');
     const myVideo = document.createElement('video');            // video obj for this client
     myVideo.muted = true;                                       // client mutes own video obj to stop from hearing self
+    const myCalls = {};
     let myPeer;
+
 	// When a client first joins a session, they must wait until it is their turn to
 	// load the existing session paths. Their canvas starts as locked and a special
 	// flag 'initialPathsReceived' prevents them from adding paths that are currently being
@@ -117,6 +119,7 @@ export function paperSockets() {
 
 	// socket listeners
 	socket.on('addPaths', addPaths);					// initializes the canvas
+    socket.on('userLeftSession', userLeftSession);
 	socket.on('lockCanvas', lockCanvas);				// prevents user from drawing
 	socket.on('createNewDrawing', createNewDrawing);	// starts a path
 	socket.on('drawSegment', drawSegment);				// extends a path
@@ -147,6 +150,17 @@ export function paperSockets() {
 	// notify server to send existing session paths
 	socket.emit('hello', user);
 
+    // called when client receives userLeftSession message from server. Manually
+    // ends the call with another client, which is faster than waiting for peer.js
+    // to do it automatically. (not currently used)
+    function userLeftSession(userID) {
+        console.log(myCalls);
+        console.log(userID);
+        if(myCalls[userID]) {
+            console.log('goodbye ' + userID);
+            myCalls[userID].close();
+        }
+    }
 
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
@@ -228,31 +242,41 @@ export function paperSockets() {
 	}
 
     function setupVideoRoom() {
+        // connect to the peer server
         myPeer = new Peer(socket.id, {
             host: '/',
             port: '5001'
         });
-
+        // request to use video/audio from client device
         navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true
         }).then(stream => {
+            // add clients own video stream to clients video grid
             addVideoStream(myVideo, stream);
-
+            // when client receives a call from another client, answer it and
+            // add that clients stream to this clients video grid
             myPeer.on('call', (call) => {
-                console.log('peer called');
                 call.answer(stream);
-            })
-
+                const video = document.createElement('video');
+                call.on('stream', (userVideoStream) => {
+                        addVideoStream(video, userVideoStream);
+                });
+            });
+            // let server know client is connected, so server can broadcast
+            // userJoinedSession message to all clients in the same session
             socket.emit('confirmSessionJoined', user);
 
+            // when server notifies this client that a new user has joined the
+            // session, send call that user and to share video streams.
             socket.on('userJoinedSession', (userID) => {
                 connectToNewUser(userID, stream);
             });
         })
     }
 
-    // assigns video stream to video object
+    // assigns video stream to video object and appends video object to
+    // the html video array for viewing on client's webpage
     function addVideoStream(video, stream)  {
         video.srcObject = stream;
         video.addEventListener('loadedmetadata', () => {
@@ -262,8 +286,9 @@ export function paperSockets() {
     }
 
     // send a user this clients video stream, then when the user responds with their
-    // video stream, add it to this clients list of videos
+    // video stream, add it to this clients video grid
     function connectToNewUser(userID, stream) {
+        console.log('connecting to new user');
         const call = myPeer.call(userID, stream);
         const video = document.createElement('video');
         call.on('stream', (userVideoStream) => {
@@ -273,6 +298,8 @@ export function paperSockets() {
         call.on('close', () => {
             video.remove();
         })
+        // add call to call list to track which client is linked to which call
+        //myCalls[userID] = call;
     }
 
     // event listener called when a keyboard key is pressed

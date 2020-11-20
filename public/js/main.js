@@ -36,5 +36,3 @@ socket.on("giveUsername" , (username) => {
         user.name =  "Guest" +  Math.floor( Math.random() * 10000);
     }
 });
-
-
