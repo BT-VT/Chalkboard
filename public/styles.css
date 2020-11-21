@@ -74,6 +74,10 @@ body {
     height: 300px;
     width: 300px;
 }
+
+h2{
+    color: #AFAFAF;
+}
 .toolbox .group .item.active,
 .toolbox .group .item:hover {
     background-color: #0F1930;
