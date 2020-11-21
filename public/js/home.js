@@ -9,6 +9,10 @@ function home() {
                     <div class="item download" data-command="download" title="Download">
                         <img src="images/download-icon.png" />
                     </div>
+
+                    <div class="item upload" id="Upload to Canvas" data-tool="uploadImage"><img src = "images/pictureUpload.png"></div>
+
+
                     <a href="#modal" class="modal-trigger" data-target="modal-save" style="color: #02A6C1">
                         <div class="item " title="Upload">
                             <img src="images/upload-icon.png" />
