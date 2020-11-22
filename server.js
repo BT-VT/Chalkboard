@@ -378,17 +378,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnecting', async () => {
-        console.log('user is disconnecting');
+        console.log('user + ' socket.id + ' is disconnecting');
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
-        console.log(userSessions);
-        // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
-        if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
-            await checkForNewUsers(socket, userSessions[1]);
-            sessions.get(userSessions[1]).LOCKED = false;
-            console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
-            io.to(userSessions[1]).emit('deleteCurPath', socket.id);
-        }
+        if(userSessions.length > 1) {
+            // tell other users to disconnect video call with this user who is leaving the session
+            socket.to(userSessions[1]).emit('userLeftSession', socket.id);
 
+            // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
+            if(sessions.get(userSessions[1]).LOCKED == socket.id) {
+                await checkForNewUsers(socket, userSessions[1]);
+                sessions.get(userSessions[1]).LOCKED = false;
+                console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
+                io.to(userSessions[1]).emit('deleteCurPath', socket.id);
+            }
+        }
     });
 
 
@@ -418,10 +421,7 @@ io.on('connection', (socket) => {
 
     socket.on("joinSession", async (user, prevSession) =>  {
         try {
-            if (prevSession != null) {
-                socket.leave(prevSession);
-            }
-
+            // if session had prevSession, it is automatically removed when it disconnects from page reload
             // check if session already exists on server
             if (sessions.has(user.sessionID)) {
                 //   sessions.get(user.sessionID).push(user);

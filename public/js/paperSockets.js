@@ -154,10 +154,8 @@ export function paperSockets() {
     // ends the call with another client, which is faster than waiting for peer.js
     // to do it automatically. (not currently used)
     function userLeftSession(userID) {
-        console.log(myCalls);
-        console.log(userID);
         if(myCalls[userID]) {
-            console.log('goodbye ' + userID);
+            console.log('user leaving session: ' + userID);
             myCalls[userID].close();
         }
     }
@@ -285,7 +283,7 @@ export function paperSockets() {
     // send a user this clients video stream, then when the user responds with their
     // video stream, add it to this clients video grid
     function connectToNewUser(userID, stream) {
-        console.log('connecting to new user');
+        console.log('connecting to new user: ' + userID);
         const call = myPeer.call(userID, stream);
         const video = document.createElement('video');
         call.on('stream', (userVideoStream) => {
@@ -296,7 +294,7 @@ export function paperSockets() {
             video.remove();
         })
         // add call to call list to track which client is linked to which call
-        //myCalls[userID] = call;
+        myCalls[userID] = call;
     }
 
     // event listener called when a keyboard key is pressed
