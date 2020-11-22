@@ -34,7 +34,7 @@ function home() {
                 </div>
             </div>
             <!-- Paint sheet where we draw-->
-            <canvas id="canvas" width="1200" height="500" style=""></canvas>
+            <canvas id="canvas" width="1325" height="500" style="border:1px solid black"></canvas>
             <!-- right toolbox with colors-->
             <div id="video-grid"></div>
         `;

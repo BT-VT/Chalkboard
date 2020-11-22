@@ -17,7 +17,7 @@ export function paperSockets() {
 	const pickr = Pickr.create({
 		el: '.color-picker',
 		theme: 'classic', // or 'monolith', or 'nano'
-		default: '#000000',
+		default: '#FFFFFF',
 		swatches: [
 			'rgba(255, 0, 0, 1)',
 			'rgba(255, 127, 0, 1)',
@@ -279,8 +279,8 @@ export function paperSockets() {
         video.addEventListener('loadedmetadata', () => {
             video.play();
         })
-        videoGrid.append(video);
-    }
+		videoGrid.append(video);
+	}
 
     // send a user this clients video stream, then when the user responds with their
     // video stream, add it to this clients video grid
