@@ -24,6 +24,7 @@
     <!-- Load chalkboard scripts -->
     <script type="module" src="js/paperSockets.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+    <script type="module" src="js/picturetopicture.js"></script>
 </head>
 
 <style>
@@ -42,7 +43,6 @@
 </style>
 
 <body>
-
     <!--Dropdown Structure-->
     <ul id="dropdown1" class="dropdown-content">
         <li class="logged-in" style="display: none;">
@@ -61,6 +61,7 @@
     
     <!--NAV BAR-->
     <div id="page">
+        <video id="video" controls height="360" width="640" hidden></video>
         <div class="navbar-fixed">
             <nav class="z-depth-0 nav-extended">
                 <a href="#/home" class="brand-logo">
@@ -85,6 +86,11 @@
                         <label class="theme-switch">
                             <p style="padding-right:20px;"><input type="checkbox" required/>Theme</p>
                         </label>
+                    </li>
+                    <li>
+                        <div class="button-container">
+                            <button id="button1">Start</button>
+                        </div>
                     </li>
                     
                     <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown-button"
