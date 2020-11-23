@@ -18,8 +18,9 @@ socket.on("chat-message", (msg) => {
 });
 
 socket.on("updateUserList", (userList) => {
-    sessionMembers.innerHTML += "\n" + userList;
+    sessionMembers.innerHTML = "Users in Session:\n" + userList;
 });
+
 
 
 sendContainer.addEventListener("submit", e => {
@@ -51,7 +52,6 @@ hideBTn.onclick = function() {
     }
 }
 
-
 socket.on("typing", (data, user) => {
     if (data === 1) {
         typingMsg.innerHTML = user + " is typing...";
@@ -68,4 +68,3 @@ messageInput.addEventListener("keyup", () => {
     }
     socket.emit("typingMsg", isTyping, user);
 });
-

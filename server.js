@@ -19,6 +19,7 @@ app.use(express.static(__dirname + "/node_modules/paper/dist"));
 let sessions = new Map();
 let webRoom = "default";
 
+
 /*
 sessions = map : {
     sessionID: {
@@ -106,9 +107,9 @@ function checkForNewUsers(socket, sessionID) {
         // send all waiting sockets the session paths
         while(newUsers.length) {
             let newSocket = newUsers.shift();
-            console.log('sending paths to socket ' + newSocket.id + 'waiting in newUser queue of session: ' + sessionID);
+            console.log('sending paths to socket ' + newSocket.id + ' waiting in newUser queue of session: ' + sessionID);
             //socket.broadcast.to(newSocket.id).emit('addPaths', sessions.get(user.sessionID).paths); // send paths to next new user in queue
-            socket.to(newSocket.id).emit('addPaths', sessions.get(sessionID).paths); // send paths to next new user in queue
+            io.to(newSocket.id).emit('addPaths', sessions.get(sessionID).paths); // send paths to next new user in queue
         }
         response(newUsers.length);
     });
@@ -120,9 +121,14 @@ io.on('connection', (socket) => {
 
     socket.on('hello', () => {
         setTimeout(() => {
-        socket.emit("updateRoom", webRoom);
-        webRoom = "default";
-        }, 1000)
+
+            
+             socket.emit("updateRoom", webRoom);
+             webRoom = "default";
+            
+        
+
+        }, 500)
         
     })
 
@@ -375,13 +381,29 @@ io.on('connection', (socket) => {
         // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
         if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
             await checkForNewUsers(socket, userSessions[1]);
-            sessions.get(userSesssions[1]).LOCKED = false;
+            sessions.get(userSessions[1]).LOCKED = false;
             console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
             io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
         
+       
+        let previousSessionUserIDs = sessions.get(userSessions[1]).sessionUserIDs;
+        let previousSessionUsers = sessions.get(userSessions[1]).sessionUsers;
+        let index = previousSessionUserIDs.indexOf(socket.id);
+      //  console.log(index);
+        if (index != -1) {
+            sessions.get(userSessions[1]).sessionUserIDs = previousSessionUserIDs.splice(index, 1);
+            sessions.get(userSessions[1]).sessionUsers = previousSessionUsers.splice(index, 1);
+         //   console.log(previousSessionUsers);
+            io.to(userSessions[1]).emit("updateUserList", "\n" + sessions.get(userSessions[1]).sessionUsers.join("\n"));
+         }
+                    
+        
     });
-
+        
+   
+   
+    
 
 
     // =============== CHAT HANDLING ============================
@@ -392,6 +414,7 @@ io.on('connection', (socket) => {
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
         io.to(user.sessionID).emit("chat-message", user.name + " at " + formattedTime + ":\n" + message);
+        
     });
 
     // broadcasts a message when a user is typing
@@ -409,16 +432,28 @@ io.on('connection', (socket) => {
 
     socket.on("joinSession", async (user, prevSession) =>  {
         try {
-            if (prevSession != null) {
+
+          //  console.log(prevSession);
+            if (prevSession != null && sessions.has(prevSession)) { 
                 socket.leave(prevSession);
+                
+                // removing name from list
+                let previousSessionUsers = sessions.get(prevSession).sessionUsers;
+                let index = previousSessionUsers.indexOf(user.name);
+
+                if (index != -1) {
+                    sessions.get(prevSession).sessionUsers = previousSessionUsers.splice(index, 1);
+                    io.to(prevSession).emit("updateUserList", "\n" + sessions.get(prevSession).sessionUsers.join("\n"));
+                }
             }
 
             // check if session already exists on server
             if (sessions.has(user.sessionID)) {
                 //   sessions.get(user.sessionID).push(user);
                 socket.join(user.sessionID);
-                sessions.get(user.sessionID).usersInSession.push(user.name);
-                io.to(user.sessionID).emit("updateUserList", sessions.get(user.sessionID).usersInSession);
+                sessions.get(user.sessionID).sessionUsers.push(user.name);
+                sessions.get(user.sessionID).sessionUserIDs.push(socket.id);
+                io.to(user.sessionID).emit("updateUserList", "\n" + sessions.get(user.sessionID).sessionUsers.join("\n"));
                 //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
                 console.log('user requested to join existing session: ' + user.sessionID);
                 await tryToSendPaths(socket, user.sessionID);
@@ -428,7 +463,9 @@ io.on('connection', (socket) => {
                 let sessionObj = {
                     paths: [],
                     LOCKED: false,
-                    usersInSession: [user.name]
+                    newUsers: [],
+                    sessionUsers: [user.name],
+                    sessionUserIDs: [socket.id]
                 }
                 // check if session exists in dB. If it does, add it to the server and
                 // add the user to the session, else create a new session and add the user.
@@ -445,7 +482,8 @@ io.on('connection', (socket) => {
                 }
                 sessions.set(user.sessionID, sessionObj);
                 socket.join(user.sessionID);
-                io.to(user.sessionID).emit("updateUserList", sessions.get(user.sessionID).usersInSession);
+                console.log("current users: " + sessions.get(user.sessionID).sessionUsers)
+                io.to(user.sessionID).emit("updateUserList", "\n" + sessions.get(user.sessionID).sessionUsers.join("\n"));
                 await tryToSendPaths(socket, user.sessionID);
                 // socket.emit('addPaths', sessions.get(user.sessionID).paths);
             }
@@ -457,7 +495,9 @@ io.on('connection', (socket) => {
 
 
 
-});
 
+
+
+});
 
 exports.server = server;
