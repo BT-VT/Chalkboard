@@ -1190,7 +1190,7 @@ export function paperSockets() {
 			if (setDrawingTool('marker')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         markerBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/pencil_2.png), auto";
+        document.querySelector('#canvas').style.cursor = "url(images/pen-2.png), auto";
 				console.log('marker selected');
 			}
 			else { console.log('failed to select marker'); }
@@ -1204,7 +1204,7 @@ export function paperSockets() {
 			if (setDrawingTool('circle')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         circleBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "auto";
+        document.querySelector('#canvas').style.cursor = "url(images/circle-2.png), auto";
 				console.log('circle selected!');
 			}
 			else { console.log('failed to select circle'); }
@@ -1274,7 +1274,7 @@ export function paperSockets() {
 			if(setDrawingTool('colorFill')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         fillBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/paint-bucket-icon_2.png), auto";
+        document.querySelector('#canvas').style.cursor = "url(images/paint-fill.png), auto";
 				console.log('color fill selected!');
 			}
 			else { console.log('failed to select color fill'); }
@@ -1288,7 +1288,7 @@ export function paperSockets() {
 			if(setDrawingTool('grab')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         grabBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "grab";
+        document.querySelector('#canvas').style.cursor = "url(images/grab-2.png), auto";
 				console.log('grab selected!');
 			}
 			else { console.log('failed to select grab'); }
@@ -1316,7 +1316,7 @@ export function paperSockets() {
 			if (setDrawingTool("eraser")) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         eraserBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/eraser_2.png), auto";
+        document.querySelector('#canvas').style.cursor = "url(images/eraser-2.png), auto";
 				console.log('eraser selected');
 			}
 			else { console.log('failed to select eraser'); }
