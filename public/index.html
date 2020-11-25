@@ -61,9 +61,9 @@
     
     <!--NAV BAR-->
     <div id="page">
-        <video id="video" controls height="360" width="640" hidden></video>
+        <video id="video" controls height="408px" width="203px" hidden></video>
         <div class="navbar-fixed">
-            <nav class="z-depth-0 nav-extended">
+            <nav class="z-depth-0 nav-extended"> 
                 <a href="#/home" class="brand-logo">
                     <img src="images/chalkboard logo.png" style="width: 180px; margin-top:0px;">
                 </a>
@@ -89,7 +89,11 @@
                     </li>
                     <li>
                         <div class="button-container">
-                            <button id="button1">Start</button>
+                            <script type="text/javascript" src="js/picturetopicture.js"></script>
+                            <script language="javascript">
+                                selectMediaStream();
+                            </script>
+                            <button id="button1" onclick="runShareMedia()">Start</button>
                         </div>
                     </li>
                     
