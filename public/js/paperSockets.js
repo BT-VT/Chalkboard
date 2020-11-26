@@ -1204,7 +1204,7 @@ export function paperSockets() {
 			if (setDrawingTool('circle')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         circleBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/circle-2.png), auto";
+        document.querySelector('#canvas').style.cursor = "auto";
 				console.log('circle selected!');
 			}
 			else { console.log('failed to select circle'); }
