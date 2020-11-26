@@ -378,7 +378,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnecting', async () => {
-        console.log('user + ' + socket.id + ' is disconnecting');
+        console.log('user ' + socket.id + ' is disconnecting');
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
         if(userSessions.length > 1) {
             // tell other users to disconnect video call with this user who is leaving the session
