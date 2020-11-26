@@ -194,7 +194,6 @@ export function paperSockets() {
 	// called when socket receives an 'addPaths' message from server. Adds all
 	// previously existing session paths to new client's canvas and allows client
 	// to begin to receive canvas updates when other users are drawing.
-	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	// newPaths = [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ]
 	function addPaths(newPaths) {
 		if (!initialPathsReceived) {
