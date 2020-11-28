@@ -50,7 +50,8 @@ export function paperSockets() {
 		var hexColor = color.toHEXA().toString();
 		console.log(hexColor)
 		window.globalVar = hexColor;
-		window.selectedColor = hexColor.toString()
+		window.selectedColor = hexColor.toString();
+		document.getElementsByClassName('pcr-button')[0].style.color= hexColor;
 
 	})
 	pickr.on('save', (color, instance) => {
