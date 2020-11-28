@@ -195,7 +195,6 @@ export function paperSockets() {
 	// called when socket receives an 'addPaths' message from server. Adds all
 	// previously existing session paths to new client's canvas and allows client
 	// to begin to receive canvas updates when other users are drawing.
-	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	// newPaths = [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ]
 	function addPaths(newPaths) {
 		if (!initialPathsReceived) {
@@ -256,7 +255,7 @@ export function paperSockets() {
                 call.answer(stream);
                 const video = document.createElement('video');
                 call.on('stream', (userVideoStream) => {
-                        addVideoStream(video, userVideoStream);
+                    addVideoStream(video, userVideoStream);
                 });
             });
             // let server know client is connected, so server can broadcast
@@ -294,6 +293,7 @@ export function paperSockets() {
         call.on('close', () => {
             video.remove();
         })
+        
         // add call to call list to track which client is linked to which call
         myCalls[userID] = call;
     }
