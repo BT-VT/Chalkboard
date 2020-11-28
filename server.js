@@ -133,7 +133,6 @@ io.on('connection', (socket) => {
         socket.to(user.sessionID).broadcast.emit('userJoinedSession', socket.id);
     });
 
-
     // ================ CANVAS HANDLING =========================
 
     // initial message from client to request session path

@@ -254,7 +254,7 @@ export function paperSockets() {
                 call.answer(stream);
                 const video = document.createElement('video');
                 call.on('stream', (userVideoStream) => {
-                        addVideoStream(video, userVideoStream);
+                    addVideoStream(video, userVideoStream);
                 });
             });
             // let server know client is connected, so server can broadcast
@@ -292,6 +292,7 @@ export function paperSockets() {
         call.on('close', () => {
             video.remove();
         })
+        
         // add call to call list to track which client is linked to which call
         myCalls[userID] = call;
     }
