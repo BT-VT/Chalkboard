@@ -63,6 +63,7 @@ export function paperSockets() {
 
 	// Setup directly from canvas id:
 	paper.setup('canvas');
+	//document.getElementById('canvas').height = 5000;
 	var tool = new paper.Tool();
 
     // video and audio global variables
