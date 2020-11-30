@@ -4,7 +4,7 @@ function myChalkboards () {
 
     <div class="content">
         <div class="chalkboards" id="grid">
-            <h2 style="text-align: center; font-weight: 500; font-size: 28px; color: #000; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;">My chalkboards</h2>
+            <h2 style="text-align: center; font-weight: 500; font-size: 28px; color: #AFAFAF; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;">My chalkboards</h2>
         </div>
     </div>
         `;

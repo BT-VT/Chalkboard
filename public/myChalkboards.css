@@ -63,7 +63,7 @@
     align-content: flex-start;
 }
 .chalkboards {
-    background-color: lightgray;
+    background-color: #1b2130;
     /*border-style: solid;/**/
     /*border-color: blue;/**/
     min-height: 100vh;
