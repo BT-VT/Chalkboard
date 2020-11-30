@@ -42,6 +42,7 @@ body {
     justify-content: space-between;
 }
 .toolbox {
+    position: fixed;
     display: flex;
     flex-direction: column;
     justify-content: top;

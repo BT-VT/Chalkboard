@@ -64,6 +64,8 @@ export function paperSockets() {
 	// Setup directly from canvas id:
 	paper.setup('canvas');
 	//document.getElementById('canvas').height = 5000;
+	paper.view.viewSize.height = 3500;
+	paper.view.viewSize.width = 3500;
 	var tool = new paper.Tool();
 
     // video and audio global variables
