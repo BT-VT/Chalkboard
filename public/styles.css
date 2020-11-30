@@ -4,14 +4,15 @@ body {
     flex-direction: column;
     min-height: 100%;
     min-width: 100%;
-    background-color: #283333;
+    background-color: #1b2130;
 }
-#navbar {
+.navbar {
     height: 10vh;
+    background-color: #131721;
 }
 
 #navProgress {
-    color: gray;
+    color: #0F1930;
     font-size: large;
     /*padding-left: 25%;/**/
     position: relative;
@@ -47,15 +48,15 @@ body {
     flex-direction: column;
     justify-content: top;
     height: 90vh;
-    background-color: #a0a0a0;
+    background-color: #1b2130;
     overflow-y: auto;
 }
 .toolbox .group {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: #a0a0a0;
-    border-bottom: thin solid gray;
+    background-color: #1b2130;
+    border-bottom: thin solid #1b2130;
 }
 .toolbox .group .item {
     display: flex;
@@ -74,9 +75,10 @@ body {
     height: 300px;
     width: 300px;
 }
+
 .toolbox .group .item.active,
 .toolbox .group .item:hover {
-    background-color: #4b6161;
+    background-color: #0F1930;
 }
 .toolbox .group.stroks .item {
     position: relative;
@@ -169,4 +171,8 @@ body {
   .grid-title {
       font-size: 20px;
       font-weight: bold;
+  }
+
+  .pcr-app{
+      background-color: #2a334a;
   }
