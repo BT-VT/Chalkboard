@@ -1069,6 +1069,71 @@ export function paperSockets() {
 	}
 
 
+/* ================================ IMAGE UPLOAD TO CANVAS ================================= */
+
+let fileButton = document.getElementById('file-input');
+if(fileButton) {
+    fileButton.addEventListener('change', (e) => {
+        console.log('uploading image to google cloud storage');
+        // get file
+        let file = e.target.files[0];
+        // create storage ref to empty storage object
+        // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+        let storageRef = firebase.storage().ref('chalkboardImages/' + file.name);
+        // upload file to storage ref location
+        let task = storageRef.put(file);
+
+        // update progress log and save download URL
+        // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
+        task.on('state_changed',
+            // called when upload state of upload changes
+            function progress(snapshot) {
+                // update progress log
+                let percentage = snapshot.bytesTransferred /
+                                    snapshot.totalBytes * 100;
+                console.log('upload: ' + percentage + '%');
+            },
+            // called when upload fails
+            function error(err) {
+                console.log(err);
+            },
+            // called when upload finishes, get URL and display corresponding image
+            async function complete() {
+                console.log('upload complete');
+                try {
+                    let url = await storageRef.getDownloadURL();
+                    if(url) {
+                        console.log('adding image to canvas');
+                        // call function that takes URL as arg and adds img to canvas.
+                        let raster = addImageToCanvas(url);
+
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        );
+    });
+}
+
+// use a supplied URL to download an image and add it to the canvas
+let addImageToCanvas = (url) => {
+    console.log('in addImageToCanvas');
+    let raster = new paper.Raster(url);
+    raster.onLoad = () => {
+        console.log('image loaded to canvas');
+        raster.size = paper.view.viewSize;
+        raster.position = paper.view.center
+        raster.scale(0.5);
+        console.log('viewSize: ' + paper.view.viewSize);
+        console.log('raster size: ' + raster.size);
+        return raster;
+    }
+}
+
+/* ================================ DONE IMAGE UPLOAD TO CANVAS ============================ */
+
+
 	var uploadBtn = document.querySelector(".upload");
 	var selectedFile;
 	if (uploadBtn) {
