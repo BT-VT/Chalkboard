@@ -11,6 +11,12 @@ body {
     background-color: #131721;
 }
 
+.image-upload>input {
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+
 #navProgress {
     color: #0F1930;
     font-size: large;

@@ -188,6 +188,11 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('addTextChar', lockOwner, char);
     });
 
+    socket.on('requestAddImageToCanvas', (url, user) => {
+        let pathID = uuidv4();
+        io.to(user.sessionID).emit('addImageToCanvas', url, pathID);
+    });
+
     socket.on('requestErase', (pathName, user) => {
         console.log('request erase ' + pathName);
         io.to(user.sessionID).emit('erasePath', pathName);
@@ -326,6 +331,19 @@ io.on('connection', (socket) => {
         // if no new users are waiting, unlock all users canvas's.
         sessions.get(user.sessionID).LOCKED = false;
         console.log('ended text, LOCKED set to false in session: ' + user.sessionID);
+        io.to(user.sessionID).emit('unlockCanvas', socket.id);
+    });
+
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
+    socket.on('confirmImageUpload', async (pathData, user) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path;
+        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        await checkForNewUsers(socket, user.sessionID);
+        // if no new users are waiting, unlock all users canvas's.
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended image upload, LOCKED set to false in session: ' + user.sessionID);
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 

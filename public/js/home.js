@@ -3,17 +3,14 @@ function home() {
     <!-- tool box on left panel -->
             <div class="toolbox left">
                 <div class="group commands">
-                    <div class="item undo" data-command="undo" title="Undo">
-                        <img src="images/undo-icon.png" />
+                    <div class="item undo" data-command="undo" title="Undo"><img src="images/undo-icon.png" /></div>
+                    <div class="item download" data-command="download" title="Download"><img src="images/download-icon.png" /></div>
+                    <div class="item image-upload"  id="upload-canvas" title="upload-canvas">
+                        <label for="file-input"><img src="images/upload-canvas-icon.png" /></label>
+                        <input id="file-input" type="file" />
                     </div>
-                    <div class="item download" data-command="download" title="Download">
-                        <img src="images/download-icon.png" />
-                    </div>
-
                     <a href="#modal" class="modal-trigger" data-target="modal-save" style="color: #02A6C1">
-                        <div class="item " title="Upload">
-                            <img src="images/upload-icon.png" />
-                        </div>
+                        <div class="item " title="Upload"><img src="images/upload-icon.png" /></div>
                     </a>
                     <div class="item"  title="Color Picker">
                         <div class="color-picker"></div>
