@@ -132,6 +132,7 @@ export function paperSockets() {
     socket.on('editText', editText);
     socket.on('textBackspace', textBackspace);
     socket.on('addTextChar', addTextChar);
+    socket.on('addImageToCanvas', addImageToCanvas);
 	socket.on('erasePath', erasePath);
 	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
@@ -632,6 +633,8 @@ export function paperSockets() {
             pathsItem.path.strokeWidth = pathsItem.path.strokeWidth - attributes.scale;
             pathsItem.path.data.scaled = false;
         }
+        console.log('serializing paths item: ');
+        console.log(pathsItem.path.exportJSON());
 		return {
 			pathName: pathsItem.pathName,
 			path: pathsItem.path.exportJSON()
@@ -666,9 +669,7 @@ export function paperSockets() {
 			pathName: 'path-' + pathID,
 			path: curPath
 		}
-
-		let pathName = 'path-' + pathID;
-
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		curPath = new paper.Path();
@@ -693,6 +694,7 @@ export function paperSockets() {
 			pathName: 'circle-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -716,6 +718,7 @@ export function paperSockets() {
 			pathName: type + '-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -737,6 +740,7 @@ export function paperSockets() {
 			pathName: 'triangle-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -759,6 +763,7 @@ export function paperSockets() {
 			pathName: 'line-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -779,6 +784,7 @@ export function paperSockets() {
             pathName: 'text-' + pathID,
             path: curPath
         }
+        // set listeners for individual paths, then add path to paths list
         setPathFunctions(pathsItem, attributes.scale);
         paths.push(pathsItem);
         console.log(paths);
@@ -1073,7 +1079,28 @@ export function paperSockets() {
 
 let fileButton = document.getElementById('file-input');
 if(fileButton) {
-    fileButton.addEventListener('change', (e) => {
+    fileButton.onclick = () => {
+        console.log('file Button clicked');
+        if(!LOCKED) { socket.emit('requestLock', user); }
+    }
+    fileButton.addEventListener('change', async (e) => {
+        console.log('file button changed...');
+        if(!LOCKED || LOCKED == socket.id) {
+            console.log('lock is free, uploading image to cloud');
+            let url = await uploadImageToCloud(e);
+            console.log('adding image to canvas');
+            // call function that takes URL as arg and adds img to canvas.
+            socket.emit('requestAddImageToCanvas', url, user);
+            // addImageToCanvas(url);
+        }
+        else {
+            console.log('lock not owned, cannot upload image');
+        }
+    });
+}
+
+let uploadImageToCloud = (e) => {
+    return new Promise( (resolve, reject) => {
         console.log('uploading image to google cloud storage');
         // get file
         let file = e.target.files[0];
@@ -1103,13 +1130,12 @@ if(fileButton) {
                 try {
                     let url = await storageRef.getDownloadURL();
                     if(url) {
-                        console.log('adding image to canvas');
-                        // call function that takes URL as arg and adds img to canvas.
-                        let raster = addImageToCanvas(url);
-
+                        console.log('retrieved url of image from cloud storage');
+                        resolve(url);
                     }
                 } catch (err) {
                     console.log(err);
+                    reject(false);
                 }
             }
         );
@@ -1117,16 +1143,34 @@ if(fileButton) {
 }
 
 // use a supplied URL to download an image and add it to the canvas
-let addImageToCanvas = (url) => {
-    console.log('in addImageToCanvas');
+function addImageToCanvas(url, pathID) {
     let raster = new paper.Raster(url);
     raster.onLoad = () => {
         console.log('image loaded to canvas');
-        raster.size = paper.view.viewSize;
+        // adjust image to half size of canvas
+        //raster.size = paper.view.viewSize;
         raster.position = paper.view.center
         raster.scale(0.5);
-        console.log('viewSize: ' + paper.view.viewSize);
-        console.log('raster size: ' + raster.size);
+
+        // add individual path data that's used for other functions
+        raster.data.scaled = false;
+        raster.data.type = 'image';
+        raster.data.id = pathID;
+		// add new path to paths array as path Item
+		let pathsItem = {
+			pathName: 'image-' + pathID,
+			path: raster
+		}
+        // set listeners for individual paths, then add path to paths list
+		setPathFunctions(pathsItem, attributes.scale);
+		paths.push(pathsItem);
+		console.log(paths);
+
+		if (LOCKED == socket.id) {
+			console.log(socket.id + ' sending imageUploadDone confirmation to server');
+			// serialize path before sending to server
+			socket.emit('confirmImageUpload', serializedPathsItem(pathsItem), user);
+		}
         return raster;
     }
 }
