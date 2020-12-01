@@ -3,6 +3,7 @@ function home() {
     <!-- tool box on left panel -->
             <div class="toolbox left">
                 <div class="group commands">
+                    <div class= "item" id="mute"><img src="images/mute-icon.jpeg" /></div>
                     <div class="item undo" data-command="undo" title="Undo"><img src="images/undo-icon.png" /></div>
                     <div class="item download" data-command="download" title="Download"><img src="images/download-icon.png" /></div>
                     <div class="item image-upload"  id="upload-canvas" title="upload-canvas">

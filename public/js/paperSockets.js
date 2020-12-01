@@ -289,6 +289,17 @@ export function paperSockets() {
                 // call.peer is peerID of peer on other end of call.
                 myCalls[call.peer] = call;
             });
+
+            // when a client clicks the mute button, toggle audio/video stream off
+            // for that client
+            let muteBtn = document.querySelector("#mute");
+        	if (muteBtn) {
+        		muteBtn.onclick = function() {
+                    console.log('mute clicked!')
+                    muteBtn.classList.toggle("active");
+                    stream.getTracks().forEach(track => track.enabled = !track.enabled);
+                }
+            }
         })
     }
 
