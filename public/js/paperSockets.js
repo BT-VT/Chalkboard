@@ -222,6 +222,9 @@ export function paperSockets() {
                 else if (pathName.search('text') > -1) {
                     pathsItem.path = new paper.PointText().importJSON(pathObj);
                 }
+                else if (pathName.search('image') > -1) {
+                    pathsItem.path = new paper.Raster().importJSON(pathObj);
+                }
 				setPathFunctions(pathsItem, attributes.scale);
 				paths.push(pathsItem);
 			}
