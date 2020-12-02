@@ -650,8 +650,6 @@ export function paperSockets() {
             pathsItem.path.strokeWidth = pathsItem.path.strokeWidth - attributes.scale;
             pathsItem.path.data.scaled = false;
         }
-        console.log('serializing paths item: ');
-        console.log(pathsItem.path.exportJSON());
 		return {
 			pathName: pathsItem.pathName,
 			path: pathsItem.path.exportJSON()
@@ -974,6 +972,14 @@ export function paperSockets() {
 			else if (paper.Key.isDown('right')) {
 				socket.emit('requestPathRotate', attributes.rotation, pathInd, user);
 			}
+            else if(paper.Key.isDown('shift') && path.data.type == 'image') {
+                path.bounds = {
+                    x: path.bounds.x,
+                    y: path.bounds.y,
+                    width: event.point.x - path.bounds.x,
+                    height: event.point.y - path.bounds.y
+                }
+            }
 			else if(!paper.Key.isDown('shift')) {
 				// get new position of path based on new position of mouse
 				let x = event.point.x;
@@ -988,8 +994,13 @@ export function paperSockets() {
             console.log('up event on specific path, should only be called when tool = grab');
 
             if(paper.Key.isDown('shift')) {
-                setDrawingTool('textEdit');
-                socket.emit('requestEditText', pathInd, user);
+                if(path.data.type == 'text') {
+                    setDrawingTool('textEdit');
+                    socket.emit('requestEditText', pathInd, user);
+                }
+                else if(path.data.type == 'image') {
+                    console.log('image released');
+                }
             }
             else {
                 // get the serialized version of the path that was moved, which contains
