@@ -2,6 +2,7 @@ window.globalVar = "";
 window.selectedColor = '#000000';
 
 import User from "./user.js";
+import Homepage from "./homepage.js";
 
 export let user = new User(
   "Guest" + Math.floor(Math.random() * 10000),
@@ -234,6 +235,7 @@ export function paperSockets() {
 			}
 
             setupVideoRoom();
+            if(user.sessionID == 'homepage-002') { Homepage.greet(); }
 		}
 	}
 
