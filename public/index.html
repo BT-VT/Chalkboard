@@ -30,9 +30,10 @@
 <style> 
     #video-grid {
         display: grid;
-        transform: scaleX(-1) ;
-        grid-template-columns: repeat(auto-fill, 150px);
-        grid-auto-rows: 150px; 
+        position: fixed;
+        right: 0;
+        grid-template-columns: repeat(auto-fill, 100px);
+        grid-auto-rows: 100px;
     }
 
     video {
@@ -63,7 +64,7 @@
     <div id="page">
         <video id="video" controls height="408px" width="203px" hidden></video>
         <div class="navbar-fixed">
-            <nav class="z-depth-0 nav-extended"> 
+            <nav class="z-depth-0 lighten-4 nav-extended navbar">
                 <a href="#/home" class="brand-logo">
                     <img src="images/chalkboard logo.png" style="width: 180px; margin-top:0px;">
                 </a>
@@ -71,37 +72,29 @@
                         style='color:gray'>menu</i></a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li><span id="navProgress"></span></li>
-                    <li style="color: gray;">Text/Drawing Size:</li>
-                    <li style="padding-right: 20px;">
-                      <input
-                        id="slider"
-                        type="range"
-                        min="1"
-                        max="80"
-                        value="2"
-                        step="2"
-                      />
+                    <li style="color: #FFF; margin-top: 2px; margin-right:10px;">Text/Drawing Size: </li>
+                    <li>
+                        <input id="slider" type="range" min="1" max="100" value="2" step="2" />
+                    </li>
+                    <li>
+                        <a class="modal-trigger grey-text" data-target="help-modal">
+                            <i class="material-icons" style = "margin-top: 6px; margin-left: 16px;">help</i>
+                        </a>
                     </li>
                     <li>
                         <label class="theme-switch">
-                            <p style="padding-right:20px;"><input type="checkbox" required/>Theme</p>
+                            <p style="padding-right:20px;"><input type="checkbox" required unselectable="on">Theme</p>
                         </label>
                     </li>
                     <li>
                         <div class="button-container">
                             <script type="text/javascript" src="js/picturetopicture.js"></script>
-                            <script language="javascript">
-                                selectMediaStream();
-                            </script>
-                            <button id="button1" onclick="runShareMedia()">Start</button>
+                            <button id="button1" onclick="runShareMedia()" unselectable="on"><p>Start</p></button>
                         </div>
                     </li>
-                    
-                    <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown-button"
-                            data-target="dropdown1" data-activates="dropdown1"><p>Audio/Video</p><i
-                                class="material-icons right">arrow_drop_down</i></a></li>
+                
                    <li class="logged-in" style="display: none;">
-                        <a href="#/my-chalkboards"  class="grey-text modal-trigger"><p id="">My chalkboards</p></a>
+                        <a href="#/my-chalkboards"  class="grey-text modal-trigger"><p id="" unselectable="on">My chalkboards</p></a>
                     </li>
                     <li>
                         <a href="#" class="logged-in grey-text">
@@ -109,7 +102,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="">Join/Create a
+                        <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="" unselectable="on">Join/Create a
                             Session</p></a>
                     </li>
                     <li class="logged-in" style="display: none;">
@@ -118,11 +111,11 @@
                         </p>
                     </li>
                     <li class="logged-out" style="display: none;">
-                        <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #000"><p id=" importedFont">Log
+                        <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #000"><p id=" importedFont" unselectable="on">Log
                             in</p></a>
                     </li>
                     <li class="logged-out" style="display: none;">
-                        <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #000"><p id="toggleColor importedFont">Sign
+                        <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #000"><p id="toggleColor importedFont" unselectable="on">Sign
                             up</p></a>
                     </li>
                 </ul>
@@ -161,17 +154,17 @@
                 <a href="#/my-chalkboards" class="grey-text"><p id="toggleColor">My chalkboards</p></a>
             </li>
             <li>
-                <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="toggleColor">Join/Create a Session</p></a>
+                <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="toggleColor" unselectable="on">Join/Create a Session</p></a>
             </li>
             <li class="logged-in" style="display: none;">
-                <a href="#modal" class="grey-text modal-trigger" id="navEmail" data-target="modal-account"><p id="toggleColor">Account</p></a>
+                <a href="#modal" class="grey-text modal-trigger" id="navEmail" data-target="modal-account" unselectable="on"><p id="toggleColor">Account</p></a>
             </li>
             <li class="logged-out" style="display: none;">
-                <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1"><p id="toggleColor">Log
+                <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1" unselectable="on"><p id="toggleColor textColor">Log
                     in</p></a>
             </li>
             <li class="logged-out" style="display: none;">
-                <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #02A6C1"><p id="toggleColor">Sign
+                <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #b4cace" unselectable="on"><p id="toggleColor">Sign
                     up</p></a>
             </li>
         </ul>
@@ -223,6 +216,57 @@
                 </div>
             </div>
         </div>
+        <!--HELP MODAL-->
+        <div id="help-modal" class="modal">
+            <div class="modal-content center align">
+                <h4>Tutorial</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Keys</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Move/Grab an object</td>
+                            <td>Select the grabber tool, hover over the border of desired object until it expands, click
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Rotate an object</td>
+                            <td>Select the grabber tool, grab an object, use left/right arrow keys</td>
+                        </tr>
+                        <tr>
+                            <td>Change selected color</td>
+                            <td>Open color picker, select color, press 'Save'</td>
+                        </tr>
+                        <tr>
+                            <td>Enter text</td>
+                            <td>shift+enter</td>
+                        </tr>
+                        <tr>
+                            <td>Edit text</td>
+                            <td>Use grabber tool, shift+click on text</td>
+                        </tr>
+                        <tr>
+                            <td>Fill tool</td>
+                            <td>Mouse over object border until it expands, click</td>
+                        </tr>
+                        <tr>
+                            <td>Start</td>
+                            <td>When page loads, select an application and press the start button to enable screen share</td>
+                        </tr>
+                        <tr>
+                            <td>Theme</td>
+                            <td>Change the design of the website by pressing the theme button</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <!-- Join a Session modal -->
         <div id=modal-session class="modal">
@@ -241,7 +285,7 @@
         <!--SAVE/UPLOAD MODAL-->
         <div id="modal-save" class="modal">
             <div class="modal-content">
-                <h4 style="color: gray"><p>Save chalkboard<p></h4><br />
+                <h4 ><p id="importedFont">Save chalkboard<p></h4><br />
                 <form id="save-form">
                     <div class="input-field">
                         <input type="text" id="chalkboard-title" />
@@ -305,6 +349,8 @@
         <div id="message-container" style="z-index: 15; margin-left: 3.5%;">
             <div id="whoIsTyping"></div>
         </div>
+
+        <div id ="sessionList" style="z-index: 15; margin-left: 5%;"> Users in Session:</div>
 
         <form id="send-container" style="z-index: 15; margin-left: 3.5%">
             <input type="text" id="message-input" placeholder="Type a message">

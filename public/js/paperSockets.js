@@ -50,7 +50,8 @@ export function paperSockets() {
 		var hexColor = color.toHEXA().toString();
 		console.log(hexColor)
 		window.globalVar = hexColor;
-		window.selectedColor = hexColor.toString()
+		window.selectedColor = hexColor.toString();
+		document.getElementsByClassName('pcr-button')[0].style.color= hexColor;
 
 	})
 	pickr.on('save', (color, instance) => {
@@ -62,6 +63,9 @@ export function paperSockets() {
 
 	// Setup directly from canvas id:
 	paper.setup('canvas');
+	//document.getElementById('canvas').height = 5000;
+	paper.view.viewSize.height = 3500;
+	paper.view.viewSize.width = 3500;
 	var tool = new paper.Tool();
 
     // video and audio global variables
@@ -127,10 +131,12 @@ export function paperSockets() {
 	socket.on('drawTrackingRect', drawTrackingRect);
 	socket.on('drawTrackingTriangle', drawTrackingTriangle);
 	socket.on('drawTrackingLine', drawTrackingLine);
+    socket.on('updateImageSize', updateImageSize);
     socket.on('setPointText', setPointText);
     socket.on('editText', editText);
     socket.on('textBackspace', textBackspace);
     socket.on('addTextChar', addTextChar);
+    socket.on('addImageToCanvas', addImageToCanvas);
 	socket.on('erasePath', erasePath);
 	socket.on('finishDrawing', finishDrawing);			// ends a path and unlocks canvas
 	socket.on('finishCircle', finishCircle);
@@ -150,26 +156,14 @@ export function paperSockets() {
 	// notify server to send existing session paths
 	socket.emit('hello', user);
 
-    // called when client receives userLeftSession message from server. Manually
-    // ends the call with another client, which is faster than waiting for peer.js
-    // to do it automatically. (not currently used)
-    function userLeftSession(userID) {
-        console.log(myCalls);
-        console.log(userID);
-        if(myCalls[userID]) {
-            console.log('goodbye ' + userID);
-            myCalls[userID].close();
-        }
-    }
-
 	// called by every non-drawing client when one client begins drawing.
 	// prevents other clients from emitting drawing coordinates to server
-	function lockCanvas(owner) {
+	function lockCanvas(owner, user) {
 		LOCKED = owner;
 		console.log('canvas LOCKED by socket ' + owner);
 		let msg = document.getElementById("navProgress");
-		msg.setAttribute('style', 'font-size: 16px');
-		msg.innerHTML = `Someone is drawing...`;
+		msg.setAttribute('style', 'font-size: 16px;color:#FFF;padding-top:10px;padding-right:75px');
+		msg.innerHTML = user.name + " is drawing...";
 		return LOCKED;
 	}
 
@@ -196,7 +190,6 @@ export function paperSockets() {
 	// called when socket receives an 'addPaths' message from server. Adds all
 	// previously existing session paths to new client's canvas and allows client
 	// to begin to receive canvas updates when other users are drawing.
-	// newPaths = [ [pathName, pathObj], ... , [pathName, pathObj] ]
 	// newPaths = [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ]
 	function addPaths(newPaths) {
 		if (!initialPathsReceived) {
@@ -233,6 +226,9 @@ export function paperSockets() {
                 else if (pathName.search('text') > -1) {
                     pathsItem.path = new paper.PointText().importJSON(pathObj);
                 }
+                else if (pathName.search('image') > -1) {
+                    pathsItem.path = new paper.Raster().importJSON(pathObj);
+                }
 				setPathFunctions(pathsItem, attributes.scale);
 				paths.push(pathsItem);
 			}
@@ -240,6 +236,16 @@ export function paperSockets() {
             setupVideoRoom();
 		}
 	}
+
+    // called when client receives userLeftSession message from server. Manually
+    // ends the call with another client, which is faster than waiting for peer.js
+    // to do it automatically. (not currently used)
+    function userLeftSession(userID) {
+        if(myCalls[userID]) {
+            console.log('user:' + userID + ' leaving session');
+            myCalls[userID].close();
+        }
+    }
 
     function setupVideoRoom() {
         // connect to the peer server
@@ -251,25 +257,72 @@ export function paperSockets() {
         }).then(stream => {
             // add clients own video stream to clients video grid
             addVideoStream(myVideo, stream);
+
+            // let server know client is connected, so server can broadcast
+            // userJoinedSession message to all clients in the same session
+            socket.emit('confirmSessionJoined', user);
+
+            // when server notifies this client that a new user has joined the
+            // session, call that new user user to begin sharing video streams.
+            // userID is the socket ID of the new user joining the session, which
+            // acts as the user ID for the new user in the video call
+            socket.on('userJoinedSession', (userID) => {
+                connectToNewUser(userID, stream);
+            });
+
             // when client receives a call from another client, answer it and
             // add that clients stream to this clients video grid
             myPeer.on('call', (call) => {
                 call.answer(stream);
                 const video = document.createElement('video');
                 call.on('stream', (userVideoStream) => {
-                        addVideoStream(video, userVideoStream);
+                    addVideoStream(video, userVideoStream);
                 });
-            });
-            // let server know client is connected, so server can broadcast
-            // userJoinedSession message to all clients in the same session
-            socket.emit('confirmSessionJoined', user);
 
-            // when server notifies this client that a new user has joined the
-            // session, send call that user and to share video streams.
-            socket.on('userJoinedSession', (userID) => {
-                connectToNewUser(userID, stream);
+                // set listener to remove stream on receiving clients end if
+                // initiating client disconnects
+                call.on('close', () => {
+                    console.log('removing video stream');
+                    video.remove();
+                })
+
+                // add call to call-list, tracks which client is linked to which call,
+                // call.peer is peerID of peer on other end of call.
+                myCalls[call.peer] = call;
             });
+
+            // when a client clicks the mute button, toggle audio/video stream off
+            // for that client
+            let muteBtn = document.querySelector("#mute");
+        	if (muteBtn) {
+        		muteBtn.onclick = function() {
+                    console.log('mute clicked!')
+                    muteBtn.classList.toggle("active");
+                    stream.getTracks().forEach(track => track.enabled = !track.enabled);
+                }
+            }
         })
+    }
+
+    // send a new user this clients video stream, then when the user responds
+    // with their video stream, add it to this clients video grid
+    function connectToNewUser(userID, stream) {
+        console.log('connecting to new user: ' + userID);
+        const call = myPeer.call(userID, stream);
+        const video = document.createElement('video');
+        call.on('stream', (userVideoStream) => {
+            addVideoStream(video, userVideoStream);
+        });
+        // set listener to remove stream on initiating clients end if receiving
+        // client disconnects
+        call.on('close', () => {
+            console.log('removing video stream');
+            video.remove();
+        })
+
+        // add call to call list to track which client is linked to which call,
+        // call.peer is peerID of peer on other end of call.
+        myCalls[call.peer] = call;
     }
 
     // assigns video stream to video object and appends video object to
@@ -279,24 +332,7 @@ export function paperSockets() {
         video.addEventListener('loadedmetadata', () => {
             video.play();
         })
-		videoGrid.append(video);
-	}
-
-    // send a user this clients video stream, then when the user responds with their
-    // video stream, add it to this clients video grid
-    function connectToNewUser(userID, stream) {
-        console.log('connecting to new user');
-        const call = myPeer.call(userID, stream);
-        const video = document.createElement('video');
-        call.on('stream', (userVideoStream) => {
-            addVideoStream(video, userVideoStream);
-        });
-        // set listener to end video when stream stops
-        call.on('close', () => {
-            video.remove();
-        })
-        // add call to call list to track which client is linked to which call
-        //myCalls[userID] = call;
+        videoGrid.append(video);
     }
 
     // event listener called when a keyboard key is pressed
@@ -506,6 +542,13 @@ export function paperSockets() {
 		}
 	}
 
+    // called when updateImageSize is received from server. changes the size of
+    // a raster specified by its index location in the paths array.
+    function updateImageSize(newBounds, index) {
+        if (!initialPathsReceived) { return; }
+        paths[index].path.bounds = newBounds;
+    }
+
     // called when setPointText is received from server.
     // creates a new paper.js text object at a location specified by the user.
     // the location and all attributes are stored in pointTextAttr..
@@ -649,9 +692,7 @@ export function paperSockets() {
 			pathName: 'path-' + pathID,
 			path: curPath
 		}
-
-		let pathName = 'path-' + pathID;
-
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		curPath = new paper.Path();
@@ -676,6 +717,7 @@ export function paperSockets() {
 			pathName: 'circle-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -699,6 +741,7 @@ export function paperSockets() {
 			pathName: type + '-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -720,6 +763,7 @@ export function paperSockets() {
 			pathName: 'triangle-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -742,6 +786,7 @@ export function paperSockets() {
 			pathName: 'line-' + pathID,
 			path: curPath
 		}
+        // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		console.log(paths);
@@ -762,6 +807,7 @@ export function paperSockets() {
             pathName: 'text-' + pathID,
             path: curPath
         }
+        // set listeners for individual paths, then add path to paths list
         setPathFunctions(pathsItem, attributes.scale);
         paths.push(pathsItem);
         console.log(paths);
@@ -934,6 +980,17 @@ export function paperSockets() {
 			else if (paper.Key.isDown('right')) {
 				socket.emit('requestPathRotate', attributes.rotation, pathInd, user);
 			}
+            else if(paper.Key.isDown('shift') && path.data.type != 'text') {
+                // if client is trying to adjust size of image, get new image bounds
+                // and send to server.
+                let newBounds = {
+                    x: path.bounds.x,
+                    y: path.bounds.y,
+                    width: event.point.x - path.bounds.x,
+                    height: event.point.y - path.bounds.y
+                }
+                socket.emit('requestUpdateImageSize', newBounds, pathInd, user);
+            }
 			else if(!paper.Key.isDown('shift')) {
 				// get new position of path based on new position of mouse
 				let x = event.point.x;
@@ -947,7 +1004,7 @@ export function paperSockets() {
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
             console.log('up event on specific path, should only be called when tool = grab');
 
-            if(paper.Key.isDown('shift')) {
+            if(paper.Key.isDown('shift') && path.data.type == 'text') {
                 setDrawingTool('textEdit');
                 socket.emit('requestEditText', pathInd, user);
             }
@@ -1050,6 +1107,109 @@ export function paperSockets() {
 			link.click();
 		}
 	}
+
+
+/* ================================ IMAGE UPLOAD TO CANVAS ================================= */
+
+let fileButton = document.getElementById('file-input');
+if(fileButton) {
+    fileButton.onclick = () => {
+        console.log('file Button clicked');
+        if(!LOCKED) { socket.emit('requestLock', user); }
+    }
+    fileButton.addEventListener('change', async (e) => {
+        console.log('file button changed...');
+        if(!LOCKED || LOCKED == socket.id) {
+            console.log('lock is free, uploading image to cloud');
+            let url = await uploadImageToCloud(e);
+            console.log('adding image to canvas');
+            // call function that takes URL as arg and adds img to canvas.
+            socket.emit('requestAddImageToCanvas', url, user);
+            // addImageToCanvas(url);
+        }
+        else {
+            console.log('lock not owned, cannot upload image');
+        }
+    });
+}
+
+let uploadImageToCloud = (e) => {
+    return new Promise( (resolve, reject) => {
+        console.log('uploading image to google cloud storage');
+        // get file
+        let file = e.target.files[0];
+        // create storage ref to empty storage object
+        // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
+        let storageRef = firebase.storage().ref('chalkboardImages/' + file.name);
+        // upload file to storage ref location
+        let task = storageRef.put(file);
+
+        // update progress log and save download URL
+        // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#on
+        task.on('state_changed',
+            // called when upload state of upload changes
+            function progress(snapshot) {
+                // update progress log
+                let percentage = snapshot.bytesTransferred /
+                                    snapshot.totalBytes * 100;
+                console.log('upload: ' + percentage + '%');
+            },
+            // called when upload fails
+            function error(err) {
+                console.log(err);
+            },
+            // called when upload finishes, get URL and display corresponding image
+            async function complete() {
+                console.log('upload complete');
+                try {
+                    let url = await storageRef.getDownloadURL();
+                    if(url) {
+                        console.log('retrieved url of image from cloud storage');
+                        resolve(url);
+                    }
+                } catch (err) {
+                    console.log(err);
+                    reject(false);
+                }
+            }
+        );
+    });
+}
+
+// use a supplied URL to download an image and add it to the canvas
+function addImageToCanvas(url, pathID) {
+    let raster = new paper.Raster(url);
+    raster.onLoad = () => {
+        console.log('image loaded to canvas');
+        // adjust image to half size of canvas
+        //raster.size = paper.view.viewSize;
+        raster.position = paper.view.center
+        raster.scale(0.5);
+
+        // add individual path data that's used for other functions
+        raster.data.scaled = false;
+        raster.data.type = 'image';
+        raster.data.id = pathID;
+		// add new path to paths array as path Item
+		let pathsItem = {
+			pathName: 'image-' + pathID,
+			path: raster
+		}
+        // set listeners for individual paths, then add path to paths list
+		setPathFunctions(pathsItem, attributes.scale);
+		paths.push(pathsItem);
+		console.log(paths);
+
+		if (LOCKED == socket.id) {
+			console.log(socket.id + ' sending imageUploadDone confirmation to server');
+			// serialize path before sending to server
+			socket.emit('confirmImageUpload', serializedPathsItem(pathsItem), user);
+		}
+        return raster;
+    }
+}
+
+/* ================================ DONE IMAGE UPLOAD TO CANVAS ============================ */
 
 
 	var uploadBtn = document.querySelector(".upload");
@@ -1192,7 +1352,7 @@ export function paperSockets() {
 			if (setDrawingTool('marker')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         markerBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/pencil_2.png), auto";
+        document.querySelector('#canvas').style.cursor = "url(images/pen-2.png), auto";
 				console.log('marker selected');
 			}
 			else { console.log('failed to select marker'); }
@@ -1276,7 +1436,7 @@ export function paperSockets() {
 			if(setDrawingTool('colorFill')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         fillBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/paint-bucket-icon_2.png), auto";
+        document.querySelector('#canvas').style.cursor = "url(images/paint-fill.png), auto";
 				console.log('color fill selected!');
 			}
 			else { console.log('failed to select color fill'); }
@@ -1290,7 +1450,7 @@ export function paperSockets() {
 			if(setDrawingTool('grab')) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         grabBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "grab";
+        document.querySelector('#canvas').style.cursor = "url(images/grab-2.png), auto";
 				console.log('grab selected!');
 			}
 			else { console.log('failed to select grab'); }
@@ -1318,7 +1478,7 @@ export function paperSockets() {
 			if (setDrawingTool("eraser")) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         eraserBtn.classList.toggle("active");
-        document.querySelector('#canvas').style.cursor = "url(images/eraser_2.png), auto";
+        document.querySelector('#canvas').style.cursor = "url(images/eraser-2.png), auto";
 				console.log('eraser selected');
 			}
 			else { console.log('failed to select eraser'); }

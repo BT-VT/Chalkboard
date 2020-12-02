@@ -25,6 +25,7 @@ sessions = map : {
     sessionID: {
         paths: [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ],
         LOCKED: false,
+        usersInSession: [user.name],
         newUsers: []
     }
 }
@@ -120,15 +121,17 @@ io.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
 
     socket.on('hello', () => {
+        setTimeout(() => {
         socket.emit("updateRoom", webRoom);
         webRoom = "default";
+        }, 1000)
+
     })
 
     socket.on('confirmSessionJoined', (user) => {
         console.log('confirmSessionJoined received')
         socket.to(user.sessionID).broadcast.emit('userJoinedSession', socket.id);
     });
-
 
     // ================ CANVAS HANDLING =========================
 
@@ -139,7 +142,7 @@ io.on('connection', (socket) => {
     socket.on('requestLock', (user) => {
         sessions.get(user.sessionID).LOCKED = socket.id;
         console.log('lock given to ' + socket.id + ' in session: ' + user.sessionID);
-        io.to(user.sessionID).emit('lockCanvas', socket.id);
+        io.to(user.sessionID).emit('lockCanvas', socket.id, user);
     });
 
     // called when mousedown event is detected by client. pathAttr obj is
@@ -147,7 +150,7 @@ io.on('connection', (socket) => {
     socket.on('requestNewDrawing', (pathAttr, user) => {
         sessions.get(user.sessionID).LOCKED = socket.id;
         console.log('begin drawing, LOCKED set to: ' + socket.id + ' in session: ' + user.sessionID);
-        io.to(user.sessionID).emit('lockCanvas', socket.id);       // broadcast to all sockets except sender who triggered event
+        io.to(user.sessionID).emit('lockCanvas', socket.id, user);       // broadcast to all sockets except sender who triggered event
         io.to(user.sessionID).emit('createNewDrawing', pathAttr);  // broadcast to all sockets, including sender who triggered event
     });
 
@@ -183,6 +186,11 @@ io.on('connection', (socket) => {
 
     socket.on('requestAddTextChar', (lockOwner, char, user) => {
         io.to(user.sessionID).emit('addTextChar', lockOwner, char);
+    });
+
+    socket.on('requestAddImageToCanvas', (url, user) => {
+        let pathID = uuidv4();
+        io.to(user.sessionID).emit('addImageToCanvas', url, pathID);
     });
 
     socket.on('requestErase', (pathName, user) => {
@@ -326,6 +334,19 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('unlockCanvas', socket.id);
     });
 
+    // pathData = { pathName: circle-pathID, path: ['Path', pathObj] }
+    socket.on('confirmImageUpload', async (pathData, user) => {
+        let pathName = pathData.pathName;
+        let pathObj = pathData.path;
+        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        await checkForNewUsers(socket, user.sessionID);
+        // if no new users are waiting, unlock all users canvas's.
+        sessions.get(user.sessionID).LOCKED = false;
+        console.log('ended image upload, LOCKED set to false in session: ' + user.sessionID);
+        io.to(user.sessionID).emit('unlockCanvas', socket.id);
+    });
+
     socket.on('requestPathMove', (newPosition, index, user) => {
         io.to(user.sessionID).emit('movePath', newPosition, index);
     });
@@ -344,6 +365,10 @@ io.on('connection', (socket) => {
 
     socket.on('requestEditText', (index, user) => {
         io.to(user.sessionID).emit('editText', index);
+    });
+
+    socket.on('requestUpdateImageSize', (newBounds, index, user) => {
+        io.to(user.sessionID).emit('updateImageSize', newBounds, index);
     });
 
     // called when lock owner releases a path that was being moved. notifies
@@ -374,13 +399,19 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnecting', async () => {
+        console.log('user ' + socket.id + ' is disconnecting');
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
-        // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
-        if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
-            await checkForNewUsers(socket, userSessions[1]);
-            sessions.get(userSesssions[1]).LOCKED = false;
-            console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
-            io.to(userSessions[1]).emit('deleteCurPath', socket.id);
+        if(userSessions.length > 1) {
+            // tell other users to disconnect video call with this user who is leaving the session
+            socket.to(userSessions[1]).emit('userLeftSession', socket.id);
+
+            // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
+            if(sessions.get(userSessions[1]).LOCKED == socket.id) {
+                await checkForNewUsers(socket, userSessions[1]);
+                sessions.get(userSessions[1]).LOCKED = false;
+                console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
+                io.to(userSessions[1]).emit('deleteCurPath', socket.id);
+            }
         }
     });
 
@@ -411,14 +442,13 @@ io.on('connection', (socket) => {
 
     socket.on("joinSession", async (user, prevSession) =>  {
         try {
-            if (prevSession != null) {
-                socket.leave(prevSession);
-            }
-
+            // if session had prevSession, it is automatically removed when it disconnects from page reload
             // check if session already exists on server
             if (sessions.has(user.sessionID)) {
                 //   sessions.get(user.sessionID).push(user);
                 socket.join(user.sessionID);
+                sessions.get(user.sessionID).usersInSession.push(user.name);
+                io.to(user.sessionID).emit("updateUserList", sessions.get(user.sessionID).usersInSession);
                 //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
                 console.log('user requested to join existing session: ' + user.sessionID);
                 await tryToSendPaths(socket, user.sessionID);
@@ -427,6 +457,7 @@ io.on('connection', (socket) => {
                 let sessionObj = {
                     paths: [],
                     LOCKED: false,
+                    usersInSession: [user.name],
                     newUsers: []
                 }
                 // check if session exists in dB. If it does, add it to the server and
@@ -444,6 +475,7 @@ io.on('connection', (socket) => {
                 }
                 sessions.set(user.sessionID, sessionObj);
                 socket.join(user.sessionID);
+                io.to(user.sessionID).emit("updateUserList", sessions.get(user.sessionID).usersInSession);
                 await tryToSendPaths(socket, user.sessionID);
             }
         }

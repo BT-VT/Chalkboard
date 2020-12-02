@@ -3,16 +3,15 @@ function home() {
     <!-- tool box on left panel -->
             <div class="toolbox left">
                 <div class="group commands">
-                    <div class="item undo" data-command="undo" title="Undo">
-                        <img src="images/undo-icon.png" />
-                    </div>
-                    <div class="item download" data-command="download" title="Download">
-                        <img src="images/download-icon.png" />
+                    <div class= "item" id="mute"><img src="images/mute-icon.png" /></div>
+                    <div class="item undo" data-command="undo" title="Undo"><img src="images/undo-icon.png" /></div>
+                    <div class="item download" data-command="download" title="Download"><img src="images/download-icon.png" /></div>
+                    <div class="item image-upload"  id="image-upload" title="image-icon.png">
+                        <label for="file-input"><img src="images/image-icon.png" /></label>
+                        <input id="file-input" type="file" />
                     </div>
                     <a href="#modal" class="modal-trigger" data-target="modal-save" style="color: #02A6C1">
-                        <div class="item " title="Upload">
-                            <img src="images/upload-icon.png" />
-                        </div>
+                        <div class="item " title="Upload"><img src="images/upload-icon.png" /></div>
                     </a>
                     <div class="item"  title="Color Picker">
                         <div class="color-picker"></div>
@@ -28,7 +27,7 @@ function home() {
                     <div class="item active" id="marker" data-tool="pencil" title="Pencil Tool"><img src="images/pencil-icon.png"></div>
                     <div class="item" id="eraser" data-tool="eraser" title="Eraser Tool"><img src="images/eraser-icon.png"></div>
                     <div class="item" id="fill" data-tool="fill" title="Fill Tool"><img src="images/paint-bucket-icon.png"></div>
-                    <div class="item" id="grab" data-tool="grab" title="Grab Tool"><img src="images/grab-icon.png"></div>
+                    <div class="item" id="grab" data-tool="grab" title="Grab Tool"><img src="images/grabicon.png"></div>
                     <div class="item" id="text" data-tool="text" title="Text Tool"><img src="images/text-icon.png"></div>
                     </div>
                 </div>

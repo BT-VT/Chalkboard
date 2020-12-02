@@ -3,6 +3,7 @@ import {socket, user} from "./paperSockets.js"
 let sendContainer = document.getElementById("send-container");
 let messageInput = document.getElementById("message-input");
 let messageContainer = document.getElementById("message-container");
+let sessionMembers = document.getElementById("sessionList");
 
 let hideBTn = document.getElementById("hide-display");
 let typingMsg = document.getElementById("whoIsTyping");
@@ -16,6 +17,9 @@ socket.on("chat-message", (msg) => {
     appendMessage(msg);
 });
 
+socket.on("updateUserList", (userList) => {
+    sessionMembers.innerHTML += "\n" + userList;
+});
 
 
 sendContainer.addEventListener("submit", e => {
@@ -36,11 +40,13 @@ hideBTn.onclick = function() {
         sendContainer.style.display = "none";
         messageContainer.style.display = "none";
         typingMsg.style.display = "none";
+        sessionMembers.style.display = "none"
         showHideNum = 1;
     } else {
         sendContainer.style.display = "block";
         messageContainer.style.display = "block";
         typingMsg.style.display = "block";
+        sessionMembers.style.display = "block";
         showHideNum = 0;
     }
 }
