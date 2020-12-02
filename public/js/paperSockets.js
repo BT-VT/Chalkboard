@@ -980,7 +980,7 @@ export function paperSockets() {
 			else if (paper.Key.isDown('right')) {
 				socket.emit('requestPathRotate', attributes.rotation, pathInd, user);
 			}
-            else if(paper.Key.isDown('shift') && path.data.type == 'image') {
+            else if(paper.Key.isDown('shift') && path.data.type != 'text') {
                 // if client is trying to adjust size of image, get new image bounds
                 // and send to server.
                 let newBounds = {
