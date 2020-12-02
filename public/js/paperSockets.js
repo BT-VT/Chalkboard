@@ -2,6 +2,7 @@ window.globalVar = "";
 window.selectedColor = '#000000';
 
 import User from "./user.js";
+import Homepage from "./homepage.js";
 
 export let user = new User(
   "Guest" + Math.floor(Math.random() * 10000),
@@ -234,6 +235,7 @@ export function paperSockets() {
 			}
 
             setupVideoRoom();
+            if(user.sessionID == 'homepage-002') { Homepage.greet(); }
 		}
 	}
 
@@ -1178,7 +1180,7 @@ let uploadImageToCloud = (e) => {
 
 // use a supplied URL to download an image and add it to the canvas
 function addImageToCanvas(url, pathID) {
-    let raster = new paper.Raster(url);
+    let raster = new paper.Raster( { crossOrigin: 'anonymous', source: url } );
     raster.onLoad = () => {
         console.log('image loaded to canvas');
         // adjust image to half size of canvas

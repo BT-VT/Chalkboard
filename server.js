@@ -129,7 +129,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('confirmSessionJoined', (user) => {
-        console.log('confirmSessionJoined received')
         socket.to(user.sessionID).broadcast.emit('userJoinedSession', socket.id);
     });
 
