@@ -367,6 +367,10 @@ io.on('connection', (socket) => {
         io.to(user.sessionID).emit('editText', index);
     });
 
+    socket.on('requestUpdateImageSize', (newBounds, index, user) => {
+        io.to(user.sessionID).emit('updateImageSize', newBounds, index);
+    });
+
     // called when lock owner releases a path that was being moved. notifies
     // server that a path location needs to be updated in the paths array.
     // paths = [{pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj}]

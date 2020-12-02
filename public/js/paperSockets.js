@@ -131,6 +131,7 @@ export function paperSockets() {
 	socket.on('drawTrackingRect', drawTrackingRect);
 	socket.on('drawTrackingTriangle', drawTrackingTriangle);
 	socket.on('drawTrackingLine', drawTrackingLine);
+    socket.on('updateImageSize', updateImageSize);
     socket.on('setPointText', setPointText);
     socket.on('editText', editText);
     socket.on('textBackspace', textBackspace);
@@ -540,6 +541,13 @@ export function paperSockets() {
 			this.dashOffset += attributes.dashOffset;
 		}
 	}
+
+    // called when updateImageSize is received from server. changes the size of
+    // a raster specified by its index location in the paths array.
+    function updateImageSize(newBounds, index) {
+        if (!initialPathsReceived) { return; }
+        paths[index].path.bounds = newBounds;
+    }
 
     // called when setPointText is received from server.
     // creates a new paper.js text object at a location specified by the user.
@@ -973,12 +981,15 @@ export function paperSockets() {
 				socket.emit('requestPathRotate', attributes.rotation, pathInd, user);
 			}
             else if(paper.Key.isDown('shift') && path.data.type == 'image') {
-                path.bounds = {
+                // if client is trying to adjust size of image, get new image bounds
+                // and send to server.
+                let newBounds = {
                     x: path.bounds.x,
                     y: path.bounds.y,
                     width: event.point.x - path.bounds.x,
                     height: event.point.y - path.bounds.y
                 }
+                socket.emit('requestUpdateImageSize', newBounds, pathInd, user);
             }
 			else if(!paper.Key.isDown('shift')) {
 				// get new position of path based on new position of mouse
@@ -993,14 +1004,9 @@ export function paperSockets() {
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
             console.log('up event on specific path, should only be called when tool = grab');
 
-            if(paper.Key.isDown('shift')) {
-                if(path.data.type == 'text') {
-                    setDrawingTool('textEdit');
-                    socket.emit('requestEditText', pathInd, user);
-                }
-                else if(path.data.type == 'image') {
-                    console.log('image released');
-                }
+            if(paper.Key.isDown('shift') && path.data.type == 'text') {
+                setDrawingTool('textEdit');
+                socket.emit('requestEditText', pathInd, user);
             }
             else {
                 // get the serialized version of the path that was moved, which contains
