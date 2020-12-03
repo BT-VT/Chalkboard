@@ -490,6 +490,8 @@ export function paperSockets() {
 		}
 		// paths = [ {pathName: "pathN", path: Path} ]
 		else if (drawingTools.eraser && event.item) {
+            // require shift to be held in order to erase an image
+            if(event.item.data.type == 'image' && !paper.Key.isDown('shift')) { return; }
 			let pathsItemArr = paths.filter(pathsItem => pathsItem.path == event.item);
 			if (pathsItemArr.length == 1) {
 				socket.emit('requestErase', pathsItemArr[0].pathName, user);
@@ -1113,13 +1115,21 @@ export function paperSockets() {
 
 /* ================================ IMAGE UPLOAD TO CANVAS ================================= */
 
-let fileButton = document.getElementById('file-input');
-if(fileButton) {
-    fileButton.onclick = () => {
+// use image to trigger file selection when clicked
+let fileButton = document.getElementById('image-upload');
+let fileInput = document.getElementById('file-input');
+
+if(fileButton && fileInput) {
+    // on image click, trigger file selection click.
+    fileButton.onclick = () => { fileInput.click(); }
+    // handle file input click
+    fileInput.onclick = () => {
         console.log('file Button clicked');
         if(!LOCKED) { socket.emit('requestLock', user); }
     }
-    fileButton.addEventListener('change', async (e) => {
+    // when new file is selected, add it to cloud storage and send url of image
+    // to server so server can broadcast it to all clients to download/upload (addImageToCanvas)
+    fileInput.addEventListener('change', async (e) => {
         console.log('file button changed...');
         if(!LOCKED || LOCKED == socket.id) {
             console.log('lock is free, uploading image to cloud');
@@ -1135,11 +1145,13 @@ if(fileButton) {
     });
 }
 
+// called when single client selects file with file selector button
 let uploadImageToCloud = (e) => {
     return new Promise( (resolve, reject) => {
         console.log('uploading image to google cloud storage');
         // get file
         let file = e.target.files[0];
+        if(!file) { reject(false); }
         // create storage ref to empty storage object
         // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getdownloadurl
         let storageRef = firebase.storage().ref('chalkboardImages/' + file.name);
@@ -1184,9 +1196,8 @@ function addImageToCanvas(url, pathID) {
     raster.onLoad = () => {
         console.log('image loaded to canvas');
         // adjust image to half size of canvas
-        //raster.size = paper.view.viewSize;
-        raster.position = paper.view.center
         raster.scale(0.5);
+        raster.bounds.topLeft = {x: 0, y: 0};
 
         // add individual path data that's used for other functions
         raster.data.scaled = false;
