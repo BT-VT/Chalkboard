@@ -1,5 +1,6 @@
 /*Fonts*/
 @import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
 body {
     position: absolute;
     display: flex;
@@ -228,7 +229,7 @@ p{
     display: inline;
     margin: 0;
     padding: 0;
-    font-family: 'Calibri', cursive;
+    font-family: 'Architects Daughter';
     font-size: medium;
 }
 p:focus{

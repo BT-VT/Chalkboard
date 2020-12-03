@@ -341,7 +341,7 @@ export function paperSockets() {
 	tool.onKeyDown = (event) => {
 		console.log(event.key + ' key was pressed');
         // a list of keys to ignore default actions for
-        let keys = ['backspace', 'space', 'l', 'left', 'right', "'", 'enter'];
+        let keys = ['backspace', 'space', 'left', 'right', "'", 'enter'];
         // a list of attributes that use keyboard keys, if one is being used,
         // the keys in the keys array should have their default actions prevented
         let attrs = [drawingTools.colorFill, drawingTools.grab, drawingTools.text, drawingTools.textEdit];
@@ -356,10 +356,11 @@ export function paperSockets() {
         // edit the PointText accordingly
         if(LOCKED == socket.id && (drawingTools.text || drawingTools.textEdit)){
             console.log('current text: ' + curPath.content);
-            // the shift+enter key combo ends text editing and releases the lock
+            // the shift+enter key combo creates new line
             if(paper.Key.isDown('shift') && paper.Key.isDown('enter')) {
                 socket.emit('requestAddTextChar', socket.id, '\n', user);
             }
+            // enter key ends text editing
             else if(paper.Key.isDown('enter')) {
                 // if a user was editing a pre-existing text string, it should be handled
                 // differently than a string that needs to be added to the paths list when complete.
@@ -964,8 +965,8 @@ export function paperSockets() {
 					// tell server to notify clients to set path fill color no empty
 					socket.emit('requestColorFill', null, pathInd, user);
 				}
-				// if the 'l' key is held down when line is clicked on
-				else if(paper.Key.isDown('l')) {
+				// if the 'shift' key is held down when line is clicked on
+				else if(paper.Key.isDown('shift')) {
 					// change stroke color of path instead of fill color of path
 					socket.emit('requestNewStrokeColor', window.selectedColor, pathInd, user);
 				}

@@ -27,7 +27,7 @@
     <script type="module" src="js/picturetopicture.js"></script>
 </head>
 
-<style> 
+<style>
     #video-grid {
         display: grid;
         position: fixed;
@@ -37,12 +37,12 @@
     }
 
     video {
-        width: 100%; 
+        width: 100%;
         height: 100%;
         object-fit: cover;
     }
 </style>
-    
+
 <body>
     <!--Dropdown Structure-->
     <ul id="dropdown1" class="dropdown-content">
@@ -59,7 +59,7 @@
             <div class="gray-text" id="show-peer"></div>
         </li>
     </ul>
-    
+
     <!--NAV BAR-->
     <div id="page">
         <video id="video" controls height="408px" width="203px" hidden></video>
@@ -89,22 +89,22 @@
                     <li>
                         <div class="button-container">
                             <script type="text/javascript" src="js/picturetopicture.js"></script>
-                            <button id="button1" onclick="runShareMedia()" unselectable="on"><p>Start</p></button>
+                            <button id="button1" onclick="runShareMedia()" unselectable="on"><p>Start PiP</p></button>
                         </div>
                     </li>
-                
+
                    <li class="logged-in" style="display: none;">
                         <a href="#/my-chalkboards"  class="grey-text modal-trigger"><p id="" unselectable="on">My chalkboards</p></a>
                     </li>
                     <li>
                         <a href="#" class="logged-in grey-text">
-                                
+
                         </a>
                     </li>
                     <li>
                         <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="" unselectable="on">Join/Create a
                             Session</p></a>
-                    </li> 
+                    </li>
                     <li class="logged-in" style="display: none;">
                         <p><a href="#modal" class="modal-trigger colorSwitch" id="navEmail" data-target="modal-account"
                             style="color: var(--secondary-color); border-bottom: 3px solid transparent;"></a>
@@ -140,11 +140,11 @@
                                 <li class="logged-in" style="display: none;">
                                     <a id="screenShare" class="grey-text"><p id="toggleColor">Screen share</p></a>
                                 </li>
-                            
+
                                 <li>
                                     <div class="gray-text" id="show-peer"></div>
                                 </li>
-                                
+
                             </ul>
                         </div>
                     </li>
@@ -224,44 +224,54 @@
                     <thead>
                         <tr>
                             <th>Action</th>
-                            <th>Keys</th>
+                            <th>Directions</th>
                         </tr>
                     </thead>
 
                     <tbody>
-
+                        <tr>
+                            <td>Theme</td>
+                            <td>Change the color theme of the app by pressing the theme button</td>
+                        </tr>
+                        <tr>
+                            <td>Picture in Picure</td>
+                            <td>When page loads, select a screen to "share", then press 'Start PiP' to activate picture-in-picture</td>
+                        </tr>
                         <tr>
                             <td>Move/Grab an object</td>
-                            <td>Select the grabber tool, hover over the border of desired object until it expands, click
-                            </td>
+                            <td>Select the grab tool, hover over border of desired object until it scales up slightly, click & drag</td>
+                        </tr>
+                        <tr>
+                            <td>Change object size</td>
+                            <td>Select the grab tool, hold shift key then click and drag object</td>
                         </tr>
                         <tr>
                             <td>Rotate an object</td>
-                            <td>Select the grabber tool, grab an object, use left/right arrow keys</td>
+                            <td>Select the grabber tool, grab an object, hold down left or right arrow key and drag mouse</td>
                         </tr>
                         <tr>
-                            <td>Change selected color</td>
-                            <td>Open color picker, select color, press 'Save'</td>
+                            <td>Fill object with color</td>
+                            <td>Select fill tool, hover over border of desired object until it scales up slightly, click</td>
                         </tr>
                         <tr>
-                            <td>Enter text</td>
+                            <td>Remove fill color</td>
+                            <td>hold backspace key while following Fill color instructions</td>
+                        </tr>
+                        <tr>
+                            <td>Change border color</td>
+                            <td>hold shift key while following Fill color instructions</td>
+                        </tr>
+                        <tr>
+                            <td>Erase object</td>
+                            <td>Select eraser tool, drag mouse over object (smaller lines require slower dragging)</td>
+                        </tr>
+                        <tr>
+                            <td>add newline in text box</td>
                             <td>shift+enter</td>
                         </tr>
                         <tr>
-                            <td>Edit text</td>
-                            <td>Use grabber tool, shift+click on text</td>
-                        </tr>
-                        <tr>
-                            <td>Fill tool</td>
-                            <td>Mouse over object border until it expands, click</td>
-                        </tr>
-                        <tr>
-                            <td>Start</td>
-                            <td>When page loads, select an application and press the start button to enable screen share</td>
-                        </tr>
-                        <tr>
-                            <td>Theme</td>
-                            <td>Change the design of the website by pressing the theme button</td>
+                            <td>Edit existing text</td>
+                            <td>Use grab tool, shift+click on text</td>
                         </tr>
                     </tbody>
                 </table>
@@ -299,7 +309,7 @@
 
 
         <div id="canvas-container">
-            
+
         </div>
 
         <!-- The core Firebase JS SDK is always required and must be listed first -->
@@ -388,7 +398,7 @@
 
         </script>
     </div>
-    
+
 </body>
 
 </html>
