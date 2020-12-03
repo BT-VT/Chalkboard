@@ -18,7 +18,7 @@ export function paperSockets() {
 	const pickr = Pickr.create({
 		el: '.color-picker',
 		theme: 'classic', // or 'monolith', or 'nano'
-		default: '#FFFFFF',
+		default: window.selectedColor,
 		swatches: [
 			'rgba(255, 0, 0, 1)',
 			'rgba(255, 127, 0, 1)',
