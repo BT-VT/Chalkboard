@@ -3,7 +3,6 @@ Chalkboard is an online interactive canvas that allows users to meet and collabo
 to add shapes and objects to a Chalkboard canvas. Anything added to a chalkboard canvas will instantly be displayed for all users viewing
 that canvas through a web browser. Users can create chalkboard "sessions" where each session has its own unique canvas independent of all
 other canvas's, allowing multiple groups of collaborators to work simultaneously within their own workspaces hosted by Chalkboard.
-Chalkboard is *definitely not* buggy and if you are having trouble using it it's probably just you, not us... we swear...
 
 #### Resources
 Chalkboard was developed using an Express server built ontop of Node.js. The client side uses a number of libraries, primarily Paper.js
