@@ -67,6 +67,7 @@ export function paperSockets() {
 	paper.view.viewSize.height = 3500;
 	paper.view.viewSize.width = 3500;
 	var tool = new paper.Tool();
+    const homepage = new Homepage();
 
     // video and audio global variables
     const videoGrid = document.getElementById('video-grid');
@@ -229,7 +230,7 @@ export function paperSockets() {
 			}
 
             setupVideoRoom();
-            if(user.sessionID == 'homepage-002') { Homepage.greet(); }
+            if(user.sessionID == 'homepage-002') { homepage.greet(); }
 		}
 	}
 
@@ -386,24 +387,24 @@ export function paperSockets() {
 				socket.emit('requestNewDrawing', pathAttr, user);
 			}
 			else if (drawingTools.circle) {
-        let pathAttr = getPathAttributes(attributes.multicolor);
+                let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.rect || drawingTools.ellipse) {
-        let pathAttr = getPathAttributes(attributes.multicolor);
+                let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.triangle) {
-        let pathAttr = getPathAttributes(attributes.multicolor);
+                let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
 			else if (drawingTools.line) {
-        let pathAttr = getPathAttributes(attributes.multicolor);
+                let pathAttr = getPathAttributes(attributes.multicolor);
 				socket.emit('requestLock', user);
 			}
             else if (drawingTools.text) {
-              let pathAttr = getPathAttributes(attributes.multicolor);
-              socket.emit('requestLock', user);
+                let pathAttr = getPathAttributes(attributes.multicolor);
+                socket.emit('requestLock', user);
             }
 			else if (drawingTools.eraser) {
 				socket.emit('requestLock', user);
@@ -626,6 +627,7 @@ export function paperSockets() {
                 fontSize: attributes.fontSize,
                 content:''
 			}
+            console.log(pointTextAttr);
 			socket.emit('requestPointText', pointTextAttr, user);
         }
 		else if (drawingTools.eraser) {
@@ -682,7 +684,7 @@ export function paperSockets() {
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		curPath = new paper.Path();
-
+        console.log(""+pathsItem.path.segments);
 		if (LOCKED == socket.id) {
 			// serialize path before sending to server
 			socket.emit('confirmDrawingDone', serializedPathsItem(pathsItem), user);
