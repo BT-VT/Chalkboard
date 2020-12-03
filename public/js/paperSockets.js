@@ -49,7 +49,6 @@ export function paperSockets() {
 
 	pickr.on('change', (color, instance) => {
 		var hexColor = color.toHEXA().toString();
-		console.log(hexColor)
 		window.globalVar = hexColor;
 		window.selectedColor = hexColor.toString();
 		document.getElementsByClassName('pcr-button')[0].style.color= hexColor;
@@ -94,7 +93,6 @@ export function paperSockets() {
         sliderSize = this.value;
         attributes.fontSize = sliderSize;
         attributes.strokeWidth = sliderSize;
-        console.log(sliderSize);
     }
 
 	let attributes = {
@@ -161,7 +159,6 @@ export function paperSockets() {
 	// prevents other clients from emitting drawing coordinates to server
 	function lockCanvas(owner, user) {
 		LOCKED = owner;
-		console.log('canvas LOCKED by socket ' + owner);
 		let msg = document.getElementById("navProgress");
 		msg.setAttribute('style', 'font-size: 16px;color:#FFF;padding-top:10px;padding-right:75px');
 		msg.innerHTML = user.name + " is drawing...";
@@ -171,7 +168,6 @@ export function paperSockets() {
 	function unlockCanvas(owner) {
 		if (owner == false || LOCKED == owner) {
 			LOCKED = false;
-			console.log('canvas is UNLOCKED');
 		}
 		let msg = document.getElementById('navProgress');
 		msg.innerHTML = "";
@@ -196,7 +192,6 @@ export function paperSockets() {
 		if (!initialPathsReceived) {
 			LOCKED = false;
 			initialPathsReceived = true;
-			console.log('adding new paths ...... ');
 			// add each path from server to client paths array. pathObj is a Path-like
 			// object that must be converted to a Paper.js Path
 			for (let newPathsItem of newPaths) {
@@ -205,7 +200,6 @@ export function paperSockets() {
 				let pathObj = newPathsItem.path;
 				let pathsItem = { pathName: pathName }
 
-				console.log('adding path ' + pathsItem.pathName);
 				if (pathName.search('path') > -1) {
 					pathsItem.path = new paper.Path().importJSON(pathObj);
 				}
@@ -244,7 +238,6 @@ export function paperSockets() {
     // to do it automatically. (not currently used)
     function userLeftSession(userID) {
         if(myCalls[userID]) {
-            console.log('user:' + userID + ' leaving session');
             myCalls[userID].close();
         }
     }
@@ -284,7 +277,6 @@ export function paperSockets() {
                 // set listener to remove stream on receiving clients end if
                 // initiating client disconnects
                 call.on('close', () => {
-                    console.log('removing video stream');
                     video.remove();
                 })
 
@@ -298,7 +290,6 @@ export function paperSockets() {
             let muteBtn = document.querySelector("#mute");
         	if (muteBtn) {
         		muteBtn.onclick = function() {
-                    console.log('mute clicked!')
                     muteBtn.classList.toggle("active");
                     stream.getTracks().forEach(track => track.enabled = !track.enabled);
                 }
@@ -309,7 +300,6 @@ export function paperSockets() {
     // send a new user this clients video stream, then when the user responds
     // with their video stream, add it to this clients video grid
     function connectToNewUser(userID, stream) {
-        console.log('connecting to new user: ' + userID);
         const call = myPeer.call(userID, stream);
         const video = document.createElement('video');
         call.on('stream', (userVideoStream) => {
@@ -318,7 +308,6 @@ export function paperSockets() {
         // set listener to remove stream on initiating clients end if receiving
         // client disconnects
         call.on('close', () => {
-            console.log('removing video stream');
             video.remove();
         })
 
@@ -339,7 +328,6 @@ export function paperSockets() {
 
     // event listener called when a keyboard key is pressed
 	tool.onKeyDown = (event) => {
-		console.log(event.key + ' key was pressed');
         // a list of keys to ignore default actions for
         let keys = ['backspace', 'space', 'left', 'right', "'", 'enter'];
         // a list of attributes that use keyboard keys, if one is being used,
@@ -355,7 +343,6 @@ export function paperSockets() {
         // clicked on the canvas to create a PointText / claim the lock, Then
         // edit the PointText accordingly
         if(LOCKED == socket.id && (drawingTools.text || drawingTools.textEdit)){
-            console.log('current text: ' + curPath.content);
             // the shift+enter key combo creates new line
             if(paper.Key.isDown('shift') && paper.Key.isDown('enter')) {
                 socket.emit('requestAddTextChar', socket.id, '\n', user);
@@ -385,7 +372,6 @@ export function paperSockets() {
     }
 
     function addTextChar(lockOwner, char) {
-        console.log('adding char to text');
         if(!initialPathsReceived || LOCKED != lockOwner) { return }
         curPath.content += char;
         // adjust the boundary box using custom func attached to path
@@ -424,8 +410,6 @@ export function paperSockets() {
 			}
 			return;
 		}
-		console.log('my socket id: ' + socket.id);
-		console.log('cant start new path, lock is locked to socket ' + LOCKED);
 		return;
 	}
 
@@ -595,13 +579,11 @@ export function paperSockets() {
     }
 
 	function erasePath(pathName) {
-		console.log("inital: " + initialPathsReceived);
 		if (!initialPathsReceived) { return; }
 		let pathRemoved = null;
 		for (let i = 0; i < paths.length; i++) {
 			// if path is found try to remove it from canvas
 			if (paths[i].pathName == pathName && paths[i].path.remove()) {
-				console.log('erased ' + pathName);
 				// if removed successfully, remove from paths list
 				paths = paths.filter(pathsItem => pathsItem.pathName != pathName);
 				if (LOCKED == socket.id) {
@@ -685,7 +667,6 @@ export function paperSockets() {
 	// from all other paths that exist or will exist
 	function finishDrawing(pathID, user) {
 		if (initialPathsReceived == false) {
-			console.log('waiting to load paths');
 			return;
 		}
 		curPath.simplify();
@@ -701,10 +682,8 @@ export function paperSockets() {
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
 		curPath = new paper.Path();
-		console.log(paths);
 
 		if (LOCKED == socket.id) {
-			console.log(socket.id + ' sending drawingDone confirmation to server');
 			// serialize path before sending to server
 			socket.emit('confirmDrawingDone', serializedPathsItem(pathsItem), user);
 		}
@@ -725,7 +704,6 @@ export function paperSockets() {
         // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
-		console.log(paths);
 		curPath = new paper.Path.Circle();
 
 		if (LOCKED == socket.id) {
@@ -749,7 +727,6 @@ export function paperSockets() {
         // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
-		console.log(paths);
 		curPath = new paper.Path.Rectangle();
 
 		if (LOCKED == socket.id) {
@@ -771,7 +748,6 @@ export function paperSockets() {
         // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
-		console.log(paths);
 		curPath = new paper.Path();
 
 		if (LOCKED == socket.id) {
@@ -794,7 +770,6 @@ export function paperSockets() {
         // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
-		console.log(paths);
 		curPath = new paper.Path.Line();
 
 		if (LOCKED == socket.id) {
@@ -815,7 +790,6 @@ export function paperSockets() {
         // set listeners for individual paths, then add path to paths list
         setPathFunctions(pathsItem, attributes.scale);
         paths.push(pathsItem);
-        console.log(paths);
         curPath = new paper.PointText();
 
         if(LOCKED == socket.id) {
@@ -829,7 +803,6 @@ export function paperSockets() {
         let index = paths.findIndex(pathItem => pathItem.path == curPath);
         // remove the boundary box
         curPath.data.bounds.remove();
-        console.log(paths);
         curPath = new paper.PointText();
         if(LOCKED == socket.id) {
             setDrawingTool('grab');
@@ -842,13 +815,11 @@ export function paperSockets() {
 	// index is the index of the path to make changes to in the paths array.
 	function movePath(newPosition, index) {
 		if (!initialPathsReceived) { return; }
-		console.log('index of path to move: ' + index);
 		paths[index].path.position = newPosition;
 	}
 	// callback for rotating a path
 	function rotatePath(degrees, index) {
 		if(!initialPathsReceived) { return; }
-		console.log('rotating path ' + degrees + ' degrees');
 		paths[index].path.rotate(degrees);
 	}
 	// callback for changing stroke color of a path.
@@ -868,7 +839,6 @@ export function paperSockets() {
     // fill color or text bounds box
 	function colorFill(color, index, owner) {
 		if (!initialPathsReceived) { return; }
-        console.log('change path color to: ' + color);
         // dont set text colorFill to null, this is equivalent to setting a
         // shapes strokeColor to null.
         if (color || paths[index].path.data.type != 'text') {
@@ -876,7 +846,6 @@ export function paperSockets() {
     		paths[index].path.fillColor = color;
             // if this is the client who requested the color change, notify server
             if(socket.id == owner) {
-                console.log('sending updated path to server');
                 // serialize updated path and send to server to be saved on sererside
                 let updatedPath = serializedPathsItem(paths[index]).path;
                 socket.emit('confirmPathUpdated', updatedPath, index, user);
@@ -895,7 +864,6 @@ export function paperSockets() {
 		if (pathObj && pathObj.pathName == pathName) {
 			paths.pop();
 			pathObj.path.remove();
-			console.log('removed ' + pathObj.pathName);
 		}
 	}
 
@@ -903,7 +871,6 @@ export function paperSockets() {
 	// lock owner was disconnected and curPath should be removed & LOCK should be unlocked.
 	function deleteCurPath(owner) {
 		if (!initialPathsReceived) { return; }
-		console.log('socket ' + owner + ' disconnected while drawing, releasing lock...');
 		curPath.remove();
 		curPath = new paper.Path();
 		unlockCanvas(owner);
@@ -914,7 +881,6 @@ export function paperSockets() {
 		let strokeColor;
 		if (rand == true) {
 			strokeColor = rgbToHex(Math.random(), Math.random(), Math.random());
-			console.log(strokeColor);
 		}
 		else {
 			strokeColor = window.selectedColor;
@@ -1007,7 +973,6 @@ export function paperSockets() {
 		// called when path is 'released' from drag
 		path.onMouseUp = function (event) {
 			if (LOCKED != socket.id || drawingTools.grab != true) { return; }
-            console.log('up event on specific path, should only be called when tool = grab');
 
             if(paper.Key.isDown('shift') && path.data.type == 'text') {
                 setDrawingTool('textEdit');
@@ -1091,7 +1056,6 @@ export function paperSockets() {
 			window.selectedColor = btn.attributes["data-color"].value;
 			if (window.selectedColor == '#c46f0f') { attributes.multicolor = true; }
 			else { attributes.multicolor = false; }
-			console.log(window.selectedColor);
 		};
 	});
 
@@ -1101,7 +1065,6 @@ export function paperSockets() {
 	var commandBtn = document.querySelector(".download");
 	if (commandBtn) {
 		commandBtn.onclick = function () {
-			console.log("testing download");
 			var canvas = document.getElementById("canvas");
 			var image = canvas
 				.toDataURL("image/png", 1.0)
@@ -1125,23 +1088,18 @@ if(fileButton && fileInput) {
     fileButton.onclick = () => { fileInput.click(); }
     // handle file input click
     fileInput.onclick = () => {
-        console.log('file Button clicked');
         if(!LOCKED) { socket.emit('requestLock', user); }
     }
     // when new file is selected, add it to cloud storage and send url of image
     // to server so server can broadcast it to all clients to download/upload (addImageToCanvas)
     fileInput.addEventListener('change', async (e) => {
-        console.log('file button changed...');
         if(!LOCKED || LOCKED == socket.id) {
-            console.log('lock is free, uploading image to cloud');
             let url = await uploadImageToCloud(e);
-            console.log('adding image to canvas');
             // call function that takes URL as arg and adds img to canvas.
             socket.emit('requestAddImageToCanvas', url, user);
             // addImageToCanvas(url);
         }
         else {
-            console.log('lock not owned, cannot upload image');
         }
     });
 }
@@ -1149,7 +1107,6 @@ if(fileButton && fileInput) {
 // called when single client selects file with file selector button
 let uploadImageToCloud = (e) => {
     return new Promise( (resolve, reject) => {
-        console.log('uploading image to google cloud storage');
         // get file
         let file = e.target.files[0];
         if(!file) { reject(false); }
@@ -1167,23 +1124,18 @@ let uploadImageToCloud = (e) => {
                 // update progress log
                 let percentage = snapshot.bytesTransferred /
                                     snapshot.totalBytes * 100;
-                console.log('upload: ' + percentage + '%');
             },
             // called when upload fails
             function error(err) {
-                console.log(err);
             },
             // called when upload finishes, get URL and display corresponding image
             async function complete() {
-                console.log('upload complete');
                 try {
                     let url = await storageRef.getDownloadURL();
                     if(url) {
-                        console.log('retrieved url of image from cloud storage');
                         resolve(url);
                     }
                 } catch (err) {
-                    console.log(err);
                     reject(false);
                 }
             }
@@ -1195,7 +1147,6 @@ let uploadImageToCloud = (e) => {
 function addImageToCanvas(url, pathID) {
     let raster = new paper.Raster( { crossOrigin: 'anonymous', source: url } );
     raster.onLoad = () => {
-        console.log('image loaded to canvas');
         // adjust image to half size of canvas
         raster.scale(0.5);
         raster.bounds.topLeft = {x: 0, y: 0};
@@ -1212,10 +1163,8 @@ function addImageToCanvas(url, pathID) {
         // set listeners for individual paths, then add path to paths list
 		setPathFunctions(pathsItem, attributes.scale);
 		paths.push(pathsItem);
-		console.log(paths);
 
 		if (LOCKED == socket.id) {
-			console.log(socket.id + ' sending imageUploadDone confirmation to server');
 			// serialize path before sending to server
 			socket.emit('confirmImageUpload', serializedPathsItem(pathsItem), user);
 		}
@@ -1231,10 +1180,8 @@ function addImageToCanvas(url, pathID) {
 	if (uploadBtn) {
 		uploadBtn.addEventListener('click', async (e) => {
             if(user.sessionID == 'default') {
-                console.log('cannot save default page');
                 return;
             }
-			console.log("test uploadbtn with events");
 			//selectedFile = e.target.files[0];
 			//let i = 0;
 
@@ -1242,8 +1189,6 @@ function addImageToCanvas(url, pathID) {
 			var image = canvas
 				.toDataURL("image/png", 1.0);
 			//.replace("image/png", "image/octet-stream");
-			console.log(typeof (image));
-			//console.log(image);
 			let imageId = generateURL();
 
 
@@ -1264,15 +1209,12 @@ function addImageToCanvas(url, pathID) {
 				  var progress =
 					(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
 				  var message = document.getElementById("navProgress");
-				  console.log("Upload is " + progress + "% done");
 				  message.innerHTML = "Uploading: " + progress + "% ";
 				  switch (snapshot.state) {
 					case firebase.storage.TaskState.PAUSED: // or 'paused'
-					  console.log("Upload is paused");
 					  message.innerHTML = "Upload is paused";
 					  break;
 					case firebase.storage.TaskState.RUNNING: // or 'running'
-					  console.log("Upload is running");
 					  break;
 				  }
 				},
@@ -1322,12 +1264,7 @@ function addImageToCanvas(url, pathID) {
 							title: chalkboard_title
 						  })
 						  .then(function (docRef) {
-							console.log(
-								//	This throws an error when adding a document with a custom ID
-							  //"SUCCESS: Document written with ID: ",
-							  //docRef.id
-							  "SUCCESS: Document was written to database."
-							);
+
 						  })
 						  .catch(function (error) {
 							console.error("Error adding document: ", error);
@@ -1353,12 +1290,10 @@ function addImageToCanvas(url, pathID) {
 			if (!LOCKED) {
 				//document.querySelector("[data-tool].active").classList.toggle("active");
 				//undoBtn.classList.toggle("active");
-				console.log('undo clicked!');
 				socket.emit('undo', user);
 			}
 		}
 	}
-	else { console.log('undo button not found'); }
 
 	let markerBtn = document.querySelector("#marker");
 	if (markerBtn) {
@@ -1367,12 +1302,9 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         markerBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "url(images/pen-2.png), auto";
-				console.log('marker selected');
 			}
-			else { console.log('failed to select marker'); }
 		}
 	}
-	else { console.log('marker button not found'); }
 
 	let circleBtn = document.querySelector("#circle");
 	if (circleBtn) {
@@ -1381,12 +1313,9 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         circleBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "auto";
-				console.log('circle selected!');
 			}
-			else { console.log('failed to select circle'); }
 		}
 	}
-	else { console.log('circle button not found'); }
 
 	let ellipseBtn = document.querySelector("#ellipse");
 	if (ellipseBtn) {
@@ -1395,12 +1324,9 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         ellipseBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "auto";
-				console.log('ellipse selected!');
 			}
-			else { console.log('failed to select ellipse'); }
 		}
 	}
-	else { console.log('ellipse button not found'); }
 
 	let rectBtn = document.querySelector("#rect");
 	if (rectBtn) {
@@ -1409,12 +1335,9 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         rectBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "auto";
-				console.log('rectangle selected!');
 			}
-			else { console.log('failed to select rectange'); }
 		}
 	}
-	else { console.log('rectangle button not found'); }
 
 	let triangleBtn = document.querySelector("#triangle");
 	if (triangleBtn) {
@@ -1423,12 +1346,9 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         triangleBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "auto";
-				console.log('triangle selected!');
 			}
-			else { console.log('failed to select triangle'); }
 		}
 	}
-	else { console.log('triangle button not found'); }
 
 	let lineBtn = document.querySelector("#line");
 	if(lineBtn) {
@@ -1437,12 +1357,11 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         lineBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "auto";
-				console.log('line selected!');
 			}
-			else { console.log('failed to select line'); }
+			else {  }
 		}
 	}
-	else { console.log('line button not found'); }
+	else {  }
 
 	let fillBtn = document.querySelector("#fill");
 	if(fillBtn) {
@@ -1451,12 +1370,12 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         fillBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "url(images/paint-fill.png), auto";
-				console.log('color fill selected!');
+
 			}
-			else { console.log('failed to select color fill'); }
+			else { }
 		}
 	}
-	else { console.log('fill button not found'); }
+	else {  }
 
 	let grabBtn = document.querySelector("#grab");
 	if(grabBtn) {
@@ -1465,12 +1384,12 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         grabBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "url(images/grab-2.png), auto";
-				console.log('grab selected!');
+
 			}
-			else { console.log('failed to select grab'); }
+			else {  }
 		}
 	}
-	else { console.log('grab button not found'); }
+	else {  }
 
     let textBtn = document.querySelector("#text");
 	if(textBtn) {
@@ -1479,12 +1398,12 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         textBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "text";
-				console.log('text selected!');
+
 			}
-			else { console.log('failed to select text'); }
+			else {  }
 		}
 	}
-	else { console.log('Text button not found'); }
+	else { }
 
 	let eraserBtn = document.querySelector("#eraser");
 	if (eraserBtn) {
@@ -1493,10 +1412,10 @@ function addImageToCanvas(url, pathID) {
 				document.querySelector("[data-tool].active").classList.toggle("active");
         eraserBtn.classList.toggle("active");
         document.querySelector('#canvas').style.cursor = "url(images/eraser-2.png), auto";
-				console.log('eraser selected');
+
 			}
-			else { console.log('failed to select eraser'); }
+			else {  }
 		}
 	}
-	else { console.log('eraser button not found'); }
+	else {  }
 }
