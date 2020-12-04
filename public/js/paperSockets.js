@@ -263,6 +263,7 @@ export function paperSockets() {
             video: true,
             audio: true
         }).then(stream => {
+            stream.getTracks().forEach(track => track.enabled = false);
             // add clients own video stream to clients video grid
             addVideoStream(myVideo, stream);
 
