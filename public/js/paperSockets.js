@@ -68,6 +68,7 @@ export function paperSockets() {
 	paper.view.viewSize.height = 3500;
 	paper.view.viewSize.width = 3500;
 	var tool = new paper.Tool();
+    const homepage = new Homepage();
 
     // video and audio global variables
     const videoGrid = document.getElementById('video-grid');
@@ -235,7 +236,7 @@ export function paperSockets() {
 			}
 
             setupVideoRoom();
-            if(user.sessionID == 'homepage-002') { Homepage.greet(); }
+            if(user.sessionID == 'default') { homepage.addWelcomeText(); }
 		}
 	}
 
