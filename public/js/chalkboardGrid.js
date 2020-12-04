@@ -56,11 +56,12 @@ function chalkboardGrid() {
             a.appendChild(img);
             //img.src = data.img;
             img.setAttribute("src", data.img);
+            img.setAttribute("class", "chalkboard-image");
             a.setAttribute('href', data.url);
             //document.getElementById("grid").appendChild(img);
             //resolve('image displayed');
             //create a new row if there are an even number of chalkboards
-            if (numChalkboards % 2 == 0) {
+            if (numChalkboards % 3 == 0) {
                 //console.log("# of chalkboards: " + numChalkboards);
                 var row = document.createElement("div");
                 row.classList.add("row");
@@ -68,7 +69,7 @@ function chalkboardGrid() {
                 //img.src = data.img;
                 document.getElementById("grid").appendChild(row);
                 var col = document.createElement("div");
-                col.classList.add("col50");
+                col.classList.add("col33");
                 col.appendChild(a);
                 let chalkboard_title = data.title;
                 let title_ele = document.createElement("div");
@@ -89,7 +90,7 @@ function chalkboardGrid() {
                 var arr = document.getElementById("grid").getElementsByClassName("row");
                 var row = arr[arr.length - 1];
                 var col = document.createElement("div");
-                col.classList.add("col50");
+                col.classList.add("col33");
                 row.appendChild(col);
                 //row.getElementById("first");
                 //img.src = data.img;
