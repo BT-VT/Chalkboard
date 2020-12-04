@@ -48,6 +48,10 @@ body {
     position: fixed
 }
 
+#start-pip-button {
+    display: none;
+}
+
 
 #canvas-container {
     display: flex;
