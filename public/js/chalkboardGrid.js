@@ -78,6 +78,7 @@ function chalkboardGrid() {
                 col.appendChild(title_ele);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
+                date.classList.add("grid-date");
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
                 col.appendChild(date);
                 row.appendChild(col);
@@ -102,6 +103,7 @@ function chalkboardGrid() {
                 col.appendChild(title_ele);
                 var date = document.createElement("p");
                 let dateSaved = new Date(data.date_saved.seconds*1000).toLocaleDateString();
+                date.classList.add("grid-date");
                 date.innerHTML = dateSaved + ', ' + new Date(data.date_saved.seconds*1000).toLocaleTimeString();
                 col.appendChild(date);
                 numChalkboards += 1;
