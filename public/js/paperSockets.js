@@ -192,6 +192,7 @@ export function paperSockets() {
         if(user.sessionID == 'default') {
             LOCKED = false;
             initialPathsReceived = true;
+            setupVideoRoom();
             homepage.addWelcomeText();
             return;
         }
@@ -864,7 +865,7 @@ export function paperSockets() {
 	// array and removes path from canvas.
 	// paths = [ {pathName: "pathN", path: Path} ]
 	function deleteLastPath(pathName) {
-		if (!initialPathsReceived) { return; }
+		if (!initialPathsReceived || paths.length == 0) { return; }
 		let pathObj = paths[paths.length - 1];
 		// confirm path to be removed
 		if (pathObj && pathObj.pathName == pathName) {

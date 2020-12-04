@@ -199,8 +199,10 @@ io.on('connection', (socket) => {
     socket.on('confirmErasePath', async (pathName, user) => {
         console.log('confirm erase ' + pathName);
         // remove path from paths array of path item objects (pathsItem = {pathName: pathName, path: pathObj})
-        let sessionObj = sessions.get(user.sessionID);
-        sessionObj.paths = sessionObj.paths.filter(pathsItem => pathsItem.pathName != pathName);
+        if(user.sessionID != 'default') {
+            let sessionObj = sessions.get(user.sessionID);
+            sessionObj.paths = sessionObj.paths.filter(pathsItem => pathsItem.pathName != pathName);
+        }
     });
 
     // called when mouseup event is detected by client. creates pathID and
@@ -254,7 +256,9 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
 
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -269,7 +273,9 @@ io.on('connection', (socket) => {
         let pathObj = pathData.path;
         pathObj.dashArray = null;
 
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -283,7 +289,10 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -297,7 +306,10 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -311,7 +323,10 @@ io.on('connection', (socket) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
         pathObj.dashArray = null;
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -324,7 +339,10 @@ io.on('connection', (socket) => {
     socket.on('confirmTextDone', async (pathData, user) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -337,7 +355,10 @@ io.on('connection', (socket) => {
     socket.on('confirmImageUpload', async (pathData, user) => {
         let pathName = pathData.pathName;
         let pathObj = pathData.path;
-        sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths.push({pathName: pathName, path: pathObj});
+        }
 
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.
@@ -377,7 +398,9 @@ io.on('connection', (socket) => {
         // get the paths array for the session the user is in, then get the
         // pathData obj at the specified index in the paths array, then update
         // the path variable for that pathData obj.
-        sessions.get(user.sessionID).paths[index].path = updatedPath;
+        if(user.sessionID != 'default') {
+            sessions.get(user.sessionID).paths[index].path = updatedPath;
+        }
         // always check for new users before letting a client release the lock
         await checkForNewUsers(socket, user.sessionID);
         // if no new users are waiting, unlock all users canvas's.

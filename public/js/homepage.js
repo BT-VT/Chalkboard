@@ -111,13 +111,18 @@ export default class Homepage {
     addAppDescriptionText() {
         let descriptionString =
 `Chalkboard is an online interactive canvas that allows users to meet
-and collaborate remotely.Users can work with different drawing tools
+and collaborate remotely. Users can work with different drawing tools
 to add shapes and objects to a Chalkboard canvas. Anything added to a
 chalkboard canvas will instantly be displayed for all users viewing
 that canvas through a web browser. Users can create chalkboard
 "sessions" where each session has its own unique canvas independent of
 all other canvas's, allowing multiple groups of collaborators to work
-simultaneously within their own workspaces hosted by Chalkboard.`;
+simultaneously within their own workspaces hosted by Chalkboard.
+
+To get started, join or create a session from the navigation bar.
+
+
+Want to learn more? select the question mark (?) in the navigation bar!`;
         let descriptionText = new paper.PointText( {
             point: [114, 518],
             fillColor: '#000000',
@@ -127,7 +132,7 @@ simultaneously within their own workspaces hosted by Chalkboard.`;
         });
 
         descriptionText.onFrame = (event) => {
-            if(event.count % 2 != 0) { return; }
+            if(event.count % 1 != 0) { return; }
             if(descriptionString.length > 0) {
                 descriptionText.content += descriptionString.charAt(0);
                 descriptionString = descriptionString.substr(1);
@@ -135,5 +140,4 @@ simultaneously within their own workspaces hosted by Chalkboard.`;
             }
         }
     }
-
 }
