@@ -230,7 +230,7 @@ export function paperSockets() {
 			}
 
             setupVideoRoom();
-            if(user.sessionID == 'homepage-002') { homepage.addWelcomeText(); }
+            if(user.sessionID == 'default') { homepage.addWelcomeText(); }
 		}
 	}
 
