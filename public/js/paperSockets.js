@@ -184,7 +184,6 @@ export function paperSockets() {
 		let result = "";
 		for (var i = 0; i < 8; i++) {
 			result += Math.floor(Math.random() * 100).toString(36);
-
 		}
 		return result;
 	}
@@ -194,6 +193,12 @@ export function paperSockets() {
 	// to begin to receive canvas updates when other users are drawing.
 	// newPaths = [ {pathName: name, path: pathObj}, ... , {pathName: name, path: pathObj} ]
 	function addPaths(newPaths) {
+        if(user.sessionID == 'default') {
+            LOCKED = false;
+            initialPathsReceived = true;
+            homepage.addWelcomeText();
+            return;
+        }
 		if (!initialPathsReceived) {
 			LOCKED = false;
 			initialPathsReceived = true;
@@ -236,7 +241,6 @@ export function paperSockets() {
 			}
 
             setupVideoRoom();
-            if(user.sessionID == 'default') { homepage.addWelcomeText(); }
 		}
 	}
 
