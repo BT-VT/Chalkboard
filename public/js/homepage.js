@@ -1,9 +1,6 @@
 
 
 export default class Homepage {
-    greet() {
-        this.addWelcomeText();
-    }
 
     addWelcomeText() {
         let welcomeString = "Welcome to";
@@ -16,16 +13,19 @@ export default class Homepage {
         });
 
         welcomeText.onFrame = (event) => {
-            if(event.count % 10 == 0 && welcomeString.length > 0) {
+            if(event.count % 10 != 0) { return; }
+            if(welcomeString.length > 0) {
                 welcomeText.content += welcomeString.charAt(0);
                 welcomeString = welcomeString.substr(1);
-                if(welcomeString.length == 0) { this.addChalkboardWriting(); }
+                if(welcomeString.length == 0) {
+                    console.log('welcome text added');
+                    this.addChalkboardWriting();
+                }
             }
         }
     }
 
     addChalkboardWriting() {
-        console.log('running');
         let chalkPathSegs =  [
             [{ point: { x: 171, y: 257 }, handleOut: { x: 0, y: -7.44854 } },{ point: { x: 151, y: 220 }, handleIn: { x: 7.41171, y: 3.70585 }, handleOut: { x: -6.19647, y: -3.09824 } },{ point: { x: 129, y: 230 }, handleIn: { x: 2.53816, y: -5.07633 }, handleOut: { x: -9.0784, y: 18.15681 } },{ point: { x: 110, y: 291 }, handleIn: { x: 4.21557, y: -21.07785 }, handleOut: { x: -1.0054, y: 5.027 } },{ point: { x: 110, y: 308 }, handleIn: { x: 0, y: -5.08262 }, handleOut: { x: 0, y: 23.56038 } },{ point: { x: 131, y: 368 }, handleIn: { x: -17.17457, y: -17.17457 }, handleOut: { x: 2.507, y: 2.507 } },{ point: { x: 142, y: 371 }, handleIn: { x: -3.45651, y: 0 }, handleOut: { x: 5.88778, y: 0 } },{ point: { x: 156, y: 369 }, handleIn: { x: -4.26883, y: 2.13442 }, handleOut: { x: 6.36532, y: -3.18266 } },{ point: { x: 166, y: 352 }, handleIn: { x: -3.31534, y: 3.31534 }, handleOut: { x: 0.71544, y: -0.71544 } },{ point: { x: 170, y: 348 }, handleIn: { x: 0, y: 1.55427 } }],
             [{ point: { x: 205, y: 215 }, handleOut: { x: 0, y: 51.36683 } },{ point: { x: 206, y: 369 }, handleIn: { x: 0, y: -51.53697 } }],
@@ -68,6 +68,7 @@ export default class Homepage {
         var boardPath = new paper.Path(boardPathAttrs);
 
         // while there are chalk paths left, add one per frame
+
         chalkPath.onFrame = (event) => {
             if(event.count % 2 != 0) { return; }
             if(chalkPathSegs.length > 0) {
@@ -78,14 +79,18 @@ export default class Homepage {
                     chalkPathSegs.shift();
                     chalkPath = new paper.Path(chalkPathAttrs);
                 }
+                // when all chalk paths are added, add board paths
+                if(chalkPathSegs.length == 0) {
+                    console.log('chalk paths added');
+                    writeBoardPaths();
+                }
             }
-            // when all chalk paths are added, add board paths
-            else { writeBoardPaths(); }
         }
+
         // while there are board paths left, add one per frame
         let writeBoardPaths = () => {
             boardPath.onFrame = (event) => {
-                if(event.count % 4 != 0) { return; }
+                if(event.count % 2 != 0) { return; }
                 if(boardPathSegs.length > 0) {
                     if(boardPathSegs[0].length > 0) {
                         boardPath.add(boardPathSegs[0].shift());
@@ -94,7 +99,39 @@ export default class Homepage {
                         boardPathSegs.shift();
                         boardPath = new paper.Path(boardPathAttrs);
                     }
+                    if(boardPathSegs.length == 0) {
+                        console.log('board paths added');
+                        this.addAppDescriptionText();
+                    }
                 }
+            }
+        }
+    }
+
+    addAppDescriptionText() {
+        let descriptionString =
+`Chalkboard is an online interactive canvas that allows users to meet
+and collaborate remotely.Users can work with different drawing tools
+to add shapes and objects to a Chalkboard canvas. Anything added to a
+chalkboard canvas will instantly be displayed for all users viewing
+that canvas through a web browser. Users can create chalkboard
+"sessions" where each session has its own unique canvas independent of
+all other canvas's, allowing multiple groups of collaborators to work
+simultaneously within their own workspaces hosted by Chalkboard.`;
+        let descriptionText = new paper.PointText( {
+            point: [114, 518],
+            fillColor: '#000000',
+            fontFamily: 'Courier New',
+            fontSize: 25,
+            content:''
+        });
+
+        descriptionText.onFrame = (event) => {
+            if(event.count % 2 != 0) { return; }
+            if(descriptionString.length > 0) {
+                descriptionText.content += descriptionString.charAt(0);
+                descriptionString = descriptionString.substr(1);
+                if(descriptionString.length == 0) { console.log('description text added'); }
             }
         }
     }
