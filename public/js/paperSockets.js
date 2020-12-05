@@ -100,7 +100,7 @@ export function paperSockets() {
 
 	let attributes = {
 		multicolor: false,
-		//strokeWidth: 5,
+		strokeWidth: slider.value,
 		strokeCap: 'round',
         fontFamily: 'Courier New',
         //fontSize: 14,
