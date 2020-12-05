@@ -18,14 +18,14 @@ export default class Homepage {
                 welcomeText.content += welcomeString.charAt(0);
                 welcomeString = welcomeString.substr(1);
                 if(welcomeString.length == 0) {
-                    console.log('welcome text added');
-                    this.addChalkboardWriting();
+                    console.log('welcome text added to canvas');
+                    this.addChalkWriting();
                 }
             }
         }
     }
 
-    addChalkboardWriting() {
+    addChalkWriting() {
         let chalkPathSegs =  [
             [{ point: { x: 171, y: 257 }, handleOut: { x: 0, y: -7.44854 } },{ point: { x: 151, y: 220 }, handleIn: { x: 7.41171, y: 3.70585 }, handleOut: { x: -6.19647, y: -3.09824 } },{ point: { x: 129, y: 230 }, handleIn: { x: 2.53816, y: -5.07633 }, handleOut: { x: -9.0784, y: 18.15681 } },{ point: { x: 110, y: 291 }, handleIn: { x: 4.21557, y: -21.07785 }, handleOut: { x: -1.0054, y: 5.027 } },{ point: { x: 110, y: 308 }, handleIn: { x: 0, y: -5.08262 }, handleOut: { x: 0, y: 23.56038 } },{ point: { x: 131, y: 368 }, handleIn: { x: -17.17457, y: -17.17457 }, handleOut: { x: 2.507, y: 2.507 } },{ point: { x: 142, y: 371 }, handleIn: { x: -3.45651, y: 0 }, handleOut: { x: 5.88778, y: 0 } },{ point: { x: 156, y: 369 }, handleIn: { x: -4.26883, y: 2.13442 }, handleOut: { x: 6.36532, y: -3.18266 } },{ point: { x: 166, y: 352 }, handleIn: { x: -3.31534, y: 3.31534 }, handleOut: { x: 0.71544, y: -0.71544 } },{ point: { x: 170, y: 348 }, handleIn: { x: 0, y: 1.55427 } }],
             [{ point: { x: 205, y: 215 }, handleOut: { x: 0, y: 51.36683 } },{ point: { x: 206, y: 369 }, handleIn: { x: 0, y: -51.53697 } }],
@@ -35,6 +35,45 @@ export default class Homepage {
             [{ point: { x: 437, y: 203 }, handleOut: { x: 0, y: 13.81247 } },{ point: { x: 435, y: 258 }, handleIn: { x: -3.88418, y: -11.65253 }, handleOut: { x: 4.84595, y: 14.53786 } },{ point: { x: 437, y: 308 }, handleIn: { x: 0, y: -15.84965 }, handleOut: { x: 0, y: 11.7883 } },{ point: { x: 435, y: 343 }, handleIn: { x: 0, y: -11.98551 }, handleOut: { x: 0, y: 3.23901 } },{ point: { x: 435, y: 359 }, handleIn: { x: 0, y: 3.85296 } }],
             [{ point: { x: 498, y: 239 }, handleOut: { x: -13.36089, y: 13.36089 } },{ point: { x: 455, y: 277 }, handleIn: { x: 13.0907, y: -13.0907 }, handleOut: { x: -0.33333, y: 0.33333 } },{ point: { x: 454, y: 278 }, handleIn: { x: 0.33333, y: -0.33333 }, handleOut: { x: -0.66667, y: 0.66667 } },{ point: { x: 452, y: 280 }, handleIn: { x: 0.56569, y: -0.75425 }, handleOut: { x: -2.77541, y: 3.70054 } },{ point: { x: 442, y: 290 }, handleIn: { x: 3.48398, y: -3.48398 }, handleOut: { x: -0.19526, y: 0.19526 } },{ point: { x: 441, y: 292 }, handleIn: { x: -0.7357, y: -0.7357 }, handleOut: { x: 0.83333, y: 0.83333 } },{ point: { x: 446, y: 292 }, handleIn: { x: -0.83333, y: -0.83333 }, handleOut: { x: 2.02316, y: 2.02316 } },{ point: { x: 455, y: 296 }, handleIn: { x: -1.85173, y: -1.85173 }, handleOut: { x: 7.38292, y: 7.38292 } },{ point: { x: 475, y: 325 }, handleIn: { x: -6.15159, y: -9.22739 }, handleOut: { x: 3.41756, y: 5.12634 } },{ point: { x: 483, y: 341 }, handleIn: { x: -3.17858, y: -3.17858 }, handleOut: { x: 2.4694, y: 2.4694 } },{ point: { x: 487, y: 355 }, handleIn: { x: 0, y: -3.16031 }, handleOut: { x: 0, y: 0.33333 } },{ point: { x: 487, y: 356 }, handleIn: { x: -0.2357, y: -0.2357 }, handleOut: { x: 0.89814, y: 0.89814 } },{ point: { x: 491, y: 364 }, handleIn: { x: 0, y: -0.68418 } }]
         ];
+
+        // each set of paths requires different colors
+        let chalkPathAttrs = {
+        	strokeColor: '#5B5B5B',
+        	strokeWidth: 15,
+        	strokeCap: 'round',
+        	strokeJoin: 'round'
+        }
+
+        // Create a new path and style it:
+        var chalkPath = new paper.Path(chalkPathAttrs);
+
+        // function called to start adding 'chalk' paths to canvas.
+        // while there are chalk paths left, add one per frame
+        let animateChalk = (event) => {
+            if(event.count % 2 != 0) { return; }
+            if(chalkPathSegs.length > 0) {
+                if(chalkPathSegs[0].length > 0) {
+                    chalkPath.add(chalkPathSegs[0].shift());
+                }
+                else {
+                    chalkPathSegs.shift();
+                    chalkPath.onFrame = null;
+                    chalkPath = new paper.Path(chalkPathAttrs);
+                    chalkPath.onFrame = animateChalk;
+                }
+            }
+            else {
+                console.log('"Chalk" writing added to canvas');
+                chalkPath.onFrame = null;
+                this.addBoardWriting();
+            }
+        }
+
+        chalkPath.onFrame = animateChalk;
+
+    }
+
+    addBoardWriting() {
         let boardPathSegs = [
             [{ point: { x: 524, y: 200 }, handleOut: { x: 0, y: 16.33333 } },{ point: { x: 524, y: 249 }, handleIn: { x: 0, y: -16.33333 }, handleOut: { x: 0, y: 5.205 } },{ point: { x: 524, y: 270 }, handleIn: { x: 2.24446, y: -4.48892 }, handleOut: { x: -2.0794, y: 4.15879 } },{ point: { x: 523, y: 286 }, handleIn: { x: 0, y: -4.92375 }, handleOut: { x: 0, y: 8.51596 } },{ point: { x: 523, y: 324 }, handleIn: { x: -2.5528, y: -7.65839 }, handleOut: { x: 3.75621, y: 11.26863 }  },{ point: { x: 525, y: 364 }, handleIn: { x: 0, y: -12.4045 } }],
             [{ point: { x: 530, y: 289 }, handleOut: { x: 0, y: -4.92749 } },{ point: { x: 539, y: 280 }, handleIn: { x: -2.5949, y: 2.5949 }, handleOut: { x: 8.04776, y: -8.04776 } },{ point: { x: 578, y: 285 }, handleIn: { x: -7.26794, y: -7.26794 }, handleOut: { x: 15.73705, y: 15.73705 } },{ point: { x: 579, y: 350 }, handleIn: { x: 13.21038, y: -13.21038 }, handleOut: { x: -4.32329, y: 4.32329 } },{ point: { x: 562, y: 362 }, handleIn: { x: 4.80554, y: -4.80554 }, handleOut: { x: -1.15991, y: 1.15991 } },{ point: { x: 533, y: 366 }, handleIn: { x: 1.67221, y: 1.67221 }, handleOut: { x: -0.49552, y: -0.49552 } },{ point: { x: 530, y: 363 }, handleIn: { x: 0.6606, y: 0 } }],
@@ -47,16 +86,7 @@ export default class Homepage {
             [{ point: { x: 928, y: 314 }, handleOut: { x: 0, y: 6.80765 } },{ point: { x: 934, y: 343 }, handleIn: { x: -3.48038, y: -3.48038 }, handleOut: { x: 0.9751, y: 0.9751 } },{ point: { x: 939, y: 351 }, handleIn: { x: 0, y: -1.80319 } }]
         ];
 
-        // each set of paths requires different colors
-        let chalkPathAttrs = {
-        	// 80% black:
-        	strokeColor: '#5B5B5B',
-        	strokeWidth: 15,
-        	strokeCap: 'round',
-        	strokeJoin: 'round'
-        }
         let boardPathAttrs = {
-        	// 80% black:
         	strokeColor: '#008DB0',
         	strokeWidth: 15,
         	strokeCap: 'round',
@@ -64,51 +94,36 @@ export default class Homepage {
         }
 
         // Create a new path and style it:
-        var chalkPath = new paper.Path(chalkPathAttrs);
         var boardPath = new paper.Path(boardPathAttrs);
 
-        // while there are chalk paths left, add one per frame
-
-        chalkPath.onFrame = (event) => {
+        // function called to start adding 'board' paths to canvas.
+        // While there are board paths left, add one per frame.
+        let animateBoard = (event) => {
             if(event.count % 2 != 0) { return; }
-            if(chalkPathSegs.length > 0) {
-                if(chalkPathSegs[0].length > 0) {
-                    chalkPath.add(chalkPathSegs[0].shift());
+            if(boardPathSegs.length > 0) {
+                if(boardPathSegs[0].length > 0) {
+                    boardPath.add(boardPathSegs[0].shift());
                 }
                 else {
-                    chalkPathSegs.shift();
-                    chalkPath = new paper.Path(chalkPathAttrs);
+                    boardPathSegs.shift();
+                    boardPath.onFrame = null;
+                    boardPath = new paper.Path(boardPathAttrs);
+                    boardPath.onFrame = animateBoard;
                 }
-                // when all chalk paths are added, add board paths
-                if(chalkPathSegs.length == 0) {
-                    console.log('chalk paths added');
-                    writeBoardPaths();
-                }
+            }
+            else {
+                console.log('"board" writing added to canvas');
+                boardPath.onFrame = null;
+                this.addAppDescriptionText();
             }
         }
 
-        // while there are board paths left, add one per frame
-        let writeBoardPaths = () => {
-            boardPath.onFrame = (event) => {
-                if(event.count % 2 != 0) { return; }
-                if(boardPathSegs.length > 0) {
-                    if(boardPathSegs[0].length > 0) {
-                        boardPath.add(boardPathSegs[0].shift());
-                    }
-                    else {
-                        boardPathSegs.shift();
-                        boardPath = new paper.Path(boardPathAttrs);
-                    }
-                    if(boardPathSegs.length == 0) {
-                        console.log('board paths added');
-                        this.addAppDescriptionText();
-                    }
-                }
-            }
-        }
+        boardPath.onFrame = animateBoard;
+
     }
 
     addAppDescriptionText() {
+
         let descriptionString =
 `Chalkboard is an online interactive canvas that allows users to meet
 and collaborate remotely. Users can work with different drawing tools
@@ -123,6 +138,7 @@ To get started, join or create a session from the navigation bar.
 
 
 Want to learn more? select the question mark (?) in the navigation bar!`;
+
         let descriptionText = new paper.PointText( {
             point: [114, 518],
             fillColor: '#000000',
@@ -132,11 +148,14 @@ Want to learn more? select the question mark (?) in the navigation bar!`;
         });
 
         descriptionText.onFrame = (event) => {
-            if(event.count % 1 != 0) { return; }
+            if(event.count % 2 != 0) { return; }
             if(descriptionString.length > 0) {
                 descriptionText.content += descriptionString.charAt(0);
                 descriptionString = descriptionString.substr(1);
-                if(descriptionString.length == 0) { console.log('description text added'); }
+            }
+            else {
+                console.log('description text added to canvas');
+                descriptionText.onFrame = null;
             }
         }
     }
