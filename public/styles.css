@@ -324,3 +324,11 @@ input:checked + .slider::before {
 .pcr-app{
       background-color: #FFF;
 }
+.valueSlider{
+    position: absolute;
+    bottom: 20px;
+    z-index: 10;
+}
+.thumb{
+    display:none;
+}
