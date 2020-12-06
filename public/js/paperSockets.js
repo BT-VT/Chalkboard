@@ -92,11 +92,12 @@ export function paperSockets() {
     slider.addEventListener("input", sliderChange);
     var sliderSize;
     function sliderChange() {
-        sliderSize = this.value;
+		sliderSize = this.value;
+		document.getElementById('valueSlider').innerHTML = sliderSize;
         attributes.fontSize = sliderSize;
         attributes.strokeWidth = sliderSize;
         console.log(sliderSize);
-    }
+	}
 
 	let attributes = {
 		multicolor: false,
