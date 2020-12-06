@@ -203,6 +203,18 @@ button{
       font-size: large;
   }
 
+  #logout {
+    font-family: 'Fredericka the Great', cursive;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  #delete-account {
+    font-family: 'Fredericka the Great', cursive;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
   .grid-title {
       font-size: 1.5rem;
       font-weight: bold;

@@ -66,7 +66,7 @@ export function paperSockets() {
 	paper.setup('canvas');
 	//document.getElementById('canvas').height = 5000;
 	paper.view.viewSize.height = 3500;
-	paper.view.viewSize.width = 3500;
+	paper.view.viewSize.width = 2000;
 	var tool = new paper.Tool();
     const homepage = new Homepage();
 
