@@ -128,6 +128,18 @@ button{
     background-color: var(--canvas);
 }
 
+@media only screen and (max-width: 600px) {
+    .toolbox {
+        overflow-y: visible;
+        margin-left: 0%;
+    }
+
+    .video {
+        position: fixed;
+        margin-right: 0%;
+    }
+}
+
 
 #message-container {
     background: #ccc;

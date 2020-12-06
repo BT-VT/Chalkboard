@@ -131,32 +131,6 @@
 
         <!--Sidenav for mobile-->
         <ul id="mobile-demo" class="sidenav">
-            <li class="no-padding">
-                <ul class="collapsible collapsible-accordion">
-                    <li>
-                        <a class="collapsible-header grey-text"><p id="toggleColor">Audio/Video</p><i
-                                class="material-icons">arrow_drop_down</i></a>
-                        <div class="collapsible-body">
-                            <ul>
-                                <li class="logged-in" style="display: none;">
-                                    <input id="peerID" placeholder="Peer ID" class="grey-text">
-                                </li>
-                                <li class="logged-in" style="display: none;">
-                                    <a id="call-peer" class="grey-text"><p id="toggleColor">Call Peer</p></a>
-                                </li>
-                                <li class="logged-in" style="display: none;">
-                                    <a id="screenShare" class="grey-text"><p id="toggleColor">Screen share</p></a>
-                                </li>
-
-                                <li>
-                                    <div class="gray-text" id="show-peer"></div>
-                                </li>
-
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </li>
             <li>
                 <a href="#/my-chalkboards" class="grey-text"><p id="toggleColor">My chalkboards</p></a>
             </li>
@@ -173,6 +147,9 @@
             <li class="logged-out" style="display: none;">
                 <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #b4cace" unselectable="on"><p id="toggleColor">Sign
                     up</p></a>
+            </li>
+            <li>
+                <input id="slider" type="range" min="1" max="100" value="2" step="2" />
             </li>
         </ul>
 
