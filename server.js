@@ -430,8 +430,13 @@ io.on('connection', (socket) => {
 
     socket.on('disconnecting', async () => {
 
-        //console.log("disconnected");
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
+                        
+        if (userSessions.length > 1) {
+            // tell other users to disconnect video call with this user who is leaving the session
+            socket.to(userSessions[1]).emit('userLeftSession', socket.id);
+        }
+       
         // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
         if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
             await checkForNewUsers(socket, userSessions[1]);
@@ -439,12 +444,9 @@ io.on('connection', (socket) => {
             console.log('socket ' + socket.id + ' disconnected while drawing, releasing lock from session ' + userSessions[1]);
             io.to(userSessions[1]).emit('deleteCurPath', socket.id);
         }
-        
-       
+
         let previousSessionUserIDs = sessions.get(userSessions[1]).sessionUserIDs;
         let previousSessionUsers = sessions.get(userSessions[1]).sessionUsers;
-        console.log(previousSessionUsers);
-        console.log(previousSessionUserIDs);
         let index = previousSessionUserIDs.indexOf(socket.id);
       //  console.log(index);
         if (index != -1) {
@@ -452,8 +454,6 @@ io.on('connection', (socket) => {
             previousSessionUsers.splice(index, 1);
             sessions.get(userSessions[1]).sessionUserIDs = previousSessionUserIDs;
             sessions.get(userSessions[1]).sessionUsers = previousSessionUsers;
-            console.log("after: " +  sessions.get(userSessions[1]).sessionUsers );
-            console.log("after: " +   sessions.get(userSessions[1]).sessionUserIDs );
             io.to(userSessions[1]).emit("updateUserList", "\n" + previousSessionUsers.join("\n"));
          }
                     
@@ -516,6 +516,7 @@ io.on('connection', (socket) => {
                 //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
                 console.log('user requested to join existing session: ' + user.sessionID);
                 await tryToSendPaths(socket, user.sessionID);
+           
             } else {
 
                 let sessionObj = {

@@ -143,6 +143,7 @@ button{
 
 #message-container {
     background: #ccc;
+    color: black;
     padding: 20px;
     width: 355px;
     height: 300px;
@@ -152,7 +153,7 @@ button{
     align-items: flex-start;
     border: 1px solid black;
     overflow-y: auto;
-    bottom: 15.5%;
+    bottom: 9.8em;
     right: 2%;
     position:fixed;
     display: none;
@@ -160,7 +161,7 @@ button{
 
   #send-container {
       position: fixed;
-      bottom:10%;
+      bottom: 5em;
       width: 355px;
       right: 2%;
       display: none;
@@ -168,14 +169,14 @@ button{
 
   #hide-display {
       position: fixed;
-      bottom: 6%;
+      bottom: 2em;
       right: 2%;
   }
 
   #whoIsTyping {
       position: fixed;
-      color: white;
-      bottom: 13.5%;
+      color: red;
+      bottom: 8.5em;
       right: 2%;
       display: none;
   }
@@ -183,18 +184,21 @@ button{
   #sessionList {
       position: fixed;
       background: #ccc;
+      color: black;
       height: 300px;
       max-height: 300px;
       border: 1px solid black;
-      right: 15.5%;
-      bottom: 15.5%;
+      right: 26.2em;
+      bottom: 9.8em;
+      overflow-y: auto;
       width: 150px;
       display: none;
   }
 
-
   #message-input {
-      color: white;
+      color: black;
+      background: #ccc;
+    
   }
 
   #chalkboard-title {
