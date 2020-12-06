@@ -120,7 +120,8 @@ export function paperSockets() {
 		grab: false,
         text: false,
         textEdit: false,
-		eraser: false
+		eraser: false,
+        save: false
 	}
 
 	// socket listeners
@@ -1506,4 +1507,18 @@ function addImageToCanvas(url, pathID) {
 		}
 	}
 	else { console.log('eraser button not found'); }
+
+    let saveBtn = document.querySelector("#save-button");
+	if (saveBtn) {
+		saveBtn.onclick = function () {
+			if (setDrawingTool("save")) {
+				document.querySelector("[data-tool].active").classList.toggle("active");
+        saveBtn.classList.toggle("active");
+        document.querySelector('#canvas').style.cursor = "url(images/save-icon.png), auto";
+				console.log('save selected');
+			}
+			else { console.log('failed to select save button'); }
+		}
+	}
+	else { console.log('save button not found'); }
 }

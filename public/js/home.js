@@ -11,7 +11,7 @@ function home() {
                     </div>
                     <div class="item download" data-command="download" title="Download snapshot"><img src="images/download-icon.png" /></div>
                     <a href="#modal" class="modal-trigger" data-target="modal-save" style="color: #02A6C1">
-                        <div class="item " title="save to 'My chalkboards'"><img src="images/save-icon.png" /></div>
+                        <div class="item " id="save-button" title="save to 'My chalkboards'"><img src="images/save-icon.png" /></div>
                     </a>
                     <div class="item"  title="Color Picker"><div class="color-picker"></div></div>
                     <div class="group tools">
