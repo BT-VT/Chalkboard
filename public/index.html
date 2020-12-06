@@ -14,133 +14,36 @@
     <link href="styles.css" rel="stylesheet">
     <link href="myChalkboards.css" rel="stylesheet">
     <!-- Load the libraries -->
+    <script type="module" src="js/darkMode.js"></script>
     <!-- alternate way to load paper.js from node_modules:
     <script type="text/javascript" src="paper-full.js"></script> -->
+    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.0.4/acorn.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <!-- Load chalkboard scripts -->
     <script type="module" src="js/paperSockets.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+    <script type="module" src="js/picturetopicture.js"></script>
 </head>
 
 <style>
-    .video {
-        height: 200px;
-        width: 200px;
+    #video-grid {
+        display: grid;
+        position: fixed;
+        right: 0;
+        grid-template-columns: repeat(auto-fill, 100px);
+        grid-auto-rows: 100px;
+    }
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 </style>
 
 <body>
-
-
-
-    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
-
-    <script>
-        window.addEventListener('load', (event) => {
-            var peer = new Peer()
-            var myStream;
-            var currentPeer;
-            var peerList = [];
-            peer.on('open', function (id) {
-                document.getElementById("show-peer").innerHTML = id
-            })
-            peer.on('call', function (call) {
-                navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
-                }).then((stream) => {
-                    myStream = stream
-                    addOurVideo(stream)
-                    call.answer(stream)
-                    call.on('stream', function (remoteStream) {
-                        if (!peerList.includes(call.peer)) {
-                            addRemoteVideo(remoteStream)
-                            currentPeer = call.peerConnection
-                            peerList.push(call.peer)
-                        }
-
-                    })
-                }).catch((err) => {
-                    console.log(err + " unable to get media")
-                })
-            })
-            function stopScreenShare() {
-                let videoTrack = myStream.getVideoTracks()[0];
-                var sender = currentPeer.getSenders().find(function (s) {
-                    return s.track.kind == videoTrack.kind;
-                })
-                sender.replaceTrack(videoTrack)
-            };
-            document.getElementById("call-peer").addEventListener('click', (e) => {
-                let remotePeerId = document.getElementById("peerID").value;
-                document.getElementById("show-peer").innerHTML = "connecting " + remotePeerId;
-                console.log(remotePeerId)
-                callPeer(remotePeerId);
-            })
-            document.getElementById("screenShare").addEventListener('click', (e) => {
-                navigator.mediaDevices.getDisplayMedia({
-                    video: {
-                        cursor: "always"
-                    },
-                    audio: {
-                        autoGainControl: false,
-                        echoCancellation: false,
-                        googAutoGainControl: false,
-                        noiseSuppression: false
-                    }
-                }).then((stream) => {
-                    let videoTrack = stream.getVideoTracks()[0];
-
-                    videoTrack.onended = function () {
-                        stopScreenShare()
-                    }
-                    let sender = currentPeer.getSenders().find(function (s) {
-                        return s.track.kind == videoTrack.kind
-                    })
-                    sender.replaceTrack(videoTrack)
-                }).catch((err) => {
-                    console.log("unable to get display media" + err)
-                })
-            })
-            function callPeer(id) {
-                navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
-                }).then((stream) => {
-                    myStream = stream
-                    addOurVideo(stream)
-                    let call = peer.call(id, stream)
-                    call.on('stream', function (remoteStream) {
-                        if (!peerList.includes(call.peer)) {
-                            addRemoteVideo(remoteStream)
-                            currentPeer = call.peerConnection
-                            peerList.push(call.peer)
-                        }
-
-                    })
-                }).catch((err) => {
-                    console.log(err + " unable to get media")
-                })
-            }
-            function addRemoteVideo(stream) {
-                let video = document.createElement("video");
-                video.classList.add("video")
-                video.srcObject = stream;
-                video.play()
-                document.getElementById("remoteVideo").append(video)
-            }
-            function addOurVideo(stream) {
-                let video = document.createElement("video");
-                video.classList.add("video")
-                video.srcObject = stream;
-                video.play()
-                video.muted = true;
-                document.getElementById("ourVideo").append(video)
-            }
-        });
-    </script>
     <!--Dropdown Structure-->
     <ul id="dropdown1" class="dropdown-content">
         <li class="logged-in" style="display: none;">
@@ -156,49 +59,71 @@
             <div class="gray-text" id="show-peer"></div>
         </li>
     </ul>
+
     <!--NAV BAR-->
     <div id="page">
+        <video id="video" controls height="408px" width="203px" hidden></video>
         <div class="navbar-fixed">
-            <nav class="z-depth-0 grey lighten-4 nav-extended">
+            <nav class="z-depth-0 lighten-4 nav-extended navbar">
                 <a href="#/home" class="brand-logo">
-                    <img src="images/chalkboard logo.png" style="width: 180px; margin-top: 10px;">
+                    <img src="images/chalkboard logo.png" style="width: 180px; margin-top:0px;">
                 </a>
                 <a data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons"
                         style='color:gray'>menu</i></a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li><span id="navProgress"></span></li>
-                    <li style="color: gray">Text/Drawing Size: </li>
+                    <li style="color: #FFF; margin-top: 2px; margin-right:10px;">Text/Drawing Size: </li>
                     <li>
-                      <input
-                        id="slider"
-                        type="range"
-                        min="1"
-                        max="100"
-                        value="2"
-                        step="2"
-                      />
+                        <span class = "valueSlider" id = "valueSlider"></span>
+                        
+                        <input id="slider" type="range" min="1" max="100" value="2" step="2" />
                     </li>
-                    <li><a style="display: none;" class="dropdown-trigger logged-in grey-text dropdown-button"
-                            data-target="dropdown1" data-activates="dropdown1">Audio/Video<i
-                                class="material-icons right">arrow_drop_down</i></a></li>
-                    <li class="logged-in" style="display: none;">
-                        <a href="#/my-chalkboards" class="grey-text modal-trigger">My chalkboards</a>
+                    
+                    <li>
+                        <a class="modal-trigger grey-text" data-target="help-modal">
+                            <i class="material-icons" style = "margin-top: 6px; margin-left: 16px;">help</i>
+                        </a>
                     </li>
                     <li>
-                        <a href="#" class="grey-text modal-trigger" data-target="modal-session">Join/Create a
-                            Session</a>
+                        <label class="theme-switch">
+                            <p style="padding-right:20px;"><input type="checkbox" required unselectable="on">Theme</p>
+                        </label>
+                    </li>
+                    <li>
+                        <div class="button-container">
+                            <button id="choose-pip-button" unselectable="on"><p>Choose PiP</p></button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="button-container">
+                            <button id="start-pip-button" unselectable="on"><p>Start PiP</p></button>
+                        </div>
+                    </li>
+
+                   <li class="logged-in" style="display: none;">
+                        <a href="#/my-chalkboards"  class="grey-text modal-trigger"><p id="" unselectable="on">My chalkboards</p></a>
+                    </li>
+                    <li>
+                        <a href="#" class="logged-in grey-text">
+
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="" unselectable="on">Join/Create a
+                            Session</p></a>
                     </li>
                     <li class="logged-in" style="display: none;">
-                        <a href="#modal" class="modal-trigger" id="navEmail" data-target="modal-account"
-                            style="color: #00A6C1"></a>
+                        <p><a href="#modal" class="modal-trigger colorSwitch" id="navEmail" data-target="modal-account"
+                            style="color: var(--secondary-color); border-bottom: 3px solid transparent;"></a>
+                        </p>
                     </li>
                     <li class="logged-out" style="display: none;">
-                        <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1">Log
-                            in</a>
+                        <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #000"><p id=" importedFont" unselectable="on">Log
+                            in</p></a>
                     </li>
                     <li class="logged-out" style="display: none;">
-                        <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #02A6C1">Sign
-                            up</a>
+                        <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #000"><p id="toggleColor importedFont" unselectable="on">Sign
+                            up</p></a>
                     </li>
                 </ul>
             </nav>
@@ -206,53 +131,32 @@
 
         <!--Sidenav for mobile-->
         <ul id="mobile-demo" class="sidenav">
-            <li class="no-padding">
-                <ul class="collapsible collapsible-accordion">
-                    <li>
-                        <a class="collapsible-header grey-text">Audio/Video<i
-                                class="material-icons">arrow_drop_down</i></a>
-                        <div class="collapsible-body">
-                            <ul>
-                                <li class="logged-in" style="display: none;">
-                                    <input id="peerID" placeholder="Peer ID" class="grey-text">
-                                </li>
-                                <li class="logged-in" style="display: none;">
-                                    <a id="call-peer" class="grey-text">Call Peer</a>
-                                </li>
-                                <li class="logged-in" style="display: none;">
-                                    <a id="screenShare" class="grey-text">Screen share</a>
-                                </li>
-                                <li>
-                                    <div class="gray-text" id="show-peer"></div>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
+            <li>
+                <a href="#/my-chalkboards" class="grey-text"><p id="toggleColor">My chalkboards</p></a>
             </li>
             <li>
-                <a href="#/my-chalkboards" class="grey-text">My chalkboards</a>
-            </li>
-            <li>
-                <a href="#" class="grey-text modal-trigger" data-target="modal-session">Join/Create a Session</a>
+                <a href="#" class="grey-text modal-trigger" data-target="modal-session"><p id="toggleColor" unselectable="on">Join/Create a Session</p></a>
             </li>
             <li class="logged-in" style="display: none;">
-                <a href="#modal" class="grey-text modal-trigger" id="navEmail" data-target="modal-account">Account</a>
+                <a href="#modal" class="grey-text modal-trigger" id="navEmail" data-target="modal-account" unselectable="on"><p id="toggleColor">Account</p></a>
             </li>
             <li class="logged-out" style="display: none;">
-                <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1">Log
-                    in</a>
+                <a href="#modal" class="modal-trigger" data-target="modal-login" style="color: #02A6C1" unselectable="on"><p id="toggleColor textColor">Log
+                    in</p></a>
             </li>
             <li class="logged-out" style="display: none;">
-                <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #02A6C1">Sign
-                    up</a>
+                <a href="#modal" class="modal-trigger" data-target="modal-signup" style="color: #b4cace" unselectable="on"><p id="toggleColor">Sign
+                    up</p></a>
+            </li>
+            <li>
+                <input id="slider" type="range" min="1" max="100" value="2" step="2" />
             </li>
         </ul>
 
         <!--SIGNUP MODAL-->
         <div id="modal-signup" class="modal">
             <div class="modal-content">
-                <h4>Sign up</h4><br />
+                <h4 id="importedFont">Sign up</h4><br />
                 <form id="signup-form">
                     <div class="input-field">
                         <input type="email" id="signup-email" required />
@@ -270,7 +174,7 @@
         <!--LOGIN MODAL-->
         <div id="modal-login" class="modal">
             <div class="modal-content">
-                <h4>Login</h4><br />
+                <h4 id="importedFont">Login</h4><br />
                 <form id="login-form">
                     <div class="input-field">
                         <input type="email" id="login-email" required />
@@ -288,19 +192,100 @@
         <!--ACCOUNT MODAL-->
         <div id="modal-account" class="modal">
             <div class="modal-content center align">
-                <h4>Account Details</h4>
+                <h4 id="importedFont">Account Details</h4>
                 <div class="account-details"></div>
                 <div style="margin: 12px; width: 100%">
-                    <a href="#" id="logout" style="color: #02A6C1">Log out</a>
-                    <a href="#" id="delete-account" style="color: #02A6C1">Delete account</a>
+                    <a href="#" id="logout" style="color: #000">Log out</a>
+                    <a href="#" id="delete-account" style="color: #000">Delete account</a>
                 </div>
+            </div>
+        </div>
+        <!--HELP MODAL-->
+        <div id="help-modal" class="modal">
+            <div class="modal-content center align">
+                <h4>Tutorial</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Theme</td>
+                            <td>Change the color theme of the app by pressing the theme button</td>
+                        </tr>
+                        <tr>
+                            <td>Picture in Picure</td>
+                            <td>Press 'Choose PiP' to select a display to use with picture-in-picture, press 'Start PiP' to activate</td>
+                        </tr>
+                        <tr>
+                            <td>Join/Create a Session</td>
+                            <td>Enter the name of an existing session or create a new one to join or start a unique drawing canvas</td>
+                        </tr>
+                        <tr>
+                            <td>My chalkboards</td>
+                            <td>A grid of chalkboard sessions which you have saved a link to for easy access</td>
+                        </tr>
+                        <tr>
+                            <td>Mute and unmute audio/video</td>
+                            <td>Click the teal microphone icon at the top of the toolbar on the left</td>
+                        </tr>
+                        <tr>
+                            <td>Chat feature</td>
+                            <td>select the pink icon at the bottom right of the screen to open the chat box</td>
+                        </tr>
+                        <tr>
+                            <td>Move/Grab an object</td>
+                            <td>Select the grab tool, hover over border of desired object until it scales up slightly, click & drag</td>
+                        </tr>
+                        <tr>
+                            <td>Change object size</td>
+                            <td>Select the grab tool, hold shift key then click and drag object</td>
+                        </tr>
+                        <tr>
+                            <td>Rotate an object</td>
+                            <td>Select the grabber tool, grab an object, hold down left or right arrow key and drag mouse</td>
+                        </tr>
+                        <tr>
+                            <td>Fill object with color</td>
+                            <td>Select fill tool, hover over border of desired object until it scales up slightly, click</td>
+                        </tr>
+                        <tr>
+                            <td>Remove fill color</td>
+                            <td>hold backspace key while following Fill color instructions</td>
+                        </tr>
+                        <tr>
+                            <td>Change border color</td>
+                            <td>hold shift key while following Fill color instructions</td>
+                        </tr>
+                        <tr>
+                            <td>Erase object</td>
+                            <td>Select eraser tool, drag mouse over object (smaller lines require slower dragging)</td>
+                        </tr>
+                        <tr>
+                            <td>Erase an uploaded image</td>
+                            <td>While using the eraser tool, hold down shift + click and move cursor over image</td>
+                        </tr>
+                        <tr>
+                            <td>add newline in text box</td>
+                            <td>press shift+enter while editing text on canvas</td>
+                        </tr>
+                        <tr>
+                            <td>Edit text on canvas</td>
+                            <td>Use grab tool, shift+click on text</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Join a Session modal -->
         <div id=modal-session class="modal">
             <div class="modal-content center align">
-                <h4>Enter Session ID</h4>
+                <h4 id="importedFont">Enter Session ID</h4>
                 <form id="session-form">
                     <div class="input-field">
                         <input type="text" id="session-id" required />
@@ -314,13 +299,13 @@
         <!--SAVE/UPLOAD MODAL-->
         <div id="modal-save" class="modal">
             <div class="modal-content">
-                <h4 style="color: gray">Save chalkboard</h4><br />
+                <h4 ><p id="importedFont">Save chalkboard<p></h4><br />
                 <form id="save-form">
                     <div class="input-field">
                         <input type="text" id="chalkboard-title" />
-                        <label for="chalkboard-title">Add a title...</label>
+                        <label for="chalkboard-title"><p>Add a title...</p></label>
                     </div>
-                    <button class="upload btn cyan darken-2 z-depth-0" data-command="upload">Save</button>
+                    <button class="upload btn cyan darken-2 z-depth-0" data-command="upload"><p>Save</p></button>
                     <p class="error red-text center-align"></p>
                 </form>
             </div>

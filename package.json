@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "start": "node server.js"
+    "start": "node server.js",
+    "devStart": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
   "dependencies": {
     "@simonwep/pickr": "^1.7.4",
     "canvas": "^2.6.1",
+    "ejs": "^3.1.5",
     "express": "^4.17.1",
     "firebase-admin": "^9.3.0",
     "jest": "^26.5.3",
@@ -41,5 +43,8 @@
   },
   "engines": {
     "node": "14.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
   }
 }
