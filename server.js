@@ -125,14 +125,14 @@ io.on('connection', (socket) => {
         setTimeout(() => {
 
 
-            
+
              socket.emit("updateRoom", webRoom);
              webRoom = "default";
-            
-        
+
+
 
         }, 500)
-        
+
 
     })
 
@@ -431,12 +431,12 @@ io.on('connection', (socket) => {
     socket.on('disconnecting', async () => {
 
         let userSessions = Object.keys(socket.rooms);   // always includes 'self' session, not controlled by users.
-                        
+
         if (userSessions.length > 1) {
             // tell other users to disconnect video call with this user who is leaving the session
             socket.to(userSessions[1]).emit('userLeftSession', socket.id);
         }
-       
+
         // if user was drawing while disconnected, remove the path being drawn and set the session lock to false.
         if(userSessions.length > 1 && sessions.get(userSessions[1]).LOCKED == socket.id) {
             await checkForNewUsers(socket, userSessions[1]);
@@ -448,7 +448,7 @@ io.on('connection', (socket) => {
         let previousSessionUserIDs = sessions.get(userSessions[1]).sessionUserIDs;
         let previousSessionUsers = sessions.get(userSessions[1]).sessionUsers;
         let index = previousSessionUserIDs.indexOf(socket.id);
-      //  console.log(index);
+
         if (index != -1) {
             previousSessionUserIDs.splice(index, 1);
             previousSessionUsers.splice(index, 1);
@@ -456,24 +456,22 @@ io.on('connection', (socket) => {
             sessions.get(userSessions[1]).sessionUsers = previousSessionUsers;
             io.to(userSessions[1]).emit("updateUserList", "\n" + previousSessionUsers.join("\n"));
          }
-                    
-        
+
+
     });
 
     // =============== CHAT HANDLING ============================
 
     // sends chat message to the chat box
     socket.on("sendChatMessage", (message, user) => {
-        console.log(user.sessionID);
         let time = new Date();
         let formattedTime = time.toLocaleString("en-US", {hour: "numeric", minute: "numeric"});
         io.to(user.sessionID).emit("chat-message", user.name + " at " + formattedTime + ":\n" + message);
-        
+
     });
 
     // broadcasts a message when a user is typing
     socket.on("typingMsg", (data, user) => {
-       // console.log(name);
         socket.to(user.sessionID).emit("typing", data, user.name);
     });
     // getting username from auth.js and passing it to the client (there is prob a better way to do this)
@@ -489,9 +487,9 @@ io.on('connection', (socket) => {
 
 
           //  console.log(prevSession);
-            if (prevSession != null && sessions.has(prevSession)) { 
+            if (prevSession != null && sessions.has(prevSession)) {
                 socket.leave(prevSession);
-                
+
                 // removing name from list
                 let previousSessionUsers = sessions.get(prevSession).sessionUsers;
                 let previousSessionUserIDs =sessions.get(prevSession).sessionUserIDs;
@@ -516,7 +514,7 @@ io.on('connection', (socket) => {
                 //  io.to(user.sessionID).emit("chat-message", user.name + " has joined the " + user.sessionID + " session!" );
                 console.log('user requested to join existing session: ' + user.sessionID);
                 await tryToSendPaths(socket, user.sessionID);
-           
+
             } else {
 
                 let sessionObj = {
