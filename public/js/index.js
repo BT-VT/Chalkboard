@@ -8,7 +8,7 @@ const setupUI = (user) => {
     if (user) {
         //show user info in account modal
         var html = `
-        <div>Logged in as ${user.email}</div>
+        <div id="importedFont">Logged in as ${user.email}</div>
     `;
         accountDetails.innerHTML = html;
         // toggle user UI elements
