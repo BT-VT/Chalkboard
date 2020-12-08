@@ -489,7 +489,6 @@ io.on('connection', (socket) => {
         try {
 
 
-          //  console.log(prevSession);
             if (prevSession != null && sessions.has(prevSession)) {
                 socket.leave(prevSession);
 
