@@ -1,9 +1,12 @@
 
+require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 
 // set up firestore connection
 const admin = require('firebase-admin');
-const serviceAccount = require('../chalkboardPrivate/ServiceAccountKey.json');
+const {auth} = require('google-auth-library');
+const serviceAccEnvVar = process.env.SERVICE_ACCOUNT_KEY;
+const serviceAccount = JSON.parse(serviceAccEnvVar);
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
