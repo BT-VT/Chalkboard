@@ -1,4 +1,4 @@
-# Chalkboard
+# [Chalkboard](https://chalkboardonline.herokuapp.com/)
 Chalkboard is an online interactive canvas that allows users to meet and collaborate remotely. Users can work with different drawing tools
 to add shapes and objects to a Chalkboard canvas. Anything added to a chalkboard canvas will instantly be displayed for all users viewing
 that canvas through a web browser. Users can create chalkboard "sessions" where each session has its own unique canvas independent of all
@@ -69,7 +69,7 @@ to a row of pre-selected colors for quick access.
 - **Straight Line:** draws a straight line from the down-point of the mouse to the release-point of the mouse.
 - **Rectangle:** draws a rectangle from the down-point of the mouse to the release-point of the mouse.
 - **Ellipse:** draws an ellipse from the down-point of the mouse to the release-point of the mouse.
-- **Circle:** draws a circle where the down-point of the mouse defines the center and the distance between the release-point and 
+- **Circle:** draws a circle where the down-point of the mouse defines the center and the distance between the release-point and
 down-point of the mouse defines the radius.
 - **Triangle:** draws a right triangle where the down-point of the mouse defines the location of the angle formed by the hypotenuse
 and adjacent sides, while the release-point of the mouse defines the location of the angle formed by the hypotenuse and the opposite
@@ -105,16 +105,16 @@ their name is displayed next to their message in the message thread.
   - Reproduce: It is unknown exactly why this happens, however it will occasionally occur when a client joins a session. If the
   console log is open through the debugger, a pickr.js error will be thrown every time this error occurs, and certain function output
   will appear twice on both the client and server side when drawing new lines on the canvas.
-  
+
   _this image shows the pickr.js error on the client side, which always occurs when the bug occurs_
   ![pickr.js error](https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain/blob/main/error_screenshots/pickr_error.png)
-  
+
   _this image shows output on the server, signifying a function being called more than it should be_
   ![output on server showing functions being called twice](https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain/blob/main/error_screenshots/server_double_output.png)
-  
+
   _this image shows paths being added twice on the client side (at the bottom of the image)_
   ![shows paths being added twice (bottom of image)](https://github.com/Capstone-Projects-2020-Fall/ChalkboardMain/blob/main/error_screenshots/paperSockets_called_mult_times.png)
-  
+
 - **Paths not automatically loaded when accessing canvas session from Chalkboard Logo link**
   - Behavior: When on the My-chalkboards page, if a user clicks the Chalkboard logo to get back to the session they were in, the paths
   in that session will not display on the canvas until the user manually refreshes the page. This can be avioded by selecting a saved
@@ -128,59 +128,59 @@ their name is displayed next to their message in the message thread.
   - Reproduce: with three client accessing a session, have two clients call the same client by entering the receiving clients peer ID into
   the callbox in the dropdown menu.
 - **Attempts to save sessions do not always succeed**
-  - Behavior: When the upload/save button is selected (while logged in) and a user give the session a title, then hits "enter" or clicks 
-  the "save" button, the save modal closes but the chalkboard session does not save to the database and is not accessible through the 
-  my-chalkboards page. This behavior resembles what happens if a guest tries saving a chalkboard without being logged in. When a session 
+  - Behavior: When the upload/save button is selected (while logged in) and a user give the session a title, then hits "enter" or clicks
+  the "save" button, the save modal closes but the chalkboard session does not save to the database and is not accessible through the
+  my-chalkboards page. This behavior resembles what happens if a guest tries saving a chalkboard without being logged in. When a session
   is saved successfully, the save modal does not close automatically and can be closed by clicking outside of its boundary.
   - Reproduce: This bug is not consistantly reproducable, and will happen randomly when a session is being saved by a user who is signed in.
 
 
 ### IMPLEMENTING THE text edit FEATURE (testers can ignore)
 When a new path is finished being created, the client calls the setPathFunctions(pahtsItem, attributes.scale) function and
-passes it a reference to the new path (it is usually called from a finishShape() callback function that is called when a 
+passes it a reference to the new path (it is usually called from a finishShape() callback function that is called when a
 client receives a message from the server stating that the current shape should be finished and added to the clients paths
-list). The setPathFunctions() function (line ~ 795) set's event listeners on the specific path, these event listeners are 
-used to detect mouse interactions with the paths and make figuring out what path is being interacted with extremely easy 
-(because we don't have to figure it out, paper.js does for us). When you see a line scale up when you hover the mouse over 
-it, thats because of the onMouseEnter and onMouseLeave path event listeners. Likewise, when you "grab" a path and move it, 
-or change it's color, that is because of the onMouseDown, onMouseDrag, and onMouseUp path event listeners, all which are set 
-in the setPathFunctions() function. Basically, any interaction with a specific path after it is created should be handled using 
+list). The setPathFunctions() function (line ~ 795) set's event listeners on the specific path, these event listeners are
+used to detect mouse interactions with the paths and make figuring out what path is being interacted with extremely easy
+(because we don't have to figure it out, paper.js does for us). When you see a line scale up when you hover the mouse over
+it, thats because of the onMouseEnter and onMouseLeave path event listeners. Likewise, when you "grab" a path and move it,
+or change it's color, that is because of the onMouseDown, onMouseDrag, and onMouseUp path event listeners, all which are set
+in the setPathFunctions() function. Basically, any interaction with a specific path after it is created should be handled using
 these event listeners, and not the generic mouse event listeners that are fired any time you do anything with the mouse on the
 canvas.
 
 In order to edit an existing text path (aka a string of text on the canvas, which behind the scenes is a paper.js Item object
-but is treated like a path in our program, so I'll refer to it as a text path) we will have to figure out when a user clicks 
+but is treated like a path in our program, so I'll refer to it as a text path) we will have to figure out when a user clicks
 on it which is a perfect job for the path event listeners onMouseDown and onMouseUp within setPathFunctions(). Sometimes a user
 may click on it without wanting to edit the text, so we should only switch to text-edit mode if the user has selected the grab
-icon and is holding down the shift key (we can change the key that needs to be held down to start editing, I just wanted to use 
+icon and is holding down the shift key (we can change the key that needs to be held down to start editing, I just wanted to use
 a key that wouldnt also start appending text to the text string being edited if the user hold's it down to long after choosing
 to edit it). in the path.onMouseDown() event listener on line ~813, we are already requesting the lock if the grab tool is selected
-and the user clicks down on a path, presuming their trying to move that path. We want to request the lock for editing text as 
-well when the grab tool is selected and the user clicks down, so we don't have to change anything here. When the lock is 
+and the user clicks down on a path, presuming their trying to move that path. We want to request the lock for editing text as
+well when the grab tool is selected and the user clicks down, so we don't have to change anything here. When the lock is
 requested by a client, a message is sent to the server which tells it to tell all other clients the lock is now owned by the
 reqesting client, preventing everyone else from interacting with the chalkboard canvas.
 
 The path.onMouseUp() event listener (line ~858) can be used to tell the server that we want to actually edit the text path that
 the mouse is lifting up from. Using the onMouseUp() function to do this instead of the onMouseDown() function gives the server
 enough time to grab the lock for the client trying to edit the text. We know we should only go into text-edit mode if the grab
-tool is selected AND the shift key is held down. If both of these statements are true, then we can switch the client into 
+tool is selected AND the shift key is held down. If both of these statements are true, then we can switch the client into
 textEdit mode (via setDrawingTools('textEdit') which sets all tools to false except drawingTools.textEdit) and tell the server
 to send a message to all clients to begin editing a specific pre-existing text path in their 'paths' array. this is done with
 socket.emit('requestEditText', pathInd, user), where 'user' helps the server ID the session it needs to forward the message to,
 and 'pathInd' is a variable within the scope of setPathFunctions() that is set to the index of the path that needs to be edited
 in the paths array (on both client and server, as they should mirror eachother) in the onMouseDown() function. We need to be
-able to tell every other client what text path they should edit, so we have the server forward pathInd to all clients in a 
+able to tell every other client what text path they should edit, so we have the server forward pathInd to all clients in a
 broadcast method. This is done by the server around line 310, where it broadcasts the 'editText' message to each client.
 
 When the client receives the 'editText' message from the server it calls the editText() function (around line 120 on client).
-This function is defined at line ~454, and it uses the provided index value from the server to assign the global variable 
-curPath (which points to whatever path is currently being added/edited on the canvas) to the text path that will be edited. the 
-line that says curPath.data.setBounds(curPath) uses a function I wrote and attached to every text path, which makes a dashed red 
-rectangle around the textbox when it is being edited, this function is called every time the textbox changes size, so the box 
-around the text will change its size as well. after editText() is called, every client has put the desired text path into 'edit 
+This function is defined at line ~454, and it uses the provided index value from the server to assign the global variable
+curPath (which points to whatever path is currently being added/edited on the canvas) to the text path that will be edited. the
+line that says curPath.data.setBounds(curPath) uses a function I wrote and attached to every text path, which makes a dashed red
+rectangle around the textbox when it is being edited, this function is called every time the textbox changes size, so the box
+around the text will change its size as well. after editText() is called, every client has put the desired text path into 'edit
 mode'.
 
-Once each client is in edit mode, we can start allowing the editor (client) to edit the text path. This is done by using a keyboard 
+Once each client is in edit mode, we can start allowing the editor (client) to edit the text path. This is done by using a keyboard
 event listener provided by paper.js, tool.onKeyDown() found around line 223. every time a key is pressed, this event listener
 is fired and it checks the function it points to. If a key is pressed and that client also has drawingTools.textEdit set to
 true (which should only ever be true for one client at a time, the editor) then we know this client is trying to edit a text path that
@@ -190,7 +190,7 @@ ending an edit is different than the way we handle ending a new text path. With 
 to add the text path to the paths array. With a text path being edited, we need to tell every client to stop editing, but dont
 add the path that curPath refers to to the paths array because it's already in the paths array. This distinction is made around
 line 245, where a different message is sent to the server for each scenario. When a client finishes editing a text path (rather
-than creating one), they'll use socket.emit('requestFinishEditText', user) to notify the server, who broadcasts the 
+than creating one), they'll use socket.emit('requestFinishEditText', user) to notify the server, who broadcasts the
 'finishEditText' message to all clients (line ~197 on server).
 
 When each client receives the 'finishEditText' message from the server (line ~130 on client), it calls the finishEditText()
