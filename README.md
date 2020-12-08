@@ -26,7 +26,8 @@ required dependencies for the application.
 - example: go to https://localhost:5000 in a browswer (Firefox or Chrome are recommended)
 
 #### NOTE
-- *variable* `const serviceAccount` *must be set by user to a Google Firebase **service account key** in server.js file*
+- *A .env file must be created in the main directory and include a service account key object for google FireBase set to the*
+*SERVICE_ACCOUNT_KEY environment variable. the env_sample file shows an example of where to add the key object.*
 - *Mac Users: works best with Chrome (version ~80+)*
 
 ## USER GUIDE
